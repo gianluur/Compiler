@@ -7,174 +7,28 @@
 using std::cout, std::cerr, std::endl;
 using std::string, std::vector;
 
-class Tokenizer {
-private:
-  vector<Token> m_tokens;
+class Tokenizer{
+public:
+  Tokenizer(string& src): m_src(src) { tokenize(); }
 
-  vector<Token> tokenize(string& src){
-    vector<Token> m_tokens = {};
-    for(size_t i = 0; i < src.size(); i++){
-      char currentChar = src.at(i);
+  vector<Token> getTokens() const { return m_tokens; }
+
+  void tokenize(){
+    for(i = 0; i < m_src.size(); i++){
+      char currentChar = m_src.at(i);
+
+      if (isDigit(currentChar)) tokenNumber(currentChar);
       
-      if (isdigit(currentChar)) numberToken(src, currentChar, i); 
-      
-      else {
+      else if (isParenthesis(currentChar)) tokenParenthesis(currentChar);
 
-        parenthesisToken(currentChar, i);
-        mathOperatorToken(src, currentChar, i); 
-        assignmentOperatorToken(src, currentChar, i);
-        comparisonOperatorToken(src, currentChar, i);
-      }
-        //should be invalid here
+      else if (isMathOperator(currentChar)) tokenMathOperator(currentChar);
+
+      else if (isAssignmentOperator(currentChar)) tokenAssignmentOperator(currentChar);
+
+      else if (isComparisonOperator(currentChar)) tokenComparisonOperator(currentChar);
+
+      //else invalidToken(currentChar);
     }
-    return m_tokens;
-  }
-
-  void numberToken(string& src, char currentChar, size_t& i){
-    string number = "";
-    int8_t dotCount = 0;
-    while (i < src.size() && (isdigit(src.at(i)) || (src.at(i) == '.'))){
-
-      if (src.at(i) == '.' && dotCount == 0) dotCount++;
-      else if (src.at(i) == '.' && dotCount > 1) invalidToken(currentChar, i);
-      
-      number += src.at(i);
-      i++;
-    }
-    i--;
-    m_tokens.emplace_back(Token(TokenType::NUMBER, number));
-  }
-
-  void parenthesisToken(char currentChar, size_t i){
-    switch (currentChar){
-      case '(':
-        m_tokens.emplace_back(Token(TokenType::LPAREN, string(1, currentChar)));
-        break;
-
-      case ')':
-        m_tokens.emplace_back(Token(TokenType::RPAREN, string(1, currentChar)));
-        break;
-
-      case '[':
-        m_tokens.emplace_back(Token(TokenType::LBRACKET, string(1, currentChar)));
-        break;
-
-      case ']':
-        m_tokens.emplace_back(Token(TokenType::RBRACKET, string(1, currentChar)));
-        break;
-
-      case '{':
-        m_tokens.emplace_back(Token(TokenType::LCURLY, string(1, currentChar)));
-        break;
-
-      case '}':
-        m_tokens.emplace_back(Token(TokenType::RCURLY, string(1, currentChar)));
-        break;
-      
-      default:
-        break;
-    }
-  }
-
-  void mathOperatorToken(string& src, char currentChar, size_t i){
-    //this code is so weird lmao the condition only works if you don't use .at() and if i + 1 <= src.size() 
-
-    if (string("+-*/%").find(currentChar) != string::npos && i + 1 <= src.size() && src[i + 1] != '='){
-      switch (currentChar){
-        case '+':
-          m_tokens.emplace_back(Token(TokenType::ADDITION, string(1, currentChar)));
-          break;
-
-        case '-':
-          m_tokens.emplace_back(Token(TokenType::SUBTRACTION, string(1, currentChar)));
-          break;
-        
-        case '*':
-          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, string(1, currentChar)));
-          break;
-
-        case '/':
-          m_tokens.emplace_back(Token(TokenType::DIVISION, string(1, currentChar)));
-          break;
-
-        case '%':
-          m_tokens.emplace_back(Token(TokenType::MODULUS, string(1, currentChar)));
-          break;
-
-        default:
-          break;
-      }
-    }
-  }
-
-  void assignmentOperatorToken(string& src, char currentChar, size_t& i){
-    if (currentChar == '=' && i + 1 <= src.size() && src[i + 1] != '='){
-      m_tokens.emplace_back(Token(TokenType::ASSIGNMENT, string(1, currentChar)));
-    }
-
-    else if (string("+-*/%").find(currentChar) != string::npos && i + 1 <= src.size() && src[i + 1] == '='){
-      string op = string(1, currentChar) + "=";
-
-      switch (currentChar){
-        case '+':
-          m_tokens.emplace_back(Token(TokenType::ADDITION_ASSIGNMENT, op));
-          break;
-
-        case '-':
-          m_tokens.emplace_back(Token(TokenType::SUBTRACTION_ASSIGNMENT, op));
-          break;
-        
-        case '*':
-          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION_ASSIGNMENT, op));
-          break;
-
-        case '/':
-          m_tokens.emplace_back(Token(TokenType::DIVISION_ASSIGNMENT, op));
-          break;
-
-        case '%':
-          m_tokens.emplace_back(Token(TokenType::MODULUS_ASSIGNMENT, op));
-          break;
-
-        default:
-          break;
-      }
-      i++;
-    }
-  }
-
-  void comparisonOperatorToken(string& src, char currentChar, size_t& i){
-    string op = string(1, currentChar);
-
-    if (currentChar == '>'){
-      if (i + 1 < src.size() && src.at(i + 1) == '=') {
-        op += "=";
-        m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, op));
-        i++;
-      }
-      else m_tokens.emplace_back(Token(TokenType::GREATER, op));
-    }
-    
-    else if (currentChar == '<'){
-      if (i + 1 < src.size() && src.at(i + 1) == '=') {
-        op += "=";
-        m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, op));
-        i++;
-      }
-      else m_tokens.emplace_back(Token(TokenType::LESS, op));
-    }
-
-    else if (currentChar == '=' && i + 1 < src.size() && src.at(i + 1) == '='){
-      op += "=";
-      m_tokens.emplace_back(Token(TokenType::EQUALS, op));
-      i++;
-    }
-  }
-
-  void invalidToken(char currentChar, size_t i){
-    m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar)));
-    cerr << "Invalid token detected at index: " << i << endl;
-    exit(EXIT_FAILURE);
   }
 
   void print(){
@@ -183,9 +37,191 @@ private:
     }
   }
 
-public:
-  Tokenizer(string& src): m_tokens(tokenize(src)) { print(); }
+private:
+  vector<Token> m_tokens;
+  string m_src;
+  size_t i = 0;
 
-  vector<Token> getTokens() const { return m_tokens; }
+  bool contains(const string& charset, const char& currentChar){
+    return charset.find(currentChar) != string::npos;
+  }
+
+  char nextChar(){
+    return i + 1 < m_src.size() && m_src.at(i + 1);
+  }
+
+  bool isNextChar(const char& charToCheck){
+    return i + 1 < m_src.size() && m_src.at(i + 1) == charToCheck;
+  }
+
+  bool isDigit(const char& currentChar){
+    return contains("0123456789", currentChar);
+  }
+
+  bool isParenthesis(const char& currentChar){
+    return contains("()[]{}", currentChar);
+  }
+
+  bool isMathOperator(const char& currentChar){
+    return contains("+-*/%", currentChar) && !isNextChar('=');
+  }
+
+  bool isAssignmentOperator(const char& currentChar){
+    return (currentChar == '=' && !isNextChar('=')) || (contains("+-*/%", currentChar) && isNextChar('='));
+  }
+
+  bool isComparisonOperator(const char& currentChar){
+    return contains("<>", currentChar) || (currentChar == '=' && isNextChar('=')); 
+  }
+
+  void invalidToken(const char& currentChar){
+    m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar)));
+    cerr << "Invalid token detected at index: " << i << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  void tokenNumber(const char& currentChar){
+    string number = "";
+    int8_t dotCount = 0;
+    while (i < m_src.size() && (isdigit(m_src.at(i)) || (m_src.at(i) == '.'))){
+
+      if (m_src.at(i) == '.' && dotCount == 0) dotCount++;
+      else if (m_src.at(i) == '.' && dotCount > 1) invalidToken(currentChar);
+      
+      number += m_src.at(i);
+      i++;
+    }
+    i--;
+    m_tokens.emplace_back(Token(TokenType::NUMBER, number));
+  }
+
+  void tokenParenthesis(const char& currentChar){
+    const string token = string(1, currentChar);
+
+    switch (currentChar){
+      case '(':
+        m_tokens.emplace_back(Token(TokenType::LPAREN, token));
+        break;
+
+      case ')':
+        m_tokens.emplace_back(Token(TokenType::RPAREN, token));
+        break;
+
+      case '[':
+        m_tokens.emplace_back(Token(TokenType::LBRACKET, token));
+        break;
+
+      case ']':
+        m_tokens.emplace_back(Token(TokenType::RBRACKET, token));
+        break;
+
+      case '{':
+        m_tokens.emplace_back(Token(TokenType::LCURLY, token));
+        break;
+
+      case '}':
+        m_tokens.emplace_back(Token(TokenType::RCURLY, token));
+        break;
+      
+      default:
+        break;
+    }
+  }
+
+  void tokenMathOperator(const char& currentChar){
+    const string token = string(1, currentChar);
+
+    switch (currentChar){
+      case '+':
+        m_tokens.emplace_back(Token(TokenType::ADDITION, token));
+        break;
+
+      case '-':
+        m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token));
+        break;
+      
+      case '*':
+        m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token));
+        break;
+
+      case '/':
+        m_tokens.emplace_back(Token(TokenType::DIVISION, token));
+        break;
+
+      case '%':
+        m_tokens.emplace_back(Token(TokenType::MODULUS, token));
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  void tokenAssignmentOperator(const char& currentChar){
+    
+    if (currentChar == '=') {
+      const string token = string(1, currentChar);
+      m_tokens.emplace_back(Token(TokenType::ASSIGNMENT, token)); 
+    }
+
+    else {
+      const string token = string(1, currentChar) + "=";
+
+      switch (currentChar){
+        case '+':
+          m_tokens.emplace_back(Token(TokenType::ADDITION_ASSIGNMENT, token));
+          break;
+
+        case '-':
+          m_tokens.emplace_back(Token(TokenType::SUBTRACTION_ASSIGNMENT, token));
+          break;
+        
+        case '*':
+          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION_ASSIGNMENT, token));
+          break;
+
+        case '/':
+          m_tokens.emplace_back(Token(TokenType::DIVISION_ASSIGNMENT, token));
+          break;
+
+        case '%':
+          m_tokens.emplace_back(Token(TokenType::MODULUS_ASSIGNMENT, token));
+          break;
+
+        default:
+          break;
+      }
+      i++;
+    }
+  }
+
+  void tokenComparisonOperator(const char& currentChar){
+
+    if (currentChar == '>'){
+      if (isNextChar('=')){
+        const string token = string(1, currentChar) + "=";
+        m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, token));
+        i++;
+      }
+      else m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar)));
+    }
+
+    else if (currentChar == '<'){
+      if (isNextChar('=')){
+        const string token = string(1, currentChar) + "=";
+        m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, token));
+        i++;
+      }
+      else m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar)));
+    }
+
+    else if (currentChar == '=') {
+      const string token = string(1, currentChar) + "=";
+      m_tokens.emplace_back(Token(TokenType::EQUALS, token));
+      i++;
+    }
+  }
+
 };
 
+//ADD NEGATIVE NUMBERS

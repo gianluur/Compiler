@@ -19,6 +19,7 @@ int main(int argc, char* argv[]){
 
   Tokenizer tokenizer(src);
   vector<Token> tokens = tokenizer.getTokens();
+  tokenizer.print();
   
 
   return EXIT_SUCCESS;
