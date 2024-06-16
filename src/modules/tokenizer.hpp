@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <stdexcept>
 
 #include "token.hpp"
 
@@ -14,10 +15,10 @@ public:
   vector<Token> getTokens() const { return m_tokens; }
 
   void tokenize(){
-    for(i = 0; i < m_src.size(); i++){
+    for(i = 0; i < m_src.size(); i++){  
       char currentChar = m_src.at(i);
 
-      if (isDigit(currentChar)) tokenNumber(currentChar);
+      if (isNumber(currentChar)) tokenNumber(currentChar);
       
       else if (isParenthesis(currentChar)) tokenParenthesis(currentChar);
 
@@ -27,7 +28,11 @@ public:
 
       else if (isComparisonOperator(currentChar)) tokenComparisonOperator(currentChar);
 
-      //else invalidToken(currentChar);
+      else if (isIdentifier(currentChar)) tokenIdentifier(currentChar);
+
+      else if (isSemicolon(currentChar)) tokenSemicolon(currentChar);
+
+      else invalidToken(currentChar);
     }
   }
 
@@ -47,19 +52,25 @@ private:
   }
 
   char nextChar(){
-    return i + 1 < m_src.size() && m_src.at(i + 1);
+    if (i + 1 >= m_src.size()) return '\0';
+    return m_src.at(i + 1);
+  }
+  
+  bool isNextChar(const char& charToCheck){
+    if (i + 1 >= m_src.size()) return false;
+    return m_src.at(i + 1) == charToCheck;
   }
 
-  bool isNextChar(const char& charToCheck){
-    return i + 1 < m_src.size() && m_src.at(i + 1) == charToCheck;
+  bool isParenthesis(const char& currentChar){
+    return contains("()[]{}", currentChar);
   }
 
   bool isDigit(const char& currentChar){
     return contains("0123456789", currentChar);
   }
 
-  bool isParenthesis(const char& currentChar){
-    return contains("()[]{}", currentChar);
+  bool isNumber(const char& currentChar){
+    return isDigit(currentChar) || (currentChar == '-' && isDigit(nextChar()));
   }
 
   bool isMathOperator(const char& currentChar){
@@ -74,6 +85,14 @@ private:
     return contains("<>", currentChar) || (currentChar == '=' && isNextChar('=')); 
   }
 
+  bool isIdentifier(const char& currentChar){
+    return contains("ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz", currentChar) || isDigit(currentChar);
+  }
+
+  bool isSemicolon(const char& currentChar){
+    return currentChar == ';';
+  }
+
   void invalidToken(const char& currentChar){
     m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar)));
     cerr << "Invalid token detected at index: " << i << endl;
@@ -81,8 +100,12 @@ private:
   }
 
   void tokenNumber(const char& currentChar){
+
     string number = "";
     int8_t dotCount = 0;
+
+    if (currentChar == '-') {number += currentChar; i++;}
+
     while (i < m_src.size() && (isdigit(m_src.at(i)) || (m_src.at(i) == '.'))){
 
       if (m_src.at(i) == '.' && dotCount == 0) dotCount++;
@@ -222,6 +245,32 @@ private:
     }
   }
 
-};
+  void tokenIdentifier(const char& currentChar){
+    string token = string(1, currentChar);
+    while(isIdentifier(nextChar())){
+      token += string(1, nextChar());
+      i++;
+    }
+    
+    if (token == "if") m_tokens.emplace_back(Token(TokenType::IF, token));
+    else if (token == "else") m_tokens.emplace_back(Token(TokenType::ELSE, token));
+    else if (token == "do") m_tokens.emplace_back(Token(TokenType::DO, token));
+    else if (token == "while") m_tokens.emplace_back(Token(TokenType::WHILE, token));
+    else if (token == "for") m_tokens.emplace_back(Token(TokenType::FOR, token));
+    else if (token == "return") m_tokens.emplace_back(Token(TokenType::RETURN, token));
+    else if (token == "func") m_tokens.emplace_back(Token(TokenType::FUNC, token));
+    else if (token == "struct") m_tokens.emplace_back(Token(TokenType::STRUCT, token));
+    else if (token == "int") m_tokens.emplace_back(Token(TokenType::INT, token));
+    else if (token == "float") m_tokens.emplace_back(Token(TokenType::FLOAT, token));
+    else if (token == "char") m_tokens.emplace_back(Token(TokenType::CHAR, token));
+    else if (token == "string") m_tokens.emplace_back(Token(TokenType::STRING, token));
+    else if (token == "bool") m_tokens.emplace_back(Token(TokenType::BOOL, token));
+    else m_tokens.emplace_back(Token(TokenType::IDENTIFIER, token));
+  }
 
-//ADD NEGATIVE NUMBERS
+  void tokenSemicolon(const char& currentChar){
+    const string token = string(1, currentChar);
+    m_tokens.emplace_back(Token(TokenType::SEMICOLON, token));
+  }
+
+};

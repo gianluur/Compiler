@@ -1,3 +1,9 @@
+#pragma once
+
+//REMOVING EOF MACRO FROM NAMESPACE
+#pragma push_macro("EOF")
+#undef EOF 
+
 #include <string>
 using std::string;
 
@@ -6,8 +12,28 @@ enum class TokenType {
   INVALID,
   SEMICOLON,
   NUMBER,
+  IDENTIFIER,
+
+  //KEYWORDS
+  LET,
+  CONST,
+  IF,
+  ELSE,
+  DO,
+  WHILE,
+  FOR,
+  RETURN,
+  FUNC,
+  STRUCT,
+
+  INT,
+  FLOAT,
+  CHAR,
+  STRING,
+  BOOL,
 
   //ASSIGNMENT
+  
   ASSIGNMENT,
   ADDITION_ASSIGNMENT,
   SUBTRACTION_ASSIGNMENT,
