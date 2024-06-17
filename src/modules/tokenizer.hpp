@@ -18,7 +18,11 @@ public:
     for(i = 0; i < m_src.size(); i++){  
       char currentChar = m_src.at(i);
 
-      if (isLiteral(currentChar)) tokenNumber(currentChar);
+      if (isNumber(currentChar)) tokenNumber(currentChar);
+
+      else if (isChar(currentChar)) tokenChar(currentChar);
+
+      else if (isString(currentChar)) tokenString(currentChar);
       
       else if (isParenthesis(currentChar)) tokenParenthesis(currentChar);
 
@@ -99,12 +103,12 @@ private:
     return currentChar == ';';
   }
 
-  bool isQuote(const char& currentChar){
-    return currentChar == '\'' || currentChar == '"';
+  bool isChar(const char& currentChar){
+    return currentChar == '\'';
   }
-  
-  bool isLiteral(const char& currentChar){
-    return isNumber(currentChar);
+
+  bool isString(const char& currentChar){
+    return currentChar == '\"';
   }
   
   bool isVariable(const string& token){
@@ -153,10 +157,6 @@ private:
     throw std::runtime_error("Invalid token detected at index: " + std::to_string(i)); //ADD ROWS AND COLS
   }
 
-  void tokenLiteral(const char& currentChar){
-    tokenNumber(currentChar);
-  }
-
   void tokenNumber(const char& currentChar){
     string number = "";
     int8_t dotCount = 0;
@@ -182,8 +182,28 @@ private:
 
   }
 
+  void tokenChar(const char& currentChar){
+    string token = string(1, currentChar);
+    char character = nextChar();
+    i++;
+
+    char closing = nextChar();
+    if (closing != '\'') invalidToken(currentChar);
+    i++;
+
+    token += string(1, character) + string(1, closing);
+    m_tokens.emplace_back(Token(TokenType::LITERAL_CHARACTER, token));
+  }
+
   void tokenString(const char& currentChar){
-    
+    string token = string(1, currentChar);
+    while(nextChar() != '\"' && i < m_src.size()){
+      token += string(1, nextChar());
+      i++;
+    }
+    token += string(1, nextChar());
+    i++;
+    m_tokens.emplace_back(Token(TokenType::LITERAL_STRING, token));
   }
 
   void tokenParenthesis(const char& currentChar){
