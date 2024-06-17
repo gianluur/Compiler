@@ -1,4 +1,6 @@
--69.420
+-69.420;
+-69;
+69;
 ()
 []
 {}
@@ -18,8 +20,9 @@
 *
 /
 %
-TEST_test;
-T3ST_t3st;
+
+str1ng_T3ST;
+
 let;
 const; 
 if;
@@ -30,3 +33,14 @@ for;
 return;
 func;
 struct;
+
+int;
+float;
+char;
+string;
+bool;
+null;
+
+&&;
+||;
+!;

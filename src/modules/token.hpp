@@ -1,8 +1,11 @@
 #pragma once
 
-//REMOVING EOF MACRO FROM NAMESPACE
+//REMOVING SOME ANNOYING MACROS, THAT FILL MY NAMESPACE
 #pragma push_macro("EOF")
 #undef EOF 
+
+#pragma push_macro("NULL")
+#undef NULL 
 
 #include <string>
 using std::string;
@@ -11,8 +14,17 @@ enum class TokenType {
 
   INVALID,
   SEMICOLON,
-  NUMBER,
   IDENTIFIER,
+  TRUE,
+  FALSE,
+
+  //LITERALS
+  LITERAL_INTEGER,
+  LITERAL_FLOAT,
+  LITERAL_CHARACTER,
+  LITERAL_STRING,
+  LITERAL_BOOLEAN,
+  LITERAL_NULL,
 
   //KEYWORDS
   LET,
@@ -23,14 +35,22 @@ enum class TokenType {
   WHILE,
   FOR,
   RETURN,
+  BREAK,
+  CONTINUE,
   FUNC,
   STRUCT,
 
+  //TYPES
   INT,
   FLOAT,
   CHAR,
   STRING,
   BOOL,
+
+  //LOGICAL
+  AND,
+  OR,
+  NOT,
 
   //ASSIGNMENT
   
@@ -65,7 +85,6 @@ enum class TokenType {
   LESS,
   GREATER_EQUAL,
   LESS_EQUAL,
-
 
 };
 
