@@ -1,0 +1,11 @@
+if (a > b) {
+    result = a - b;
+} else {
+    result = b - a;
+}
+
+if (isReady && result != 0) {
+    result /= 2;
+} else if (!isReady || result == 0) {
+    result *= 2;
+}

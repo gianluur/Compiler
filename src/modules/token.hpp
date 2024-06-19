@@ -1,10 +1,7 @@
 #pragma once
 
 //REMOVING SOME ANNOYING MACROS, THAT FILL MY NAMESPACE
-#pragma push_macro("EOF")
-#undef EOF 
 
-#pragma push_macro("NULL")
 #undef NULL 
 
 #include <string>
@@ -12,11 +9,19 @@ using std::string;
 
 enum class TokenType {
 
+  //MISCELLANEOUS
   INVALID,
   SEMICOLON,
+  COMMA,
+  DOT,
   IDENTIFIER,
-  TRUE,
-  FALSE,
+
+  //TYPES
+  INT,
+  FLOAT,
+  CHAR,
+  STRING,
+  BOOL,
 
   //LITERALS
   LITERAL_INTEGER,
@@ -34,18 +39,11 @@ enum class TokenType {
   DO,
   WHILE,
   FOR,
-  RETURN,
   BREAK,
   CONTINUE,
   FUNC,
+  RETURN,
   STRUCT,
-
-  //TYPES
-  INT,
-  FLOAT,
-  CHAR,
-  STRING,
-  BOOL,
 
   //LOGICAL
   AND,
@@ -53,7 +51,6 @@ enum class TokenType {
   NOT,
 
   //ASSIGNMENT
-  
   ASSIGNMENT,
   ADDITION_ASSIGNMENT,
   SUBTRACTION_ASSIGNMENT,
@@ -61,16 +58,7 @@ enum class TokenType {
   DIVISION_ASSIGNMENT,
   MODULUS_ASSIGNMENT,
 
-  //MATH
-
-  ADDITION,
-  SUBTRACTION,
-  MULTIPLICATION,
-  DIVISION,
-  MODULUS,
-
   //PARENTHESIS
-
   LPAREN,
   RPAREN,
   LBRACKET,
@@ -79,12 +67,18 @@ enum class TokenType {
   RCURLY,
 
   //COMPARISON
-
   EQUALS,
   GREATER,
   LESS,
   GREATER_EQUAL,
   LESS_EQUAL,
+
+  //MATH
+  ADDITION,
+  SUBTRACTION,
+  MULTIPLICATION,
+  DIVISION,
+  MODULUS,
 
 };
 

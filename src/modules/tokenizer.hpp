@@ -18,7 +18,9 @@ public:
     for(i = 0; i < m_src.size(); i++){  
       char currentChar = m_src.at(i);
 
-      if (isNumber(currentChar)) tokenNumber(currentChar);
+      if (isspace(currentChar)) continue;
+
+      else if (isNumber(currentChar)) tokenNumber(currentChar);
 
       else if (isChar(currentChar)) tokenChar(currentChar);
 
@@ -35,6 +37,10 @@ public:
       else if (isLogicalOperator(currentChar)) tokenLogicalOperator(currentChar);
 
       else if (isSemicolon(currentChar)) tokenSemicolon(currentChar);
+
+      else if (isComma(currentChar)) tokenComma(currentChar);
+
+      else  if (isDot(currentChar)) tokenDot(currentChar);
 
       else if (isText(currentChar)) tokenText(currentChar); 
 
@@ -80,7 +86,7 @@ private:
   }
 
   bool isMathOperator(const char& currentChar){
-    return contains("+-*/%", currentChar) && !isNextChar('=');
+    return contains("+-*/%", currentChar) && !(nextChar() == '=');
   }
 
   bool isAssignmentOperator(const char& currentChar){
@@ -101,6 +107,14 @@ private:
 
   bool isSemicolon(const char& currentChar){
     return currentChar == ';';
+  }
+
+  bool isComma(const char& currentChar){
+    return currentChar == ',';
+  }
+
+  bool isDot(const char currentChar){
+    return currentChar == '.';
   }
 
   bool isChar(const char& currentChar){
@@ -152,9 +166,20 @@ private:
     else return false;
   }
 
+  bool isBoolean(const string& token){
+    if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token)); return true;}
+    else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token)); return true;}
+    else return false;
+  }
+
+  bool isNull(const string& token){
+    if (token == "null") {m_tokens.emplace_back(Token(TokenType::LITERAL_NULL, token)); return true;}
+    else return false;
+  }
+
   void invalidToken(const char& currentChar){
     m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar)));
-    throw std::runtime_error("Invalid token detected at index: " + std::to_string(i)); //ADD ROWS AND COLS
+    throw std::runtime_error("Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i)); //ADD ROWS AND COLS
   }
 
   void tokenNumber(const char& currentChar){
@@ -201,8 +226,12 @@ private:
       token += string(1, nextChar());
       i++;
     }
-    token += string(1, nextChar());
+
+    char closing = nextChar();
+    if (closing != '\"') invalidToken(currentChar);
     i++;
+
+    token += string(1, closing);
     m_tokens.emplace_back(Token(TokenType::LITERAL_STRING, token));
   }
 
@@ -364,17 +393,26 @@ private:
     m_tokens.emplace_back(Token(TokenType::SEMICOLON, token));
   }
 
+  void tokenComma(const char& currentChar){
+    const string token = string(1, currentChar);
+    m_tokens.emplace_back(Token(TokenType::COMMA, token));
+  }
+
+  void tokenDot(const char& currentChar){
+    const string token = string(1, currentChar);
+    m_tokens.emplace_back(Token(TokenType::DOT, token));
+  }
+
   void tokenIdentifier(const string& token){
     m_tokens.emplace_back(Token(TokenType::IDENTIFIER, token));
   }
 
   bool isKeyword(const string& token){
-    return isVariable(token) || isType(token) || isIfStatement(token) || isLoopStatement(token) || isFunction(token) || isStruct(token);
+    return isVariable(token) || isType(token) || isIfStatement(token) || isLoopStatement(token) || isFunction(token) || isStruct(token) || isBoolean(token) || isNull(token);
   }
 
   void tokenText(const char& currentChar){
     const string& token = getText(currentChar);
     if (!isKeyword(token)) tokenIdentifier(token);
-
   }
 };

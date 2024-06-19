@@ -57,7 +57,7 @@ private:
   }
 
   void removeSpecialCharacters(string& src){
-    auto predicate = [](unsigned char c){return c == ' ' || c == '\n';};
+    auto predicate = [](unsigned char c){return c == '\n';};
     src.erase(remove_if(src.begin(), src.end(), predicate), src.end());
   }
 
