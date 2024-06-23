@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "./modules/preprocessing.hpp"  
-#include "./modules/tokenizer.hpp"
+#include "./modules/tokenizer/tokenizer.hpp"
 
 using std::string, std::vector;
 
