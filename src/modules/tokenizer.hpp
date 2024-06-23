@@ -44,6 +44,8 @@ public:
 
       else if (isText(currentChar)) tokenText(currentChar); 
 
+      else if (isEOF(currentChar)) tokenEOF(currentChar);
+
       else invalidToken(currentChar);
     }
   }
@@ -124,6 +126,11 @@ private:
   bool isString(const char& currentChar){
     return currentChar == '\"';
   }
+
+  bool isEOF(const char& currentChar){
+    return currentChar == '\0';
+  }
+
   
   bool isVariable(const string& token){
     if (token == "let" ) {m_tokens.emplace_back(Token(TokenType::LET, token)); return true;}
@@ -414,5 +421,10 @@ private:
   void tokenText(const char& currentChar){
     const string& token = getText(currentChar);
     if (!isKeyword(token)) tokenIdentifier(token);
+  }
+
+  void tokenEOF(const char& currentChar){
+    const string token = string(1, currentChar);
+    m_tokens.emplace_back(Token(TokenType::EOF, token));
   }
 };

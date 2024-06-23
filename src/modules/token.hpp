@@ -3,6 +3,7 @@
 //REMOVING SOME ANNOYING MACROS, THAT FILL MY NAMESPACE
 
 #undef NULL 
+#undef EOF
 
 #include <string>
 using std::string;
@@ -11,6 +12,7 @@ enum class TokenType {
 
   //MISCELLANEOUS
   INVALID,
+  EOF,
   SEMICOLON,
   COMMA,
   DOT,
@@ -87,7 +89,7 @@ struct Token {
   string lexemes;
   double value;
 
-  Token(TokenType type, string lexemes) : type(type), lexemes(lexemes) {}
+  Token(TokenType type, string lexemes) : type(type), lexemes(lexemes), value(0.0) {}
   Token(TokenType type, string lexemes, double value): type(type), lexemes(lexemes), value(value) {}
   Token(TokenType type, string lexemes, double value, size_t pos): type(type), lexemes(lexemes), value(value) {}
 };

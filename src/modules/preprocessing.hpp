@@ -41,14 +41,13 @@ private:
 
   void removeComments(string& src){
     for(size_t start = src.find("/*"), end; start != string::npos; start = src.find("/*")){
-    end = src.find("*/", start) + 2;
-    if (end == string::npos) end = src.size();
+      end = src.find("*/", start) + 2;
+      if (end == string::npos) end = src.size();
 
-    src.erase(start, end - start);
+      src.erase(start, end - start);
     }
 
     for(size_t start = src.find('#'), end; start != string::npos; start = src.find('#')){
-      
       end = src.find('\n', start);
       if (end == string::npos) end = src.size();
 
