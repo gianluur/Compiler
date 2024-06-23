@@ -88,8 +88,16 @@ struct Token {
   TokenType type;
   string lexemes;
   double value;
+  size_t start;
+  size_t end;
+
 
   Token(TokenType type, string lexemes) : type(type), lexemes(lexemes), value(0.0) {}
   Token(TokenType type, string lexemes, double value): type(type), lexemes(lexemes), value(value) {}
-  Token(TokenType type, string lexemes, double value, size_t pos): type(type), lexemes(lexemes), value(value) {}
+
+  //ADD START AND END OF TEXT AND LITERALS TOKEN
+  Token(TokenType type, string lexemes, size_t start, size_t end): 
+    type(type), lexemes(lexemes), value(0.0), start(start), end(end)  {}
+  Token(TokenType type, string lexemes, double value, size_t start, size_t end): 
+    type(type), lexemes(lexemes), value(value), start(start), end(end)  {}
 };

@@ -44,16 +44,16 @@ public:
 
       else if (isText(currentChar)) tokenText(currentChar); 
 
-      else if (isEOF(currentChar)) tokenEOF(currentChar);
-
       else invalidToken(currentChar);
     }
   }
 
   void print(){
+    cout << "----- Tokenizer start -----" << endl;
     for(Token& token : m_tokens){
       cout << "Type: " << int(token.type) << " Lexemes: " << token.lexemes << endl;
     }
+    cout << "----- Tokenizer end -----" << endl;
   }
 
 private:
@@ -126,11 +126,6 @@ private:
   bool isString(const char& currentChar){
     return currentChar == '\"';
   }
-
-  bool isEOF(const char& currentChar){
-    return currentChar == '\0';
-  }
-
   
   bool isVariable(const string& token){
     if (token == "let" ) {m_tokens.emplace_back(Token(TokenType::LET, token)); return true;}
@@ -198,7 +193,7 @@ private:
         i++;
     }
 
-    for (; isDigit(m_src.at(i)) || (m_src.at(i) == '.'); i++) {
+    for (; i < m_src.size() && (isDigit(m_src.at(i)) || (m_src.at(i) == '.')); i++) {
         if (m_src.at(i) == '.') {
             if (++dotCount > 1) {
                 invalidToken(currentChar);
@@ -421,10 +416,5 @@ private:
   void tokenText(const char& currentChar){
     const string& token = getText(currentChar);
     if (!isKeyword(token)) tokenIdentifier(token);
-  }
-
-  void tokenEOF(const char& currentChar){
-    const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::EOF, token));
   }
 };

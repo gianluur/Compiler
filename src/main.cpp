@@ -9,6 +9,7 @@
 
 #include "./modules/preprocessing.hpp"  
 #include "./modules/tokenizer/tokenizer.hpp"
+#include "./modules/parser/parser.hpp"
 
 using std::string, std::vector;
 
@@ -21,6 +22,5 @@ int main(int argc, char* argv[]){
   vector<Token> tokens = tokenizer.getTokens();
   tokenizer.print();
   
-
   return EXIT_SUCCESS;
 }
