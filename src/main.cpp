@@ -4,7 +4,6 @@
 #include <fstream>        
 #include <algorithm>
 #include <cctype>
-
 #include <vector>
 
 #include "./modules/preprocessing.hpp"  
@@ -21,6 +20,11 @@ int main(int argc, char* argv[]){
   Tokenizer tokenizer(src);
   vector<Token> tokens = tokenizer.getTokens();
   tokenizer.print();
+
+  cout << endl;
+
+  Parser parser(tokens);
+  parser.parse();
   
   return EXIT_SUCCESS;
 }

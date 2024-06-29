@@ -1,53 +1,62 @@
-#pragma once
-
 #include <iostream>
-#include <vector>
+#include <iomanip>
 #include <memory>
 
-#include "astnode.hpp"
+using std::cout, std::endl, std::setw;
+using std::unique_ptr, std::make_unique;
 
-using std::cout, std::endl;
-using std::vector, std::unique_ptr;
-
-
-class ASTNode {
-public:
-  ASTNodeType m_type;
-
-  ASTNode(ASTNodeType type): m_type(type) {}
-
-  virtual ~ASTNode() = default;
+enum class ASTNodeType {
+  INVALID,
+  NUMBER,
+  BINARY_OPERATOR,
 };
 
-using ASTNodePtr = unique_ptr<ASTNode>;
-
-class Program : public ASTNode {
+class Number {
 public:
-  vector<ASTNodePtr> statements;
-  Program(): ASTNode(ASTNodeType::PROGRAM) {}
+  virtual ~Number() = default;
+  virtual void print() const = 0;
+};
 
-  void print(){
-    cout << "----- Program start -----" << endl;
-    cout << "----- Program end -----" << endl;
+class Integer: public Number {
+public:
+  Integer(int value) : m_value(value) { print(); }
+
+  void print() const override {
+    cout << "NodeType: Integer " << "| Value: " << m_value << endl;;
   }
 
+private:
+  int m_value;
 };
 
-class Number: public ASTNode {
+class Float: public Number {
 public:
-  Number(double value): m_value(value), ASTNode(ASTNodeType::NUMBER) {}
+  Float(double value) : m_value(value) { print(); }
+
+  void print() const override {
+    cout << "NodeType: Float " << "| Value: " << m_value << endl;;
+  }
 
 private:
   double m_value;
 };
 
-class BinaryOperator: public ASTNode {
+class BinaryOperator {
 public:
-  BinaryOperator(char op, unique_ptr<ASTNode> left, unique_ptr<ASTNode> right): 
-    m_op(op), m_left(std::move(left)), m_right(std::move(right)), ASTNode(ASTNodeType::BINARY_OPERATOR) {}
 
+  BinaryOperator(char op, unique_ptr<Number> left, unique_ptr<Number> right):
+    m_operator(op), m_left(move(left)), m_right(move(right)) { print(); }
+
+  void print() {
+    cout << "NodeType: Binary Operator" << endl;
+    cout << "Operator: " << m_operator << endl;
+    cout << "Left: " << endl << setw(2) << "";
+    m_left.get()->print();
+    cout << "Right: " << endl << setw(2) << "";
+    m_right.get()->print();
+  }
 private:
-  char m_op;
-  unique_ptr<ASTNode> m_left, m_right;
-
+  char m_operator;
+  unique_ptr<Number> m_left;
+  unique_ptr<Number> m_right;
 };

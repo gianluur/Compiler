@@ -273,32 +273,7 @@ private:
 
   void tokenMathOperator(const char& currentChar){
     const string token = string(1, currentChar);
-
-    switch (currentChar){
-      case '+':
-        m_tokens.emplace_back(Token(TokenType::ADDITION, token));
-        break;
-
-      case '-':
-        m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token));
-        break;
-      
-      case '*':
-        m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token));
-        break;
-
-      case '/':
-        m_tokens.emplace_back(Token(TokenType::DIVISION, token));
-        break;
-
-      case '%':
-        m_tokens.emplace_back(Token(TokenType::MODULUS, token));
-        break;
-
-      default:
-        invalidToken(currentChar);
-        break;
-    }
+    m_tokens.emplace_back(Token(TokenType::MATH_OPERATOR, token));
   }
 
   void tokenAssignmentOperator(const char& currentChar){
