@@ -14,6 +14,7 @@ enum class TokenType {
   INVALID,
   EOF,
   SEMICOLON,
+  COLON,
   COMMA,
   DOT,
   IDENTIFIER,
@@ -24,6 +25,7 @@ enum class TokenType {
   CHAR,
   STRING,
   BOOL,
+  NULL,
 
   //LITERALS
   LITERAL_INTEGER,
@@ -31,10 +33,9 @@ enum class TokenType {
   LITERAL_CHARACTER,
   LITERAL_STRING,
   LITERAL_BOOLEAN,
-  LITERAL_NULL,
 
   //KEYWORDS
-  LET,
+  VAR,
   CONST,
   IF,
   ELSE,
@@ -76,7 +77,11 @@ enum class TokenType {
   LESS_EQUAL,
 
   //MATH
-  MATH_OPERATOR,
+  ADDITION,
+  SUBTRACTION,
+  MULTIPLICATION,
+  DIVISION,
+  MODULUS,
 
 };
 

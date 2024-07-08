@@ -5,6 +5,8 @@
 
 #include "token.hpp"
 
+#undef NULL
+
 using std::cout, std::cerr, std::endl;
 using std::string, std::vector;
 
@@ -128,7 +130,7 @@ private:
   }
   
   bool isVariable(const string& token){
-    if (token == "let" ) {m_tokens.emplace_back(Token(TokenType::LET, token)); return true;}
+    if (token == "var" ) {m_tokens.emplace_back(Token(TokenType::VAR, token)); return true;}
     else if (token == "const") {m_tokens.emplace_back(Token(TokenType::CONST, token)); return true;}
     else return false;
   }
@@ -139,6 +141,7 @@ private:
     else if (token == "char") {m_tokens.emplace_back(Token(TokenType::CHAR, token)); return true;}
     else if (token == "string") {m_tokens.emplace_back(Token(TokenType::STRING, token)); return true;}
     else if (token == "bool") {m_tokens.emplace_back(Token(TokenType::BOOL, token)); return true;}
+    else if (token == "null") {m_tokens.emplace_back(Token(TokenType::NULL, token)); return true;}
     else return false;
   }
 
@@ -171,11 +174,6 @@ private:
   bool isBoolean(const string& token){
     if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token)); return true;}
     else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token)); return true;}
-    else return false;
-  }
-
-  bool isNull(const string& token){
-    if (token == "null") {m_tokens.emplace_back(Token(TokenType::LITERAL_NULL, token)); return true;}
     else return false;
   }
 
@@ -273,7 +271,33 @@ private:
 
   void tokenMathOperator(const char& currentChar){
     const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::MATH_OPERATOR, token));
+    switch (currentChar)
+    {
+    case '+':
+      m_tokens.emplace_back(Token(TokenType::ADDITION, token));
+      break;
+
+    case '-':
+      m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token));
+      break;
+
+    case '*':
+      m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token));
+      break;
+
+    case '/':
+      m_tokens.emplace_back(Token(TokenType::DIVISION, token));
+      break;
+
+    case '%':
+      m_tokens.emplace_back(Token(TokenType::MODULUS, token));
+      break;
+
+    default:
+      break;
+    }
+
+
   }
 
   void tokenAssignmentOperator(const char& currentChar){
@@ -385,7 +409,7 @@ private:
   }
 
   bool isKeyword(const string& token){
-    return isVariable(token) || isType(token) || isIfStatement(token) || isLoopStatement(token) || isFunction(token) || isStruct(token) || isBoolean(token) || isNull(token);
+    return isVariable(token) || isType(token) || isIfStatement(token) || isLoopStatement(token) || isFunction(token) || isStruct(token) || isBoolean(token);
   }
 
   void tokenText(const char& currentChar){

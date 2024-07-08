@@ -1,0 +1,11 @@
+var int name;
+var float name;
+var char name;
+var string name;
+var bool name;
+
+var int name = 5;
+var float name = 5.1;
+var char name = 'c';
+var string name = "suca";
+var bool name = true;
