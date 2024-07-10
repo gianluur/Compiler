@@ -16,7 +16,7 @@ enum class ASTNodeType {
 class ASTNode {
 public:
   virtual ~ASTNode() = default;
-  virtual void print() const = 0;
+  virtual void print(int indentation_level = 0) const = 0;
 };
 
 class Expression : public ASTNode {};
@@ -24,13 +24,17 @@ class Literal : public Expression {};
 
 class BinaryOperator : public Expression {
 public:
-  BinaryOperator(unique_ptr<Expression> left, Token& op, unique_ptr<Expression> right): 
+  BinaryOperator(unique_ptr<Expression> left, const Token& op, unique_ptr<Expression> right): 
     m_left(std::move(left)), m_op(op.lexemes), m_right(std::move(right)) {}
 
-  void print() const override {
-    cout << "BinaryOperator: " << m_op << endl;
-    m_left->print();
-    m_right->print();
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "BinaryOperator { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
+    cout << setw(indentation_level + 2) << " " <<  "left: ";
+    m_left->print(indentation_level + 1);
+    cout << setw(indentation_level + 2) << " " << "right: ";
+    m_right->print(indentation_level + 3);
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
@@ -43,7 +47,7 @@ private:
 class Integer : public Literal {
 public:
   Integer(const Token& token) : m_token(token.lexemes) {}
-  void print() const override {
+  void print(int indentation_level = 0) const override {
     cout << "LiteralInteger: " << m_token << endl;
   }
 
@@ -54,7 +58,7 @@ private:
 class Float : public Literal {
 public:
   Float(const Token& token) : m_token(token.lexemes) {}
-  void print() const override {
+  void print(int indentation_level = 0) const override {
     cout << "Literal Float: " << m_token << endl;
   }
 
@@ -70,7 +74,7 @@ public:
   Variable(const Token& keyword, const Token& type, const Token& identifier, const Token& semicolon):
     m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes), m_semicolon(semicolon.lexemes) {}
 
-  void print() const override {
+  void print(int indentation_level = 0) const override {
     if (m_assignment.empty()) {
       cout << "Variable-Init: " << m_keyword << " " << m_type << " " << m_identifier << m_semicolon << endl;
     }

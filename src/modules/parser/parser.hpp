@@ -21,11 +21,13 @@ public:
     cout << "----- Parser Start -----" << endl;
     while (i < m_tokens.size()){
       Token& token = m_tokens.at(i);
-      if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
-        parseVariable();
+      // if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
+      //   parseVariable();
       
-      }
-      else error("Couldn't parse the current token: " + token.lexemes);
+      // }
+      // else error("Couldn't parse the current token: " + token.lexemes);
+      parseExpression();
+      
     }
     cout << "----- Parser End -----" << endl << endl;
 
@@ -92,7 +94,7 @@ private:
     else error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon.");
   } 
 
-  unique_ptr<Expression> parseExpression() {
+  void parseExpression() {
     unordered_map<char, int> precedence = {{'+', 1}, {'-', 1}, {'*', 2}, {'/', 2}, {'%', 2}};
 
     stack<Token> operators;
@@ -142,10 +144,10 @@ private:
     }
     cout << endl;
 
-    return expressionToNode(output);
+    expressionToNode(output);
   } 
 
-  unique_ptr<Expression> expressionToNode(const vector<Token>& postfixExpression) {
+  void expressionToNode(const vector<Token>& postfixExpression) {
     stack<unique_ptr<Expression>> nodes;
 
     for (const Token& token : postfixExpression) {
@@ -158,10 +160,10 @@ private:
       else if (isMathOperator(token)) {
         auto right = std::move(nodes.top()); nodes.pop();
         auto left = std::move(nodes.top()); nodes.pop();
-        nodes.push(make_unique<BinaryOperator>(left, token, right));
+        nodes.push(make_unique<BinaryOperator>(std::move(left), token, std::move(right)));
       }
     }
-    return std::move(nodes.top());
+    m_ast.emplace_back(std::move(nodes.top()));
   }
 
   bool isMathOperator(const Token& token) {
