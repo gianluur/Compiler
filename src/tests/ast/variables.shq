@@ -8,4 +8,4 @@ var int name = 5;
 var float name = 5.1;
 var char name = 'c';
 var string name = "suca";
-var bool name = true;
+var bool name = true; 

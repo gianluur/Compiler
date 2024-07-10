@@ -21,12 +21,11 @@ public:
     cout << "----- Parser Start -----" << endl;
     while (i < m_tokens.size()){
       Token& token = m_tokens.at(i);
-      // if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
-      //   parseVariable();
+      if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
+        parseVariable();
       
-      // }
-      // else error("Couldn't parse the current token: " + token.lexemes);
-      parseExpression();
+      }
+      else error("Couldn't parse the current token: " + token.lexemes);
       
     }
     cout << "----- Parser End -----" << endl << endl;
@@ -71,19 +70,14 @@ private:
     if (nextToken().type == TokenType::ASSIGNMENT) {
       Token& assignment = consumeToken();
 
-      Token& value = consumeToken();
-      if (!isLiteral(value)) error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + assignment.lexemes + "'; was expected a literal or an expression.");
+      unique_ptr<Expression> value = parseExpression();
+      //if (!isLiteral(value)) error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + assignment.lexemes + "'; was expected a literal or an expression.");
  
 
       Token& semicolon = consumeToken();
-      if (semicolon.type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes + assignment.lexemes + value.lexemes + "'; was expected a semicolon.");
+      if (semicolon.type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
       
-      if (!isMatchingType(type, value)) {
-        string value_type = getLiteralType(value);
-        error("In this variable decleration: '" + keyword.lexemes + " " + type.lexemes + " " + identifier.lexemes + " " + assignment.lexemes + " " + value.lexemes + semicolon.lexemes + "'; Type and value doens't match.\n Type is: " + type.lexemes + " and value type is: " + value_type);
-      }
-      
-      m_ast.emplace_back(make_unique<Variable>(keyword, type, identifier, assignment, value, semicolon));
+      m_ast.emplace_back(make_unique<Variable>(keyword, type, identifier, assignment, std::move(value), semicolon));
     }
 
     else if (nextToken().type == TokenType::SEMICOLON) {
@@ -94,8 +88,8 @@ private:
     else error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon.");
   } 
 
-  void parseExpression() {
-    unordered_map<char, int> precedence = {{'+', 1}, {'-', 1}, {'*', 2}, {'/', 2}, {'%', 2}};
+   unique_ptr<Expression> parseExpression() {
+    unordered_map<string, int> precedence = {{"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, {"!", 3}, {"&&", 2}, {"||", 1}};
 
     stack<Token> operators;
     vector<Token> output;
@@ -103,12 +97,13 @@ private:
     while (isValidExpressionToken()) {
         Token& current = consumeToken();
 
-        if (current.type == TokenType::LITERAL_INTEGER || current.type == TokenType::LITERAL_FLOAT) {
+        if (current.type == TokenType::LITERAL_INTEGER || current.type == TokenType::LITERAL_FLOAT || current.type == TokenType::LITERAL_BOOLEAN 
+            || current.type == TokenType::LITERAL_CHARACTER || current.type == TokenType::LITERAL_STRING || current.type == TokenType::IDENTIFIER) {
             output.push_back(current);
         } 
-        else if (isMathOperator(current)) {
+        else if (isMathOperator(current) || isBooleanOperator(current)) {
             while (!operators.empty() && operators.top().type != TokenType::LPAREN &&
-                   precedence[operators.top().lexemes[0]] >= precedence[current.lexemes[0]]) {
+                   precedence[operators.top().lexemes] >= precedence[current.lexemes]) {
                 output.push_back(operators.top());
                 operators.pop();
             }
@@ -128,6 +123,8 @@ private:
                 error("Mismatched parentheses");
             }
         }
+
+        else error("Unexpected token: " + current.lexemes);
     }
 
     while (!operators.empty()) {
@@ -138,16 +135,10 @@ private:
         operators.pop();
     }
 
-    cout << "Postfix expression: ";
-    for (auto& token : output) {
-        cout << token.lexemes << " ";
-    }
-    cout << endl;
-
-    expressionToNode(output);
+    return expressionToNode(output);
   } 
 
-  void expressionToNode(const vector<Token>& postfixExpression) {
+   unique_ptr<Expression> expressionToNode(const vector<Token>& postfixExpression) {
     stack<unique_ptr<Expression>> nodes;
 
     for (const Token& token : postfixExpression) {
@@ -157,24 +148,55 @@ private:
       else if (token.type == TokenType::LITERAL_FLOAT) {
           nodes.push(make_unique<Float>(token));
       }
-      else if (isMathOperator(token)) {
-        auto right = std::move(nodes.top()); nodes.pop();
-        auto left = std::move(nodes.top()); nodes.pop();
-        nodes.push(make_unique<BinaryOperator>(std::move(left), token, std::move(right)));
+      else if (token.type == TokenType::LITERAL_BOOLEAN) {
+          nodes.push(make_unique<Boolean>(token));
+      }
+      else if (token.type == TokenType::LITERAL_CHARACTER) {
+          nodes.push(make_unique<Char>(token));
+      }
+      else if (token.type == TokenType::LITERAL_STRING) {
+          nodes.push(make_unique<String>(token));
+      }
+      else if (token.type == TokenType::IDENTIFIER) {
+          nodes.push(make_unique<Identifier>(token));
+      }
+
+      else if (isMathOperator(token) || isBooleanOperator(token)) {
+        if (token.type == TokenType::NOT){
+          auto operand = std::move(nodes.top()); nodes.pop();
+          nodes.push(make_unique<UnaryOperator>(token, std::move(operand)));
+        }
+        else {
+          auto right = std::move(nodes.top()); nodes.pop();
+          auto left = std::move(nodes.top()); nodes.pop();
+          nodes.push(make_unique<BinaryOperator>(std::move(left), token, std::move(right)));
+        }
+
       }
     }
-    m_ast.emplace_back(std::move(nodes.top()));
+    return std::move(nodes.top());
+  }
+
+  bool isBooleanOperator(const Token& token){
+    return token.lexemes == "!" || token.lexemes == "&&" || token.lexemes == "||";
   }
 
   bool isMathOperator(const Token& token) {
     return token.lexemes == "+" || token.lexemes == "-" || 
-           token.lexemes == "*" || token.lexemes == "/" || token.lexemes == "%";
+           token.lexemes == "*" || token.lexemes == "/" || 
+           token.lexemes == "%";
   }
 
   bool isValidExpressionToken() {
-    return i < m_tokens.size() && (nextToken().type == TokenType::LITERAL_INTEGER || 
+    return i < m_tokens.size() && 
+          (nextToken().type == TokenType::LITERAL_INTEGER || 
           nextToken().type == TokenType::LITERAL_FLOAT || 
+          nextToken().type == TokenType::LITERAL_BOOLEAN ||
+          nextToken().type == TokenType::LITERAL_CHARACTER || 
+          nextToken().type == TokenType::LITERAL_STRING || 
+          nextToken().type == TokenType::IDENTIFIER ||
           isMathOperator(nextToken()) ||
+          isBooleanOperator(nextToken()) ||
           nextToken().type == TokenType::LPAREN || 
           nextToken().type == TokenType::RPAREN);
   }
@@ -193,24 +215,5 @@ private:
            token.type == TokenType::LITERAL_CHARACTER ||
            token.type == TokenType::LITERAL_STRING ||
            token.type == TokenType::LITERAL_BOOLEAN;
-  }
-
-  bool isMatchingType(const Token& type, const Token& literal) const {
-    return (type.type == TokenType::INT && literal.type == TokenType::LITERAL_INTEGER) || 
-           (type.type == TokenType::FLOAT && literal.type == TokenType::LITERAL_FLOAT) ||
-           (type.type == TokenType::CHAR && literal.type == TokenType::LITERAL_CHARACTER) ||
-           (type.type == TokenType::STRING && literal.type == TokenType::LITERAL_STRING) ||
-           (type.type == TokenType::BOOL && literal.type == TokenType::LITERAL_BOOLEAN);
-  }
-
-  string getLiteralType(const Token& literal) const {
-    switch (literal.type){
-      case TokenType::LITERAL_INTEGER: return "int";
-      case TokenType::LITERAL_FLOAT: return "float";
-      case TokenType::LITERAL_CHARACTER: return "char";
-      case TokenType::LITERAL_STRING: return "string";
-      case TokenType::LITERAL_BOOLEAN: return "bool";
-      default: return "unknown";
-    }
   }
 };
