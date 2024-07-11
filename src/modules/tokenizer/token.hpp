@@ -71,6 +71,7 @@ enum class TokenType {
 
   //COMPARISON
   EQUALS,
+  NOT_EQUAL,
   GREATER,
   LESS,
   GREATER_EQUAL,

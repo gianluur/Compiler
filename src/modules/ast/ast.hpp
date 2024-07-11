@@ -19,7 +19,11 @@ public:
   virtual void print(int indentation_level = 0) const = 0;
 };
 
-class Expression : public ASTNode {};
+class Expression : public ASTNode {
+public:
+  string infix;
+};
+
 class Literal : public Expression {};
 
 class Integer : public Literal {
@@ -114,6 +118,25 @@ private:
   unique_ptr<Expression> m_operand;
 };
 
+class AssigmentOperator : public Expression {
+public:
+  AssigmentOperator(const Token& identifier, const Token& op, unique_ptr<Expression> value):
+    m_identifier(identifier.lexemes), m_op(op.lexemes), m_value(std::move(value)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "AssigmentOperator { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << "\n";
+    cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
+    cout << setw(indentation_level + 2) << " " << "value: ";
+    m_value->print(indentation_level + 1);
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  string m_identifier;
+  string m_op;
+  unique_ptr<Expression> m_value;
+};
 
 class BinaryOperator : public Expression {
 public:

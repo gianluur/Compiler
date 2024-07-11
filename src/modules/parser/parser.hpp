@@ -23,8 +23,14 @@ public:
       Token& token = m_tokens.at(i);
       if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
         parseVariable();
-      
       }
+      
+      else if (token.type == TokenType::IDENTIFIER) {
+        parseIdentifier();
+      }
+
+
+
       else error("Couldn't parse the current token: " + token.lexemes);
       
     }
@@ -49,13 +55,27 @@ private:
   }
 
   Token& consumeToken() {
-    if (i >= m_tokens.size()) error("Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
+    if (i >= m_tokens.size()) error("ConsumeToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
     return m_tokens.at(i++);
   }
 
   Token& nextToken() {
-    if (i >= m_tokens.size()) error("Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
+    if (i >= m_tokens.size()) error("nextToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
     return m_tokens.at(i);
+  }
+
+  void parseIdentifier(){
+    Token& identifier = consumeToken();
+    
+    if (!isAssigmentOperator(nextToken())) error("Expected assignment after identifier: " + identifier.lexemes);
+    Token& assignment = consumeToken();
+
+    unique_ptr<Expression> value = parseExpression();
+
+    if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.");
+    Token& semicolon = consumeToken();
+
+    m_ast.emplace_back(make_unique<AssigmentOperator>(identifier, assignment, std::move(value)));
   }
 
   void parseVariable() {
@@ -71,11 +91,9 @@ private:
       Token& assignment = consumeToken();
 
       unique_ptr<Expression> value = parseExpression();
-      //if (!isLiteral(value)) error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + assignment.lexemes + "'; was expected a literal or an expression.");
- 
 
+      if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
       Token& semicolon = consumeToken();
-      if (semicolon.type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
       
       m_ast.emplace_back(make_unique<Variable>(keyword, type, identifier, assignment, std::move(value), semicolon));
     }
@@ -89,7 +107,10 @@ private:
   } 
 
    unique_ptr<Expression> parseExpression() {
-    unordered_map<string, int> precedence = {{"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, {"!", 3}, {"&&", 2}, {"||", 1}};
+    unordered_map<string, int> precedence = { {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
+                                              {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
+                                              {"!", 3}, {"&&", 2}, {"||", 1}
+                                            };
 
     stack<Token> operators;
     vector<Token> output;
@@ -101,7 +122,7 @@ private:
             || current.type == TokenType::LITERAL_CHARACTER || current.type == TokenType::LITERAL_STRING || current.type == TokenType::IDENTIFIER) {
             output.push_back(current);
         } 
-        else if (isMathOperator(current) || isBooleanOperator(current)) {
+        else if (isMathOperator(current) || isBooleanOperator(current) || isComparisonOperator(current)) {
             while (!operators.empty() && operators.top().type != TokenType::LPAREN &&
                    precedence[operators.top().lexemes] >= precedence[current.lexemes]) {
                 output.push_back(operators.top());
@@ -125,6 +146,7 @@ private:
         }
 
         else error("Unexpected token: " + current.lexemes);
+
     }
 
     while (!operators.empty()) {
@@ -160,8 +182,7 @@ private:
       else if (token.type == TokenType::IDENTIFIER) {
           nodes.push(make_unique<Identifier>(token));
       }
-
-      else if (isMathOperator(token) || isBooleanOperator(token)) {
+      else if (isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token)) {
         if (token.type == TokenType::NOT){
           auto operand = std::move(nodes.top()); nodes.pop();
           nodes.push(make_unique<UnaryOperator>(token, std::move(operand)));
@@ -171,10 +192,27 @@ private:
           auto left = std::move(nodes.top()); nodes.pop();
           nodes.push(make_unique<BinaryOperator>(std::move(left), token, std::move(right)));
         }
-
       }
     }
     return std::move(nodes.top());
+  }
+
+  bool isAssigmentOperator(const Token& token){
+    return token.type == TokenType::ASSIGNMENT ||
+           token.type == TokenType::ADDITION_ASSIGNMENT ||
+           token.type == TokenType::SUBTRACTION_ASSIGNMENT ||
+           token.type == TokenType::MULTIPLICATION_ASSIGNMENT ||
+           token.type == TokenType::DIVISION_ASSIGNMENT ||
+           token.type == TokenType::MODULUS_ASSIGNMENT;
+  }
+
+  bool isComparisonOperator(const Token& token) {
+    return token.type == TokenType::EQUALS ||
+           token.type == TokenType::NOT_EQUAL ||
+           token.type == TokenType::GREATER ||
+           token.type == TokenType::LESS ||
+           token.type == TokenType::GREATER_EQUAL ||
+           token.type == TokenType::LESS_EQUAL;
   }
 
   bool isBooleanOperator(const Token& token){
@@ -197,6 +235,7 @@ private:
           nextToken().type == TokenType::IDENTIFIER ||
           isMathOperator(nextToken()) ||
           isBooleanOperator(nextToken()) ||
+          isComparisonOperator(nextToken()) ||
           nextToken().type == TokenType::LPAREN || 
           nextToken().type == TokenType::RPAREN);
   }
@@ -217,3 +256,4 @@ private:
            token.type == TokenType::LITERAL_BOOLEAN;
   }
 };
+

@@ -98,11 +98,11 @@ private:
   }
 
   bool isComparisonOperator(const char& currentChar){
-    return contains("<>", currentChar) || (currentChar == '=' && isNextChar('=')); 
+    return contains("<>", currentChar) || (contains("!=", currentChar) && isNextChar('=')); 
   }
 
   bool isLogicalOperator(const char& currentChar){
-    return contains("!&|", currentChar);
+    return contains("!&|", currentChar) || (currentChar == '!') && !isNextChar('=');
   }
 
   bool isText(const char& currentChar){
@@ -362,6 +362,12 @@ private:
     else if (currentChar == '=') {
       const string token = string(1, currentChar) + "=";
       m_tokens.emplace_back(Token(TokenType::EQUALS, token));
+      i++;
+    }
+
+    else if (currentChar == '!'){
+      const string token = string(1, currentChar) + "=";
+      m_tokens.emplace_back(Token(TokenType::NOT_EQUAL, token));
       i++;
     }
   }

@@ -1,1 +1,1 @@
-var int name = x + 3 / 5;
+var bool x = 3 != 5;
