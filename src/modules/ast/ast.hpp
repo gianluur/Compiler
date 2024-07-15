@@ -293,15 +293,57 @@ public:
     cout << setw(indentation_level + 2) << " " << "update: ";
     m_update->print(indentation_level + 2);
     m_block->print(indentation_level + 2);
-
-
+    cout << setw(indentation_level) << " " << "} " << endl;
   }
-
 
 private:
   unique_ptr<Variable> m_initialization;
   unique_ptr<Expression> m_condition;
   unique_ptr<AssigmentOperator> m_update;
   unique_ptr<BlockStatement> m_block;
+
+};
+
+class Parameter: public ASTNode {
+public:
+  Parameter(const Token& type, unique_ptr<Identifier> name):
+    m_type(type.lexemes), m_name(std::move(name)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Parameter {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: ";
+    m_name->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  string m_type;
+  unique_ptr<Identifier> m_name;
+};
+
+class Function: public ASTNode {
+public:
+  Function(const Token& returnType, unique_ptr<Identifier> name, vector<unique_ptr<Parameter>> parameters, unique_ptr<BlockStatement> body):
+    m_returnType(returnType.lexemes), m_name(std::move(name)), m_parameters(std::move(parameters)), m_body(std::move(body)) {}
+
+  void print(int indentation_level) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Function {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "returnType: " << m_returnType << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: ";
+    m_name->print(indentation_level + 2);
+    for(const auto& parameter : m_parameters) {
+      parameter->print(indentation_level + 2);
+    }
+    m_body->print();
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+
+  string m_returnType;
+  unique_ptr<Identifier> m_name;
+  vector<unique_ptr<Parameter>> m_parameters;
+  unique_ptr<BlockStatement> m_body;
 
 };

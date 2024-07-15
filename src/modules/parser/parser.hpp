@@ -79,11 +79,60 @@ private:
     case TokenType::FOR:
       return parseForStatement();
       break;
+
+    case TokenType::FUNC:
+      return parseFunction();
+      break;
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
       return std::move(unique_ptr<ASTNode>());
     }
+
+  }
+
+  vector<unique_ptr<Parameter>> parseParameters() {
+    vector<unique_ptr<Parameter>> parameters;
+    while (nextToken().type == TokenType::IDENTIFIER || isType(nextToken()) || nextToken().type == TokenType::COMMA){
+      if (!isType(nextToken())) error("Expected a type in parameter");
+      const Token& type = consumeToken();
+
+      if (nextToken().type != TokenType::IDENTIFIER) error("Expected identifier after type in paramerter");
+      const Token& name = consumeToken();
+
+      parameters.emplace_back(std::move(make_unique<Parameter>(type, std::move(make_unique<Identifier>(name)))));
+
+      if (nextToken().type == TokenType::COMMA) {
+        consumeToken();
+        if (nextToken().type == TokenType::RPAREN) error("Expected another parameter after comma");
+      }
+      
+    }
+
+    return parameters;
+  }
+
+  unique_ptr<Function> parseFunction() {
+    if (nextToken().type != TokenType::FUNC) error("Expected function statement");
+    const Token& funcToken = consumeToken();
+
+    if (!isType(nextToken())) error("Expected type after function statement");
+    const Token& returnType = consumeToken();
+
+    if (nextToken().type != TokenType::IDENTIFIER) error("Expected identifier after func");
+    const Token& name = consumeToken();
+
+    if (nextToken().type != TokenType::LPAREN) error ("Expected open parenethesis for parameters after func");
+    const Token& openingParen = consumeToken();
+
+    vector<unique_ptr<Parameter>> parameters = parseParameters();
+
+    if (nextToken().type != TokenType::RPAREN) error ("Expected open parenethesis for parameters after func");
+    const Token& closingParen = consumeToken();
+
+    unique_ptr<BlockStatement> body = parseBlockStatement();
+
+    return std::move(make_unique<Function>(returnType, std::move(make_unique<Identifier>(name)), std::move(parameters), std::move(body)));
 
   }
 
@@ -163,7 +212,7 @@ private:
     Token& keyword = consumeToken();
     
     Token& type = consumeToken();
-    if (!isType(type)) error("Expected type after " + keyword.lexemes + ".");
+    if (!isType(type)) error("Expected type after " + keyword.lexemes + "."); //add check for null type
 
     Token& identifier = consumeToken();
     if (identifier.type != TokenType::IDENTIFIER) error("Expected type after " + keyword.lexemes + ".");
@@ -329,7 +378,8 @@ private:
            token.type == TokenType::FLOAT ||
            token.type == TokenType::CHAR || 
            token.type == TokenType::STRING ||
-           token.type == TokenType::BOOL;
+           token.type == TokenType::BOOL ||
+           token.type == TokenType::NULL;
   }
 
   bool isLiteral(const Token& token) const {
