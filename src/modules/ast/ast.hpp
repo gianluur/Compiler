@@ -197,3 +197,45 @@ private:
   string m_semicolon;
 
 };
+
+class BlockStatement : public ASTNode {
+public:
+  BlockStatement(vector<unique_ptr<ASTNode>> statements):
+    m_statements(std::move(statements)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "BlockStatement { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "content: ";
+    for(const auto& statement: m_statements){
+      cout << setw(indentation_level + 2) << " ";
+      statement->print(indentation_level + 4);
+    }
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  vector<unique_ptr<ASTNode>> m_statements;
+};
+
+class ControlFlow : public ASTNode {};
+
+class IfStatement: public ControlFlow {
+public:
+  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block):
+    m_condition(std::move(condition)), m_block(std::move(block)){}
+
+  void print(int indentation_level) const override {
+    cout << '\n' << setw(indentation_level) << " " << "If Statement { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "condition: ";
+    m_condition->print(indentation_level + 2);
+    m_block->print(indentation_level + 2);
+  }
+
+private:
+  unique_ptr<Expression> m_condition;
+  unique_ptr<BlockStatement> m_block;
+};
+
+class ElseStatement: public ControlFlow {
+
+};

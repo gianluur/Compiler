@@ -20,19 +20,8 @@ public:
   void parse() {
     cout << "----- Parser Start -----" << endl;
     while (i < m_tokens.size()){
-      Token& token = m_tokens.at(i);
-      if (token.type == TokenType::VAR || token.type == TokenType::CONST) {
-        parseVariable();
-      }
-      
-      else if (token.type == TokenType::IDENTIFIER) {
-        parseIdentifier();
-      }
-
-
-
-      else error("Couldn't parse the current token: " + token.lexemes);
-      
+      unique_ptr<ASTNode> node = parseASTNode();
+      m_ast.push_back(std::move(node));
     }
     cout << "----- Parser End -----" << endl << endl;
 
@@ -64,7 +53,59 @@ private:
     return m_tokens.at(i);
   }
 
-  void parseIdentifier(){
+  unique_ptr<ASTNode> parseASTNode(){
+
+    Token& token = nextToken();
+
+    switch (token.type)
+    {
+    case TokenType::VAR:
+    case TokenType::CONST:
+      return parseVariable();
+      break;
+
+    case TokenType::IDENTIFIER:
+      return parseIdentifier();
+      break;
+
+    case TokenType::IF:
+      return parseIfStatement();
+      break;
+    
+    default:
+      error("Couldn't parse the current token: " + token.lexemes);
+      return std::move(unique_ptr<ASTNode>());
+    }
+
+  }
+
+  unique_ptr<IfStatement> parseIfStatement(){
+    if (nextToken().type != TokenType::IF) error("Expected if statement");
+    const Token& ifToken = consumeToken();
+    unique_ptr<Expression> condition = parseExpression();
+
+    unique_ptr<BlockStatement> block = parseBlockStatement();
+
+    return std::move(make_unique<IfStatement>(std::move(condition), std::move(block)));
+  }
+
+  unique_ptr<BlockStatement> parseBlockStatement(){
+    if (nextToken().type != TokenType::LCURLY) error("Expected open bracket after if statement");
+    const Token& openBracket = consumeToken();
+
+    vector<unique_ptr<ASTNode>> statements;
+    while (nextToken().type != TokenType::RCURLY){
+      if (i + 1 >= m_tokens.size()) error("No closing bracket if block statement");
+      statements.emplace_back(parseASTNode());
+    }
+
+    if (nextToken().type != TokenType::RCURLY) error("Expected closing bracket after if statement");
+    const Token& closingBracket = consumeToken();
+
+    return std::move(make_unique<BlockStatement>(std::move(statements)));
+  }
+
+  unique_ptr<AssigmentOperator> parseIdentifier(){
     Token& identifier = consumeToken();
     
     if (!isAssigmentOperator(nextToken())) error("Expected assignment after identifier: " + identifier.lexemes);
@@ -75,10 +116,10 @@ private:
     if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.");
     Token& semicolon = consumeToken();
 
-    m_ast.emplace_back(make_unique<AssigmentOperator>(identifier, assignment, std::move(value)));
+    return std::move(make_unique<AssigmentOperator>(identifier, assignment, std::move(value)));
   }
 
-  void parseVariable() {
+  unique_ptr<Variable> parseVariable() {
     Token& keyword = consumeToken();
     
     Token& type = consumeToken();
@@ -95,15 +136,18 @@ private:
       if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
       Token& semicolon = consumeToken();
       
-      m_ast.emplace_back(make_unique<Variable>(keyword, type, identifier, assignment, std::move(value), semicolon));
+      return std::move(make_unique<Variable>(keyword, type, identifier, assignment, std::move(value), semicolon));
     }
 
     else if (nextToken().type == TokenType::SEMICOLON) {
       Token& semicolon = consumeToken();
-      m_ast.emplace_back(make_unique<Variable>(keyword, type, identifier, semicolon));
+      return std::move(make_unique<Variable>(keyword, type, identifier, semicolon));
     }
 
-    else error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon.");
+    else {
+      error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon.");
+      return std::move(unique_ptr<Variable>());
+    }
   } 
 
    unique_ptr<Expression> parseExpression() {
