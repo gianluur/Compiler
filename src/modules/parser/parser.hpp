@@ -75,6 +75,10 @@ private:
     case TokenType::WHILE:
       return parseWhileStatement();
       break;
+
+    case TokenType::FOR:
+      return parseForStatement();
+      break;
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
@@ -90,6 +94,23 @@ private:
     unique_ptr<BlockStatement> block = parseBlockStatement();
     return std::move(make_unique<While>(std::move(condition), std::move(block)));
 
+  }
+
+  unique_ptr<For> parseForStatement(){
+    if (nextToken().type != TokenType::FOR) error("Expected for statement");
+    const Token& forToken = consumeToken();
+
+    unique_ptr<Variable> initialization = parseVariable();
+
+
+    unique_ptr<Expression> condition = parseExpression();
+    if (nextToken().type != TokenType::SEMICOLON) error("Expected semicolon after condition in for loop");
+    consumeToken();
+
+    unique_ptr<AssigmentOperator> update = parseIdentifier();
+    unique_ptr<BlockStatement> block = parseBlockStatement();  
+
+    return std::move(make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block)));
   }
 
   unique_ptr<IfStatement> parseIfStatement(){
@@ -124,6 +145,7 @@ private:
   }
 
   unique_ptr<AssigmentOperator> parseIdentifier(){
+    if (nextToken().type != TokenType::IDENTIFIER);
     Token& identifier = consumeToken();
     
     if (!isAssigmentOperator(nextToken())) error("Expected assignment after identifier: " + identifier.lexemes);
@@ -131,7 +153,7 @@ private:
 
     unique_ptr<Expression> value = parseExpression();
 
-    if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.");
+    if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
     Token& semicolon = consumeToken();
 
     return std::move(make_unique<AssigmentOperator>(identifier, assignment, std::move(value)));
@@ -163,7 +185,7 @@ private:
     }
 
     else {
-      error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon.");
+      error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon. last token is: " + m_tokens.at(i).lexemes);
       return std::move(unique_ptr<Variable>());
     }
   } 

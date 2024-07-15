@@ -210,7 +210,7 @@ public:
       cout << setw(indentation_level + 2) << " ";
       statement->print(indentation_level + 4);
     }
-    cout << setw(indentation_level) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
@@ -275,6 +275,33 @@ public:
 
 private:
   unique_ptr<Expression> m_condition;
+  unique_ptr<BlockStatement> m_block;
+
+};
+
+class For: public Loops {
+public:
+  For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssigmentOperator> update, unique_ptr<BlockStatement> block):
+    m_initialization(std::move(initialization)), m_condition(std::move(condition)), m_update(std::move(update)), m_block(std::move(block)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "For Statement {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "initialization: ";
+    m_initialization->print(indentation_level + 2);
+    cout << setw(indentation_level + 2) << " " << "condition: ";
+    m_condition->print(indentation_level + 2);
+    cout << setw(indentation_level + 2) << " " << "update: ";
+    m_update->print(indentation_level + 2);
+    m_block->print(indentation_level + 2);
+
+
+  }
+
+
+private:
+  unique_ptr<Variable> m_initialization;
+  unique_ptr<Expression> m_condition;
+  unique_ptr<AssigmentOperator> m_update;
   unique_ptr<BlockStatement> m_block;
 
 };

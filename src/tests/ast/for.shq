@@ -1,0 +1,7 @@
+for var int i = 0; i < n; i += 1; {
+  if (x == "chloe") {
+    for var int j = 0; j < n; j += 2; {
+      x = "sigma";
+    }
+  }
+}
