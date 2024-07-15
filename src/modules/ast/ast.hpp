@@ -257,3 +257,24 @@ private:
   unique_ptr<BlockStatement> m_block;
   unique_ptr<ElseStatement> m_else;
 };
+
+class Loops: public ASTNode {};
+
+class While: public Loops {
+public:
+  While(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block):
+    m_condition(std::move(condition)), m_block(std::move(block)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "While Statement {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "condition: ";
+    m_condition->print(indentation_level + 2);
+    m_block->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  unique_ptr<Expression> m_condition;
+  unique_ptr<BlockStatement> m_block;
+
+};

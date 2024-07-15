@@ -71,11 +71,24 @@ private:
     case TokenType::IF:
       return parseIfStatement();
       break;
+
+    case TokenType::WHILE:
+      return parseWhileStatement();
+      break;
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
       return std::move(unique_ptr<ASTNode>());
     }
+
+  }
+
+  unique_ptr<While> parseWhileStatement(){
+    if (nextToken().type != TokenType::WHILE) error("Expected while statement");
+    const Token& whileToken = consumeToken();
+    unique_ptr<Expression> condition = parseExpression();
+    unique_ptr<BlockStatement> block = parseBlockStatement();
+    return std::move(make_unique<While>(std::move(condition), std::move(block)));
 
   }
 
