@@ -219,23 +219,41 @@ private:
 
 class ControlFlow : public ASTNode {};
 
+class ElseStatement: public ControlFlow {
+public:
+  ElseStatement(unique_ptr<BlockStatement> block):
+    m_block(std::move(block)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Else Statement { " << '\n';
+    m_block->print(indentation_level + 2);        
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  unique_ptr<BlockStatement> m_block;
+};
+
 class IfStatement: public ControlFlow {
 public:
   IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block):
     m_condition(std::move(condition)), m_block(std::move(block)){}
+
+  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block, unique_ptr<ElseStatement> elseBlock):
+    m_condition(std::move(condition)), m_block(std::move(block)), m_else(std::move(elseBlock)){}
 
   void print(int indentation_level) const override {
     cout << '\n' << setw(indentation_level) << " " << "If Statement { " << '\n';
     cout << setw(indentation_level + 2) << " " << "condition: ";
     m_condition->print(indentation_level + 2);
     m_block->print(indentation_level + 2);
+
+    if (m_else) m_else->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
   unique_ptr<Expression> m_condition;
   unique_ptr<BlockStatement> m_block;
-};
-
-class ElseStatement: public ControlFlow {
-
+  unique_ptr<ElseStatement> m_else;
 };

@@ -83,8 +83,13 @@ private:
     if (nextToken().type != TokenType::IF) error("Expected if statement");
     const Token& ifToken = consumeToken();
     unique_ptr<Expression> condition = parseExpression();
-
     unique_ptr<BlockStatement> block = parseBlockStatement();
+
+    if (i < m_tokens.size() && nextToken().type == TokenType::ELSE) {
+      const Token& elseToken = consumeToken();
+      unique_ptr<BlockStatement> elseBlock = parseBlockStatement();
+      return std::move(make_unique<IfStatement>(std::move(condition), std::move(block), std::move(make_unique<ElseStatement>(std::move(elseBlock)))));
+    }
 
     return std::move(make_unique<IfStatement>(std::move(condition), std::move(block)));
   }
