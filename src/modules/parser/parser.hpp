@@ -27,7 +27,7 @@ public:
     for (auto& node : m_ast) {
       node->print();
     }
-    cout << "----- AST End -----" << endl << endl;
+    cout << "\n----- AST End -----" << endl << endl;
     
   }
 
@@ -251,30 +251,38 @@ private:
   unique_ptr<Variable> parseVariable() {
     Token& keyword = consumeToken();
     
-    Token& type = consumeToken();
-    if (!isType(type)) error("Expected type after " + keyword.lexemes + "."); //add check for null type
-
-    Token& identifier = consumeToken();
-    if (identifier.type != TokenType::IDENTIFIER) error("Expected type after " + keyword.lexemes + ".");
-
-    if (nextToken().type == TokenType::ASSIGNMENT) {
-      consumeToken();
-
-      unique_ptr<Expression> value = parseExpression();
-
-      if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
-      consumeToken();
-      
-      return std::move(make_unique<Variable>(keyword, type, identifier, std::move(value)));
+    if (i >= m_tokens.size() || !isType(nextToken())) {
+      if (nextToken().type == TokenType::NULL) error("Null is not a valid type for a variable");
+      error("Expected type after variable declaration"); //add check for null type
     }
+    Token& type = consumeToken();
 
-    else if (nextToken().type == TokenType::SEMICOLON) {
+    if (i >= m_tokens.size() || nextToken().type != TokenType::IDENTIFIER) 
+      error("Expected identifier after variable declaration");
+    Token& identifier = consumeToken();
+
+    if (nextToken().type == TokenType::SEMICOLON){
       consumeToken();
       return std::move(make_unique<Variable>(keyword, type, identifier));
     }
 
+    else if (nextToken().type == TokenType::ASSIGNMENT){
+      consumeToken();
+
+      if (!isValidExpressionToken())
+        error("Expected a literal/expression/identifier after assigment operator in variable initialization");
+        
+      unique_ptr<Expression> value = parseExpression();
+
+      if (i >= m_tokens.size() || nextToken().type != TokenType::SEMICOLON)
+        error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
+      consumeToken();
+
+      return std::move(make_unique<Variable>(keyword, type, identifier, std::move(value)));
+    }
+
     else {
-      error("In this variable declaration: '" + keyword.lexemes + " " + identifier.lexemes + "'; was expected an assignment or a semicolon. last token is: " + m_tokens.at(i).lexemes);
+      error("Expected semicolon after identifier in variable declaration");
       return std::move(unique_ptr<Variable>());
     }
   } 

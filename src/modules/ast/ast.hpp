@@ -169,21 +169,21 @@ public:
     m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes) {}
 
   void print(int indentation_level = 0) const override {
-    if (m_assignment.empty()) {
-      cout << '\n' << setw(indentation_level) << " " << "Variable-Declaration { " << '\n';
-      cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
-      cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
-      cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
-      cout << setw(indentation_level + 2) << " " << "value: null" << '\n';
-      cout << setw(indentation_level) << " " << "} " << endl;
-    }
-    else {
-      cout << '\n' << setw(indentation_level) << " " << "Variable-Initialization { " << '\n';
+    if (m_value) {
+      cout << '\n' << setw(indentation_level) << "Variable-Initialization { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
       cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: ";
       m_value->print(indentation_level + 2);
+      cout << setw(indentation_level) << " " << "} " << endl;
+    }
+    else {
+      cout << '\n' << setw(indentation_level) << "Variable-Declaration { " << '\n';
+      cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
+      cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
+      cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
+      cout << setw(indentation_level + 2) << " " << "value: null" << '\n';
       cout << setw(indentation_level) << " " << "} " << endl;
     }
   }
