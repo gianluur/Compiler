@@ -279,6 +279,25 @@ private:
 
 };
 
+class Do: public Loops {
+public:
+  Do(unique_ptr<BlockStatement> body, unique_ptr<Expression> condition):
+    m_body(std::move(body)), m_condition(std::move(condition)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Do {\n";
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 2);
+    cout << setw(indentation_level + 2) << " " << "condition: ";
+    m_condition->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "}" << '\n';
+  }
+
+private:
+  unique_ptr<BlockStatement> m_body;
+  unique_ptr<Expression> m_condition;
+};
+
 class For: public Loops {
 public:
   For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssigmentOperator> update, unique_ptr<BlockStatement> block):
@@ -346,4 +365,23 @@ private:
   vector<unique_ptr<Parameter>> m_parameters;
   unique_ptr<BlockStatement> m_body;
 
+};
+
+class Struct : public ASTNode {
+public:
+  Struct(unique_ptr<Identifier> name, unique_ptr<BlockStatement> body):
+    m_name(std::move(name)), m_body(std::move(body)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Struct {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: ";
+    m_name->print(indentation_level + 2);
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  unique_ptr<Identifier> m_name;
+  unique_ptr<BlockStatement> m_body;
 };

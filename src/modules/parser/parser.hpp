@@ -76,6 +76,10 @@ private:
       return parseWhileStatement();
       break;
 
+    case TokenType::DO:
+      return parseDoStatement();
+      break;
+
     case TokenType::FOR:
       return parseForStatement();
       break;
@@ -83,12 +87,28 @@ private:
     case TokenType::FUNC:
       return parseFunction();
       break;
+
+    case TokenType::STRUCT:
+      return parseStruct();
+      break;
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
       return std::move(unique_ptr<ASTNode>());
     }
 
+  } 
+
+  unique_ptr<Struct> parseStruct(){
+    if (nextToken().type != TokenType::STRUCT) error("Expected struct");
+    const Token& structToken = consumeToken();
+    if (nextToken().type != TokenType::IDENTIFIER) error("Expected identifier after struct");
+    const Token& name = consumeToken();
+    unique_ptr<BlockStatement> body = parseBlockStatement();
+    if (nextToken().type != TokenType::SEMICOLON) error("Expected identifier after struct");
+    const Token& semicolon = consumeToken();
+    
+    return std::move(make_unique<Struct>(std::move(make_unique<Identifier>(name)), std::move(body)));
   }
 
   vector<unique_ptr<Parameter>> parseParameters() {
@@ -106,7 +126,6 @@ private:
         consumeToken();
         if (nextToken().type == TokenType::RPAREN) error("Expected another parameter after comma");
       }
-      
     }
 
     return parameters;
@@ -134,6 +153,16 @@ private:
 
     return std::move(make_unique<Function>(returnType, std::move(make_unique<Identifier>(name)), std::move(parameters), std::move(body)));
 
+  }
+
+  unique_ptr<Do> parseDoStatement(){
+    if (nextToken().type != TokenType::DO) error("Expected do-while statement");
+    const Token& doToken = consumeToken();
+    unique_ptr<BlockStatement> body = parseBlockStatement();
+    const Token& whileToken = consumeToken();
+    unique_ptr<Expression> condition = parseExpression();
+    const Token& semicolon = consumeToken();
+    return std::move(make_unique<Do>(std::move(body), std::move(condition)));
   }
 
   unique_ptr<While> parseWhileStatement(){
