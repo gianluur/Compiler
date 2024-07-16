@@ -252,9 +252,11 @@ private:
     Token& keyword = consumeToken();
     
     if (i >= m_tokens.size() || !isType(nextToken())) {
-      if (nextToken().type == TokenType::NULL) error("Null is not a valid type for a variable");
-      error("Expected type after variable declaration"); //add check for null type
-    }
+      error("Expected type after variable declaration"); 
+    } 
+    else if (nextToken().type == TokenType::NULL)
+     error("Null is not a valid type for a variable");
+
     Token& type = consumeToken();
 
     if (i >= m_tokens.size() || nextToken().type != TokenType::IDENTIFIER) 

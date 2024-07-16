@@ -30,9 +30,9 @@ class Integer : public Literal {
 public:
   Integer(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "LiteralInteger { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "value: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "LiteralInteger { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
@@ -43,9 +43,9 @@ class Float : public Literal {
 public:
   Float(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "LiteralFloat { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "value: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "LiteralFloat { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
@@ -56,9 +56,9 @@ class String: public Literal {
 public:
   String(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "LiteralString { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "value: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "LiteralString { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 private:
   string m_token;
@@ -68,9 +68,9 @@ class Char : public Literal {
 public:
   Char(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "LiteralChar { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "value: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "LiteralChar { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 private:
   string m_token;
@@ -80,9 +80,9 @@ class Boolean : public Literal {
 public:
   Boolean(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "LiteralBoolean { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "value: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "LiteralBoolean { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 private:
   string m_token;
@@ -92,9 +92,9 @@ class Identifier : public Expression {
 public:
   Identifier(const Token& token) : m_token(token.lexemes) {}
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level + 2) << " " << "Identifier { " << '\n';
-    cout << setw(indentation_level + 4) << " " << "name: " << m_token << "\n";
-    cout <<  setw(indentation_level + 2) << " " << "} " << endl;
+    cout << '\n' << setw(indentation_level) << " " << "Identifier { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: " << m_token << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 private:
   string m_token;
@@ -175,7 +175,7 @@ public:
       cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: ";
-      m_value->print(indentation_level + 2);
+      m_value->print(indentation_level + 4);
       cout << setw(indentation_level) << " " << "} " << endl;
     }
     else {
