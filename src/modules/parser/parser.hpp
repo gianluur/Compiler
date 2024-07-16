@@ -201,48 +201,53 @@ private:
   }
 
   unique_ptr<IfStatement> parseIfStatement(){
-    if (nextToken().type != TokenType::IF) error("Expected if statement");
     consumeToken();
 
     unique_ptr<Expression> condition = parseExpression();
-    unique_ptr<BlockStatement> block = parseBlockStatement();
+    unique_ptr<BlockStatement> body = parseBlockStatement();
 
     if (i < m_tokens.size() && nextToken().type == TokenType::ELSE) {
       consumeToken();
 
-      unique_ptr<BlockStatement> elseBlock = parseBlockStatement();
+      unique_ptr<BlockStatement> elseBody = parseBlockStatement();
 
-      return std::move(make_unique<IfStatement>(std::move(condition), std::move(block), std::move(make_unique<ElseStatement>(std::move(elseBlock)))));
+      return std::move(make_unique<IfStatement>(std::move(condition), std::move(body), std::move(make_unique<ElseStatement>(std::move(elseBody)))));
     }
-    return std::move(make_unique<IfStatement>(std::move(condition), std::move(block)));
+    return std::move(make_unique<IfStatement>(std::move(condition), std::move(body)));
   }
 
   unique_ptr<BlockStatement> parseBlockStatement(){
-    if (nextToken().type != TokenType::LCURLY) error("Expected open bracket after if statement");
+    if (nextToken().type != TokenType::LCURLY) 
+      error("Expected open bracket after if statement");
     consumeToken();
 
     vector<unique_ptr<ASTNode>> statements;
     while (nextToken().type != TokenType::RCURLY){
-      if (i + 1 >= m_tokens.size()) error("No closing bracket if block statement");
+      if (i + 1 >= m_tokens.size()) 
+        error("No closing bracket if block statement");
       statements.emplace_back(parseASTNode());
     }
 
-    if (nextToken().type != TokenType::RCURLY) error("Expected closing bracket after if statement");
+    if (nextToken().type != TokenType::RCURLY) 
+      error("Expected closing bracket after if statement");
     consumeToken();
 
     return std::move(make_unique<BlockStatement>(std::move(statements)));
   }
 
   unique_ptr<AssigmentOperator> parseIdentifier(){
-    if (nextToken().type != TokenType::IDENTIFIER);
     Token& identifier = consumeToken();
     
-    if (!isAssigmentOperator(nextToken())) error("Expected assignment after identifier: " + identifier.lexemes);
+    if (!isAssigmentOperator(nextToken())) 
+      error("Expected assignment operator after identifier: " + identifier.lexemes);
     Token& op = consumeToken();
 
+    if (!isValidExpressionToken())
+      error("Expected a literal/expression/identifier after assigment operator in variable initialization");
     unique_ptr<Expression> value = parseExpression();
 
-    if (nextToken().type != TokenType::SEMICOLON) error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
+    if (nextToken().type != TokenType::SEMICOLON) 
+      error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
     consumeToken();
 
     return std::move(make_unique<AssigmentOperator>(identifier, op, std::move(value)));
@@ -348,22 +353,22 @@ private:
 
     for (const Token& token : postfixExpression) {
       if (token.type == TokenType::LITERAL_INTEGER) {
-          nodes.push(make_unique<Integer>(token));
+        nodes.push(make_unique<Integer>(token));
       } 
       else if (token.type == TokenType::LITERAL_FLOAT) {
-          nodes.push(make_unique<Float>(token));
+        nodes.push(make_unique<Float>(token));
       }
       else if (token.type == TokenType::LITERAL_BOOLEAN) {
-          nodes.push(make_unique<Boolean>(token));
+        nodes.push(make_unique<Boolean>(token));
       }
       else if (token.type == TokenType::LITERAL_CHARACTER) {
-          nodes.push(make_unique<Char>(token));
+        nodes.push(make_unique<Char>(token));
       }
       else if (token.type == TokenType::LITERAL_STRING) {
-          nodes.push(make_unique<String>(token));
+        nodes.push(make_unique<String>(token));
       }
       else if (token.type == TokenType::IDENTIFIER) {
-          nodes.push(make_unique<Identifier>(token));
+        nodes.push(make_unique<Identifier>(token));
       }
       else if (isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token)) {
         if (token.type == TokenType::NOT){
@@ -410,15 +415,15 @@ private:
 
   bool isValidExpressionToken() {
     return i < m_tokens.size() && 
-          (nextToken().type == TokenType::LITERAL_INTEGER || 
+          (isMathOperator(nextToken()) ||
+          isBooleanOperator(nextToken()) ||
+          isComparisonOperator(nextToken()) ||
+          nextToken().type == TokenType::LITERAL_INTEGER || 
           nextToken().type == TokenType::LITERAL_FLOAT || 
           nextToken().type == TokenType::LITERAL_BOOLEAN ||
           nextToken().type == TokenType::LITERAL_CHARACTER || 
           nextToken().type == TokenType::LITERAL_STRING || 
           nextToken().type == TokenType::IDENTIFIER ||
-          isMathOperator(nextToken()) ||
-          isBooleanOperator(nextToken()) ||
-          isComparisonOperator(nextToken()) ||
           nextToken().type == TokenType::LPAREN || 
           nextToken().type == TokenType::RPAREN);
   }

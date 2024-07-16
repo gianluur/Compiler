@@ -124,12 +124,12 @@ public:
     m_identifier(identifier.lexemes), m_op(op.lexemes), m_value(std::move(value)) {}
 
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level) << " " << "AssigmentOperator { " << '\n';
+    cout << '\n' << setw(indentation_level) << "AssigmentOperator { " << '\n';
     cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << "\n";
     cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
     cout << setw(indentation_level + 2) << " " << "value: ";
-    m_value->print(indentation_level + 1);
-    cout << setw(indentation_level) << " " << "} " << endl;
+    m_value->print(indentation_level + 4);
+    cout << setw(indentation_level) << "} " << endl;
   }
 
 private:
@@ -147,9 +147,9 @@ public:
     cout << '\n' << setw(indentation_level) << " " << "BinaryOperator { " << '\n';
     cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
     cout << setw(indentation_level + 2) << " " <<  "left: ";
-    m_left->print(indentation_level + 1);
+    m_left->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "right: ";
-    m_right->print(indentation_level + 3);
+    m_right->print(indentation_level + 4);
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
@@ -170,7 +170,7 @@ public:
 
   void print(int indentation_level = 0) const override {
     if (m_value) {
-      cout << '\n' << setw(indentation_level) << "Variable-Initialization { " << '\n';
+      cout << '\n' << setw(indentation_level) << " " << "Variable-Initialization { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
       cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
@@ -179,12 +179,12 @@ public:
       cout << setw(indentation_level) << " " << "} " << endl;
     }
     else {
-      cout << '\n' << setw(indentation_level) << "Variable-Declaration { " << '\n';
+      cout << '\n' << setw(indentation_level) << " " << "Variable-Declaration { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
       cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: null" << '\n';
-      cout << setw(indentation_level) << " " << "} " << endl;
+      cout << setw(indentation_level) << "} " << endl;
     }
   }
 
@@ -206,7 +206,6 @@ public:
     cout << '\n' << setw(indentation_level) << " " << "BlockStatement { " << '\n';
     cout << setw(indentation_level + 2) << " " << "content: ";
     for(const auto& statement: m_statements){
-      cout << setw(indentation_level + 2) << " ";
       statement->print(indentation_level + 4);
     }
     cout << '\n' << setw(indentation_level) << " " << "} " << endl;
@@ -220,40 +219,44 @@ class ControlFlow : public ASTNode {};
 
 class ElseStatement: public ControlFlow {
 public:
-  ElseStatement(unique_ptr<BlockStatement> block):
-    m_block(std::move(block)) {}
+  ElseStatement(unique_ptr<BlockStatement> body):
+    m_body(std::move(body)) {}
 
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level) << " " << "Else Statement { " << '\n';
-    m_block->print(indentation_level + 2);        
+    cout << '\n' << setw(indentation_level) << " " << "Else Statement { ";
+    m_body->print(indentation_level + 2);        
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
-  unique_ptr<BlockStatement> m_block;
+  unique_ptr<BlockStatement> m_body;
 };
 
 class IfStatement: public ControlFlow {
 public:
-  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block):
-    m_condition(std::move(condition)), m_block(std::move(block)){}
+  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body):
+    m_condition(std::move(condition)), m_body(std::move(body)) {}
 
-  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block, unique_ptr<ElseStatement> elseBlock):
-    m_condition(std::move(condition)), m_block(std::move(block)), m_else(std::move(elseBlock)){}
+  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body, unique_ptr<ElseStatement> elseBody):
+    m_condition(std::move(condition)), m_body(std::move(body)), m_else(std::move(elseBody)) {}
 
   void print(int indentation_level) const override {
     cout << '\n' << setw(indentation_level) << " " << "If Statement { " << '\n';
     cout << setw(indentation_level + 2) << " " << "condition: ";
-    m_condition->print(indentation_level + 2);
-    m_block->print(indentation_level + 2);
+    m_condition->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 4);
 
-    if (m_else) m_else->print(indentation_level + 2);
+    if (m_else) {
+      cout << setw(indentation_level + 2) << " " << "else: ";
+      m_else->print(indentation_level + 4);
+    }
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
   unique_ptr<Expression> m_condition;
-  unique_ptr<BlockStatement> m_block;
+  unique_ptr<BlockStatement> m_body;
   unique_ptr<ElseStatement> m_else;
 };
 
