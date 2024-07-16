@@ -19,11 +19,7 @@ public:
   virtual void print(int indentation_level = 0) const = 0;
 };
 
-class Expression : public ASTNode {
-public:
-  string infix;
-};
-
+class Expression : public ASTNode {};
 class Literal : public Expression {};
 
 class Integer : public Literal {
@@ -124,12 +120,12 @@ public:
     m_identifier(identifier.lexemes), m_op(op.lexemes), m_value(std::move(value)) {}
 
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level) << "AssigmentOperator { " << '\n';
+    cout << '\n' << setw(indentation_level) << " " << "AssigmentOperator { " << '\n';
     cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << "\n";
     cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
     cout << setw(indentation_level + 2) << " " << "value: ";
     m_value->print(indentation_level + 4);
-    cout << setw(indentation_level) << "} " << endl;
+    cout << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
@@ -251,7 +247,7 @@ public:
       cout << setw(indentation_level + 2) << " " << "else: ";
       m_else->print(indentation_level + 4);
     }
-    cout << setw(indentation_level) << " " << "} " << endl;
+    cout << setw(indentation_level) << " " << "} ";
   }
 
 private:
@@ -264,20 +260,21 @@ class Loops: public ASTNode {};
 
 class While: public Loops {
 public:
-  While(unique_ptr<Expression> condition, unique_ptr<BlockStatement> block):
-    m_condition(std::move(condition)), m_block(std::move(block)) {}
+  While(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body):
+    m_condition(std::move(condition)), m_body(std::move(body)) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "While Statement {" << '\n';
     cout << setw(indentation_level + 2) << " " << "condition: ";
-    m_condition->print(indentation_level + 2);
-    m_block->print(indentation_level + 2);
+    m_condition->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
 private:
   unique_ptr<Expression> m_condition;
-  unique_ptr<BlockStatement> m_block;
+  unique_ptr<BlockStatement> m_body;
 
 };
 
@@ -289,9 +286,9 @@ public:
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Do {\n";
     cout << setw(indentation_level + 2) << " " << "body: ";
-    m_body->print(indentation_level + 2);
+    m_body->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "condition: ";
-    m_condition->print(indentation_level + 2);
+    m_condition->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "}" << '\n';
   }
 
@@ -302,18 +299,18 @@ private:
 
 class For: public Loops {
 public:
-  For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssigmentOperator> update, unique_ptr<BlockStatement> block):
-    m_initialization(std::move(initialization)), m_condition(std::move(condition)), m_update(std::move(update)), m_block(std::move(block)) {}
+  For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssigmentOperator> update, unique_ptr<BlockStatement> body):
+    m_initialization(std::move(initialization)), m_condition(std::move(condition)), m_update(std::move(update)), m_body(std::move(body)) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "For Statement {" << '\n';
     cout << setw(indentation_level + 2) << " " << "initialization: ";
-    m_initialization->print(indentation_level + 2);
+    m_initialization->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "condition: ";
-    m_condition->print(indentation_level + 2);
+    m_condition->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "update: ";
-    m_update->print(indentation_level + 2);
-    m_block->print(indentation_level + 2);
+    m_update->print(indentation_level + 4);
+    m_body->print(indentation_level + 2);
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
@@ -321,7 +318,7 @@ private:
   unique_ptr<Variable> m_initialization;
   unique_ptr<Expression> m_condition;
   unique_ptr<AssigmentOperator> m_update;
-  unique_ptr<BlockStatement> m_block;
+  unique_ptr<BlockStatement> m_body;
 
 };
 
@@ -334,7 +331,7 @@ public:
     cout << '\n' << setw(indentation_level) << " " << "Parameter {" << '\n';
     cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
     cout << setw(indentation_level + 2) << " " << "name: ";
-    m_name->print(indentation_level + 2);
+    m_name->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
@@ -352,11 +349,12 @@ public:
     cout << '\n' << setw(indentation_level) << " " << "Function {" << '\n';
     cout << setw(indentation_level + 2) << " " << "returnType: " << m_returnType << '\n';
     cout << setw(indentation_level + 2) << " " << "name: ";
-    m_name->print(indentation_level + 2);
+    m_name->print(indentation_level + 4);
     for(const auto& parameter : m_parameters) {
-      parameter->print(indentation_level + 2);
+      parameter->print(indentation_level + 4);
     }
-    m_body->print();
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
@@ -377,9 +375,9 @@ public:
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Struct {" << '\n';
     cout << setw(indentation_level + 2) << " " << "name: ";
-    m_name->print(indentation_level + 2);
+    m_name->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "body: ";
-    m_body->print(indentation_level + 2);
+    m_body->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
