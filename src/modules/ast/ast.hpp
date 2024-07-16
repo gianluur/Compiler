@@ -180,7 +180,7 @@ public:
       cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: null" << '\n';
-      cout << setw(indentation_level) << "} " << endl;
+      cout << setw(indentation_level) << " " << "} " << endl;
     }
   }
 
