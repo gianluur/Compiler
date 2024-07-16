@@ -163,10 +163,10 @@ private:
 class Variable : public ASTNode {
 public:
 
-  Variable(const Token& keyword, const Token& type, const Token& identifier, const Token& assignment, unique_ptr<Expression> value, const Token& semicolon):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes), m_assignment(assignment.lexemes), m_value(std::move(value)), m_semicolon(semicolon.lexemes) {}
-  Variable(const Token& keyword, const Token& type, const Token& identifier, const Token& semicolon):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes), m_semicolon(semicolon.lexemes) {}
+  Variable(const Token& keyword, const Token& type, const Token& identifier, unique_ptr<Expression> value):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes), m_value(std::move(value)) {}
+  Variable(const Token& keyword, const Token& type, const Token& identifier):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes) {}
 
   void print(int indentation_level = 0) const override {
     if (m_assignment.empty()) {
@@ -194,7 +194,6 @@ private:
   string m_identifier;
   string m_assignment;
   unique_ptr<Expression> m_value;
-  string m_semicolon;
 
 };
 
