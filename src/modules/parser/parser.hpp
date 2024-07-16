@@ -59,39 +59,31 @@ private:
     case TokenType::VAR:
     case TokenType::CONST:
       return parseVariable();
-      break;
 
     case TokenType::IDENTIFIER:
       return parseIdentifier();
-      break;
 
     case TokenType::IF:
       return parseIfStatement();
-      break;
 
     case TokenType::WHILE:
       return parseWhileStatement();
-      break;
 
     case TokenType::DO:
       return parseDoStatement();
-      break;
 
     case TokenType::FOR:
       return parseForStatement();
-      break;
 
     case TokenType::FUNC:
       return parseFunction();
-      break;
 
     case TokenType::STRUCT:
       return parseStruct();
-      break;
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
-      return std::move(unique_ptr<ASTNode>());
+      return unique_ptr<ASTNode>();
     }
 
   } 
@@ -108,7 +100,7 @@ private:
     if (nextToken().type != TokenType::SEMICOLON) error("Expected identifier after struct");
     consumeToken();
     
-    return std::move(make_unique<Struct>(std::move(make_unique<Identifier>(name)), std::move(body)));
+    return make_unique<Struct>(std::move(make_unique<Identifier>(name)), std::move(body));
   }
 
   vector<unique_ptr<Parameter>> parseParameters() {
@@ -152,7 +144,7 @@ private:
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
 
-    return std::move(make_unique<Function>(returnType, std::move(make_unique<Identifier>(name)), std::move(parameters), std::move(body)));
+    return make_unique<Function>(returnType, std::move(make_unique<Identifier>(name)), std::move(parameters), std::move(body));
 
   }
 
@@ -169,7 +161,7 @@ private:
     if (nextToken().type != TokenType::SEMICOLON) error("Expected semicolon at the end of do-while statement");
     consumeToken();
 
-    return std::move(make_unique<Do>(std::move(body), std::move(condition)));
+    return make_unique<Do>(std::move(body), std::move(condition));
   }
 
   unique_ptr<While> parseWhileStatement(){
@@ -179,7 +171,7 @@ private:
     unique_ptr<Expression> condition = parseExpression();
     unique_ptr<BlockStatement> block = parseBlockStatement();
 
-    return std::move(make_unique<While>(std::move(condition), std::move(block)));
+    return make_unique<While>(std::move(condition), std::move(block));
 
   }
 
@@ -197,7 +189,7 @@ private:
     unique_ptr<AssigmentOperator> update = parseIdentifier();
     unique_ptr<BlockStatement> block = parseBlockStatement();  
 
-    return std::move(make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block)));
+    return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
   }
 
   unique_ptr<IfStatement> parseIfStatement(){
@@ -211,9 +203,9 @@ private:
 
       unique_ptr<BlockStatement> elseBody = parseBlockStatement();
 
-      return std::move(make_unique<IfStatement>(std::move(condition), std::move(body), std::move(make_unique<ElseStatement>(std::move(elseBody)))));
+      return make_unique<IfStatement>(std::move(condition), std::move(body), std::move(make_unique<ElseStatement>(std::move(elseBody))));
     }
-    return std::move(make_unique<IfStatement>(std::move(condition), std::move(body)));
+    return make_unique<IfStatement>(std::move(condition), std::move(body));
   }
 
   unique_ptr<BlockStatement> parseBlockStatement(){
@@ -232,7 +224,7 @@ private:
       error("Expected closing bracket after if statement");
     consumeToken();
 
-    return std::move(make_unique<BlockStatement>(std::move(statements)));
+    return make_unique<BlockStatement>(std::move(statements));
   }
 
   unique_ptr<AssigmentOperator> parseIdentifier(){
@@ -250,7 +242,7 @@ private:
       error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
     consumeToken();
 
-    return std::move(make_unique<AssigmentOperator>(identifier, op, std::move(value)));
+    return make_unique<AssigmentOperator>(identifier, op, std::move(value));
   }
 
   unique_ptr<Variable> parseVariable() {
@@ -270,7 +262,7 @@ private:
 
     if (nextToken().type == TokenType::SEMICOLON){
       consumeToken();
-      return std::move(make_unique<Variable>(keyword, type, identifier));
+      return make_unique<Variable>(keyword, type, identifier);
     }
 
     else if (nextToken().type == TokenType::ASSIGNMENT){
@@ -285,12 +277,12 @@ private:
         error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
       consumeToken();
 
-      return std::move(make_unique<Variable>(keyword, type, identifier, std::move(value)));
+      return make_unique<Variable>(keyword, type, identifier, std::move(value));
     }
 
     else {
       error("Expected semicolon after identifier in variable declaration");
-      return std::move(unique_ptr<Variable>());
+      return unique_ptr<Variable>();
     }
   } 
 

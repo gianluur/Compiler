@@ -69,7 +69,7 @@ public:
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 private:
-  string m_token;
+  string m_token; 
 };
 
 class Boolean : public Literal {

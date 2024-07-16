@@ -1,3 +1,9 @@
+var int suca;
+var float suca;
+var bool suca;
+var char suca;
+var string suca;
+
 var int suca = 5;
 var float suca = 5.1;
 var bool suca = true;
