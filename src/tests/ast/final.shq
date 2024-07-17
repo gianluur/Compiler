@@ -41,6 +41,10 @@ func null test(string p1, string p2) {
   var int x = 5;
 }
 
+test();
+test(p1);
+test(p1, p2);
+
 struct Sigma {
   var int x;
   var string y;

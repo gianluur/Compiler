@@ -116,12 +116,13 @@ private:
 
 class AssigmentOperator : public Expression {
 public:
-  AssigmentOperator(const Token& identifier, const Token& op, unique_ptr<Expression> value):
-    m_identifier(identifier.lexemes), m_op(op.lexemes), m_value(std::move(value)) {}
+  AssigmentOperator(unique_ptr<Identifier> identifier, const Token& op, unique_ptr<Expression> value):
+    m_identifier(std::move(identifier)), m_op(op.lexemes), m_value(std::move(value)) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "AssigmentOperator { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << "\n";
+    cout << setw(indentation_level + 2) << " " << "identifier: ";
+    m_identifier->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "operator: " << m_op << "\n";
     cout << setw(indentation_level + 2) << " " << "value: ";
     m_value->print(indentation_level + 4);
@@ -129,7 +130,7 @@ public:
   }
 
 private:
-  string m_identifier;
+  unique_ptr<Identifier> m_identifier;
   string m_op;
   unique_ptr<Expression> m_value;
 };
@@ -365,6 +366,33 @@ private:
   vector<unique_ptr<Parameter>> m_parameters;
   unique_ptr<BlockStatement> m_body;
 
+};
+
+class FunctionCall: public ASTNode {
+public:
+  FunctionCall(unique_ptr<Identifier> name,  vector<unique_ptr<Identifier>> arguments):
+    m_name(std::move(name)), m_arguments(std::move(arguments)) {} 
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Function Call{" << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: ";
+    m_name->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "arguments: ";
+
+    if (m_arguments.empty()){
+      cout << '\n' << setw(indentation_level) << " " << "}\n";
+    }
+    else {
+      for(const auto& argument : m_arguments){
+        argument->print(indentation_level + 4);
+        cout << setw(indentation_level) << " " << "}\n";
+      }
+    }
+  }
+
+private:
+  unique_ptr<Identifier> m_name;
+  vector<unique_ptr<Identifier>> m_arguments;
 };
 
 class Struct : public ASTNode {
