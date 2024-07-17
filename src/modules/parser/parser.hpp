@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <optional>
 #include <stack>
 
 #include "../tokenizer/token.hpp"
@@ -65,12 +66,9 @@ private:
   }
 
   bool isComparisonOperator(const Token& token) {
-    return token.type == TokenType::EQUALS ||
-           token.type == TokenType::NOT_EQUAL ||
-           token.type == TokenType::GREATER ||
-           token.type == TokenType::LESS ||
-           token.type == TokenType::GREATER_EQUAL ||
-           token.type == TokenType::LESS_EQUAL;
+    return token.type == TokenType::EQUALS || token.type == TokenType::NOT_EQUAL ||
+           token.type == TokenType::GREATER || token.type == TokenType::LESS ||
+           token.type == TokenType::GREATER_EQUAL || token.type == TokenType::LESS_EQUAL;
   }
 
   bool isBooleanOperator(const Token& token){
@@ -79,32 +77,24 @@ private:
 
   bool isMathOperator(const Token& token) {
     return token.lexemes == "+" || token.lexemes == "-" || 
-           token.lexemes == "*" || token.lexemes == "/" || 
-           token.lexemes == "%";
+           token.lexemes == "*" || token.lexemes == "/" || token.lexemes == "%";
   }
 
-  bool isValidExpressionToken() {
-    return i < m_tokens.size() && 
-          (isMathOperator(nextToken()) ||
-          isBooleanOperator(nextToken()) ||
-          isComparisonOperator(nextToken()) ||
-          nextToken().type == TokenType::LITERAL_INTEGER || 
-          nextToken().type == TokenType::LITERAL_FLOAT || 
-          nextToken().type == TokenType::LITERAL_BOOLEAN ||
-          nextToken().type == TokenType::LITERAL_CHARACTER || 
-          nextToken().type == TokenType::LITERAL_STRING || 
-          nextToken().type == TokenType::IDENTIFIER ||
-          nextToken().type == TokenType::LPAREN || 
-          nextToken().type == TokenType::RPAREN);
-  }
+bool isValidExpressionToken() {
+  if (i >= m_tokens.size()) return false;
+
+  Token token = nextToken();
+  return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
+         token.type == TokenType::LITERAL_INTEGER || token.type == TokenType::LITERAL_FLOAT || 
+         token.type == TokenType::LITERAL_BOOLEAN || token.type == TokenType::LITERAL_CHARACTER || 
+         token.type == TokenType::LITERAL_STRING  || token.type == TokenType::IDENTIFIER || 
+         token.type == TokenType::LPAREN || token.type == TokenType::RPAREN;
+}
 
   bool isType(const Token& token) const {
-    return token.type == TokenType::INT || 
-           token.type == TokenType::FLOAT ||
-           token.type == TokenType::CHAR || 
-           token.type == TokenType::STRING ||
-           token.type == TokenType::BOOL ||
-           token.type == TokenType::NULL;
+    return token.type == TokenType::INT  || token.type == TokenType::FLOAT  ||
+           token.type == TokenType::CHAR || token.type == TokenType::STRING ||
+           token.type == TokenType::BOOL || token.type == TokenType::NULL;
   }
 
   bool isLiteral(const Token& token) const {
@@ -228,7 +218,7 @@ private:
   }
 
   unique_ptr<Function> parseFunction() {
-    if (!isNextTokenType(TokenType::FUNC)) 
+    if (!isNextTokenType(TokenType::FUNC))  
       error("Expected function statement");
     consumeToken();
 
@@ -288,7 +278,16 @@ private:
     return make_unique<While>(std::move(condition), std::move(block));
   }
 
-  unique_ptr<AssigmentOperator> parseAssigmentOperator(const Token& identifier){    
+  unique_ptr<AssigmentOperator> parseAssigmentOperator(std::optional<Token> optIdentifier = {}){    
+
+    //Getting the identifier if present
+    Token identifier;
+    if (optIdentifier) {
+      identifier = optIdentifier.value();
+    } else {
+      identifier = consumeToken();
+    }
+
     Token& op = consumeToken();
 
     if (!isValidExpressionToken())
@@ -301,25 +300,6 @@ private:
 
     return make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
   }
-
-  unique_ptr<AssigmentOperator> parseAssigmentOperator(){    
-    Token& identifier = consumeToken();
-    
-    if (!isAssigmentOperator(nextToken())) 
-      error("Expected assignment operator after identifier: " + identifier.lexemes);
-    Token& op = consumeToken();
-
-    if (!isValidExpressionToken())
-      error("Expected a literal/expression/identifier after assigment operator in variable initialization");
-    unique_ptr<Expression> value = parseExpression();
-
-    if (!isNextTokenType(TokenType::SEMICOLON)) 
-      error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
-    consumeToken();
-
-    return make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
-  }
-
 
   unique_ptr<For> parseForStatement(){
     if (!isNextTokenType(TokenType::FOR)) 
@@ -435,57 +415,65 @@ private:
   } 
 
    unique_ptr<Expression> parseExpression() {
-    unordered_map<string, int> precedence = { {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
-                                              {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
-                                              {"!", 3}, {"&&", 2}, {"||", 1}
-                                            };
+    static unordered_map<string, int> precedence = { 
+        {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
+        {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
+        {"!", 3}, {"&&", 2}, {"||", 1}
+    };
 
     stack<Token> operators;
     vector<Token> output;
 
     while (isValidExpressionToken()) {
-        Token& current = consumeToken();
+      Token& current = consumeToken();
 
-        if (current.type == TokenType::LITERAL_INTEGER || current.type == TokenType::LITERAL_FLOAT || current.type == TokenType::LITERAL_BOOLEAN 
-            || current.type == TokenType::LITERAL_CHARACTER || current.type == TokenType::LITERAL_STRING || current.type == TokenType::IDENTIFIER) {
-            output.push_back(current);
-        } 
-        else if (isMathOperator(current) || isBooleanOperator(current) || isComparisonOperator(current)) {
-            while (!operators.empty() && operators.top().type != TokenType::LPAREN &&
-                   precedence[operators.top().lexemes] >= precedence[current.lexemes]) {
-                output.push_back(operators.top());
-                operators.pop();
-            }
-            operators.push(current);
-        } 
-        else if (current.type == TokenType::LPAREN) {
-            operators.push(current);
-        } 
-        else if (current.type == TokenType::RPAREN) {
-            while (!operators.empty() && operators.top().type != TokenType::LPAREN) {
-                output.push_back(operators.top());
-                operators.pop();
-            }
-            if (!operators.empty() && operators.top().type == TokenType::LPAREN) {
-                operators.pop(); // Pop the left parenthesis
-            } else {
-                error("Mismatched parentheses");
-            }
-        }
-
-        else error("Unexpected token: " + current.lexemes);
+      if (isLiteral(current) || current.type == TokenType::IDENTIFIER) {
+        output.push_back(current);
+      } 
+      else if (isMathOperator(current) || isBooleanOperator(current) || isComparisonOperator(current)) {
+        handleOperator(current, operators, output, precedence);
+      } 
+      else if (current.type == TokenType::LPAREN) {
+        operators.push(current);
+      } 
+      else if (current.type == TokenType::RPAREN) {
+        handleClosingParenthesis(operators, output);
+      }
+      else 
+        error("Unexpected token: " + current.lexemes);
     }
 
     while (!operators.empty()) {
-        if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) {
-            error("Mismatched parentheses");
-        }
+        if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) 
+          error("Mismatched parentheses");
+        
         output.push_back(operators.top());
         operators.pop();
     }
 
     return expressionToNode(output);
   } 
+
+  void handleClosingParenthesis(stack<Token>& operators, vector<Token>& output) {
+    while (!operators.empty() && operators.top().type != TokenType::LPAREN) {
+        output.push_back(operators.top());
+        operators.pop();
+    }
+    if (!operators.empty() && operators.top().type == TokenType::LPAREN) {
+        operators.pop(); // Pop the left parenthesis
+    } else {
+        error("Mismatched parentheses");
+    }
+  }
+
+  void handleOperator(const Token& current, stack<Token>& operators, vector<Token>& output, unordered_map<string, int> precedence) {
+    while (!operators.empty() && operators.top().type != TokenType::LPAREN &&
+           precedence.at(operators.top().lexemes) >= precedence.at(current.lexemes)) {
+        output.push_back(operators.top());
+        operators.pop();
+    }
+    operators.push(current);
+  }
 
    unique_ptr<Expression> expressionToNode(const vector<Token>& postfixExpression) {
     stack<unique_ptr<Expression>> nodes;

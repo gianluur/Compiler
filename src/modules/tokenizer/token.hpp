@@ -92,7 +92,7 @@ struct Token {
   size_t start;
   size_t end;
 
-
+  Token(): type(TokenType::INVALID), lexemes("") {}
   Token(TokenType type, string lexemes) : type(type), lexemes(lexemes) {}
   Token(TokenType type, string lexemes, double value): type(type), lexemes(lexemes){}
 

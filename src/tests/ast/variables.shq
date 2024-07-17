@@ -10,3 +10,5 @@ var bool suca = true;
 var char suca = 'c';
 var string suca = "asd";
 var string id = x;
+
+var int x = 5 + 2 * 6;
