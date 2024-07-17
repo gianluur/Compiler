@@ -1,8 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <iomanip>
 #include <memory>
 
-#include "../tokenizer/token.hpp"
+#include "./token.hpp"
 
 using std::cout, std::endl, std::setw;
 using std::unique_ptr, std::make_unique;

@@ -1,16 +1,11 @@
 #include <iostream>
 #include <string>
-#include <sstream>
-#include <fstream>        
-#include <algorithm>
-#include <cctype>
 #include <vector>
-
 #include <chrono>
 
 #include "./modules/preprocessing.hpp"  
-#include "./modules/tokenizer/tokenizer.hpp"
-#include "./modules/parser/parser.hpp"
+#include "./modules/tokenizer.hpp"
+#include "./modules/parser.hpp"
 
 using std::string, std::vector;
 

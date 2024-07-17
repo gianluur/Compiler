@@ -7,8 +7,8 @@
 #include <optional>
 #include <stack>
 
-#include "../tokenizer/token.hpp"
-#include "../ast/ast.hpp"
+#include "./token.hpp"
+#include "./ast.hpp"
 
 using std::cout, std::endl;
 using std::stoi, std::stod;
