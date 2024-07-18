@@ -1,0 +1,4 @@
+class SemanticAnalyzer {
+public:
+private:
+};

@@ -55,18 +55,12 @@ private:
     }
   }
 
-  void removeSpecialCharacters(string& src){
-    auto predicate = [](unsigned char c){return c == '\n';};
-    src.erase(remove_if(src.begin(), src.end(), predicate), src.end());
-  }
-
 public:
   Preprocessor(int argc, char* argv[]) {
     checkSourcePath(argc);
 
     m_src = getSourceContents(argv[1]);
     removeComments(m_src);
-    removeSpecialCharacters(m_src);
   }
 
   string getSrc() const { return m_src; }

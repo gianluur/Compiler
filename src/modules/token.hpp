@@ -89,16 +89,11 @@ enum class TokenType {
 struct Token {
   TokenType type;
   string lexemes;
-  size_t start;
-  size_t end;
+  size_t line;
+  size_t column;
 
   Token(): type(TokenType::INVALID), lexemes("") {}
-  Token(TokenType type, string lexemes) : type(type), lexemes(lexemes) {}
-  Token(TokenType type, string lexemes, double value): type(type), lexemes(lexemes){}
-
-  //ADD START AND END OF TEXT AND LITERALS TOKEN
-  Token(TokenType type, string lexemes, size_t start, size_t end): 
-    type(type), lexemes(lexemes), start(start), end(end)  {}
-  Token(TokenType type, string lexemes, double value, size_t start, size_t end): 
-    type(type), lexemes(lexemes), start(start), end(end)  {}
+  Token(TokenType type, string lexemes): type(type), lexemes(lexemes) {}
+  Token(TokenType type, string lexemes, size_t line, size_t column): 
+    type(type), lexemes(lexemes), line(line), column(column) {}
 };
