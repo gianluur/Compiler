@@ -1,13 +1,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include <chrono>
 
 #include "./modules/preprocessing.hpp"  
 #include "./modules/tokenizer.hpp"
 #include "./modules/parser.hpp"
+#include "./modules/semantics.hpp"
+#include "./modules/ast.hpp"
 
 using std::cout, std::string, std::vector;
+using std::unique_ptr;
 
 int main(int argc, char* argv[]){
   auto start = std::chrono::high_resolution_clock::now();
@@ -21,8 +25,12 @@ int main(int argc, char* argv[]){
   vector<Token> tokens = tokenizer.getTokens();
   tokenizer.print();
 
-  // Parser parser(tokens);
-  // parser.parse();
+  Parser parser(tokens);
+  const vector<unique_ptr<ASTNode>>& ast = parser.getAST();
+
+  SemanticAnalyzer analysis(ast);
+  analysis.analyze();
+
 
   auto end = std::chrono::high_resolution_clock::now();
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -87,14 +89,19 @@ private:
 
 class Identifier : public Expression {
 public:
-  Identifier(const Token& token) : m_token(token.lexemes) {}
+  Identifier(const Token& name) : m_name(name.lexemes) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Identifier { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "name: " << m_token << "\n";
+    cout << setw(indentation_level + 2) << " " << "name: " << m_name << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
+
+  string getName() const {
+    return m_name;
+  }
+
 private:
-  string m_token;
+  string m_name;
 };
 
 class UnaryOperator: public Expression {
@@ -161,16 +168,17 @@ private:
 class Variable : public ASTNode {
 public:
 
-  Variable(const Token& keyword, const Token& type, const Token& identifier, unique_ptr<Expression> value):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes), m_value(std::move(value)) {}
-  Variable(const Token& keyword, const Token& type, const Token& identifier):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_identifier(identifier.lexemes) {}
+  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)) {}
+  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)) {}
 
   void print(int indentation_level = 0) const override {
     if (m_value) {
       cout << '\n' << setw(indentation_level) << " " << "Variable-Initialization { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
-      cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
+      cout << setw(indentation_level + 2) << " " << "name: ";
+      m_name->print(indentation_level + 4);
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: ";
       m_value->print(indentation_level + 4);
@@ -179,17 +187,34 @@ public:
     else {
       cout << '\n' << setw(indentation_level) << " " << "Variable-Declaration { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
-      cout << setw(indentation_level + 2) << " " << "identifier: " << m_identifier << '\n';
+      cout << setw(indentation_level + 2) << " " << "identifier: ";
+      m_name->print(indentation_level + 4);
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: null" << '\n';
       cout << setw(indentation_level) << " " << "} " << endl;
     }
   }
 
+  string getKeyword() const {
+    return m_keyword;
+  }
+  
+  string getType() const {
+    return m_type;
+  }
+
+  string getName() const {
+    return m_name.get()->getName();
+  }
+
+  Expression* getValue() const {
+    return m_value.get();
+  }
+
 private:
   string m_keyword;
   string m_type;
-  string m_identifier;
+  unique_ptr<Identifier> m_name;
   string m_assignment;
   unique_ptr<Expression> m_value;
 

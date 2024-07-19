@@ -16,7 +16,7 @@ using std::vector, std::unordered_map, std::stack;
 
 class Parser {
 public:
-  Parser(vector<Token> tokens) : m_tokens(std::move(tokens)), i(0) { }
+  Parser(vector<Token> tokens) : m_tokens(std::move(tokens)), i(0) { parse(); }
 
   void parse() {
     while (i < m_tokens.size()){
@@ -30,6 +30,10 @@ public:
     }
     cout << "\n----- AST End -----" << endl << endl;
     
+  }
+
+  const vector<unique_ptr<ASTNode>>& getAST() const{
+    return m_ast;
   }
 
 private:
@@ -54,6 +58,10 @@ private:
 
   bool isNextTokenType(enum TokenType type){
     return nextToken().type == type;
+  }
+
+  string getLine(size_t pos){
+    return std::to_string(pos);
   }
 
   bool isAssigmentOperator(const Token& token){
@@ -376,40 +384,40 @@ bool isValidExpressionToken() {
     Token& keyword = consumeToken();
     
     if (i >= m_tokens.size() || !isType(nextToken())) 
-      error("Expected type after variable declaration"); 
+      error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected type after " + keyword.lexemes + " keyword."); 
     
     else if (isNextTokenType(TokenType::NULL))
-      error("Null is not a valid type for a variable");
+      error("Line " + getLine(keyword.line) + " -> Syntax Error: Null is not a valid type for a variable");
 
     Token& type = consumeToken();
 
     if (i >= m_tokens.size() || !isNextTokenType(TokenType::IDENTIFIER)) 
-      error("Expected identifier after variable declaration");
-    Token& identifier = consumeToken();
+      error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected identifier after variable declaration");
+    Token& name = consumeToken();
 
     if (isNextTokenType(TokenType::SEMICOLON)){
       consumeToken();
 
-      return make_unique<Variable>(keyword, type, identifier);
+      return make_unique<Variable>(keyword, type, make_unique<Identifier>(name));
     }
 
     else if (isNextTokenType(TokenType::ASSIGNMENT)){
       consumeToken();
 
       if (!isValidExpressionToken())
-        error("Expected a literal/expression/identifier after assigment operator in variable initialization");
+        error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected a literal/expression/identifier after assigment operator in variable initialization");
         
       unique_ptr<Expression> value = parseExpression();
 
       if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
-        error("In this variable decleration: '" + keyword.lexemes + " " + identifier.lexemes  + "'; was expected a semicolon.");
+        error("Line " + getLine(keyword.line) + "-> Syntax Error: In this variable decleration: '" + keyword.lexemes + " " + name.lexemes  + "'; was expected a semicolon.");
       consumeToken();
 
-      return make_unique<Variable>(keyword, type, identifier, std::move(value));
+      return make_unique<Variable>(keyword, type, make_unique<Identifier>(name), std::move(value));
     }
 
     else {
-      error("Expected semicolon after identifier in variable declaration");
+      error("Line " + getLine(keyword.line) + "-> Syntax Error: Expected semicolon after identifier in variable declaration");
       return unique_ptr<Variable>();
     }
   } 

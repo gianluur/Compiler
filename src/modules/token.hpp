@@ -90,10 +90,9 @@ struct Token {
   TokenType type;
   string lexemes;
   size_t line;
-  size_t column;
 
   Token(): type(TokenType::INVALID), lexemes("") {}
   Token(TokenType type, string lexemes): type(type), lexemes(lexemes) {}
-  Token(TokenType type, string lexemes, size_t line, size_t column): 
-    type(type), lexemes(lexemes), line(line), column(column) {}
+  Token(TokenType type, string lexemes, size_t line): 
+    type(type), lexemes(lexemes), line(line) {}
 };

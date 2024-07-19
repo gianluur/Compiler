@@ -12,7 +12,7 @@ using std::string, std::vector;
 
 class Tokenizer{
 public:
-  Tokenizer(string& src): m_src(src), i(0), line(0), column(1) { tokenize(); }
+  Tokenizer(string& src): m_src(src), i(0), line(0) { tokenize(); }
 
   vector<Token> getTokens() const { return m_tokens; }
 
@@ -20,9 +20,9 @@ public:
     for(i = 0; i < m_src.size(); i++){  
       char currentChar = m_src.at(i);
 
-      if (isSpace(currentChar)) {column++; continue;}
+      if (isSpace(currentChar)) continue;
 
-      else if (isEndLine(currentChar)) { line += 1; column = 1; continue; }
+      else if (isEndLine(currentChar)) { line += 1;  continue; }
 
       else if (isNumber(currentChar)) tokenNumber(currentChar);
 
@@ -50,14 +50,13 @@ public:
 
       else invalidToken(currentChar);
 
-      column++;
     }
   }
 
   void print(){
     cout << "----- Tokenizer start -----" << endl;
     for(Token& token : m_tokens){
-      cout << "< Type: " << int(token.type) << " Lexemes: " << token.lexemes << " Line: " << token.line <<  " Column: " << token.column << " >\n\n" ;
+      cout << "< Type: " << int(token.type) << " Lexemes: " << token.lexemes << " Line: " << token.line << " >\n\n" ;
     }
     cout << "----- Tokenizer end -----" << endl << endl;
   }
@@ -67,7 +66,6 @@ private:
   string m_src;
   size_t i;
   size_t line;
-  size_t column;
 
   bool contains(const string& charset, const char& currentChar){
     return charset.find(currentChar) != string::npos;
@@ -144,55 +142,55 @@ private:
   }
   
   bool isVariable(const string& token){
-    if (token == "var" ) {m_tokens.emplace_back(Token(TokenType::VAR, token, line, column)); return true;}
-    else if (token == "const") {m_tokens.emplace_back(Token(TokenType::CONST, token, line, column)); return true;}
+    if (token == "var" ) {m_tokens.emplace_back(Token(TokenType::VAR, token, line)); return true;}
+    else if (token == "const") {m_tokens.emplace_back(Token(TokenType::CONST, token, line)); return true;}
     else return false;
   }
   
   bool isType(const string& token){
-    if (token == "int") {m_tokens.emplace_back(Token(TokenType::INT, token, line, column)); return true;}
-    else if (token == "float") {m_tokens.emplace_back(Token(TokenType::FLOAT, token, line, column)); return true;}
-    else if (token == "char") {m_tokens.emplace_back(Token(TokenType::CHAR, token, line, column)); return true;}
-    else if (token == "string") {m_tokens.emplace_back(Token(TokenType::STRING, token, line, column)); return true;}
-    else if (token == "bool") {m_tokens.emplace_back(Token(TokenType::BOOL, token, line, column)); return true;}
-    else if (token == "null") {m_tokens.emplace_back(Token(TokenType::NULL, token, line, column)); return true;}
+    if (token == "int") {m_tokens.emplace_back(Token(TokenType::INT, token, line)); return true;}
+    else if (token == "float") {m_tokens.emplace_back(Token(TokenType::FLOAT, token, line)); return true;}
+    else if (token == "char") {m_tokens.emplace_back(Token(TokenType::CHAR, token, line)); return true;}
+    else if (token == "string") {m_tokens.emplace_back(Token(TokenType::STRING, token, line)); return true;}
+    else if (token == "bool") {m_tokens.emplace_back(Token(TokenType::BOOL, token, line)); return true;}
+    else if (token == "null") {m_tokens.emplace_back(Token(TokenType::NULL, token, line)); return true;}
     else return false;
   }
 
   bool isIfStatement(const string& token){
-    if (token == "if") {m_tokens.emplace_back(Token(TokenType::IF, token, line, column)); return true;}
-    else if (token == "else") {m_tokens.emplace_back(Token(TokenType::ELSE, token, line, column)); return true;}
+    if (token == "if") {m_tokens.emplace_back(Token(TokenType::IF, token, line)); return true;}
+    else if (token == "else") {m_tokens.emplace_back(Token(TokenType::ELSE, token, line)); return true;}
     else return false;
   }
 
   bool isLoopStatement(const string& token){
-    if (token == "do") {m_tokens.emplace_back(Token(TokenType::DO, token, line, column)); return true;}
-    else if (token == "while") {m_tokens.emplace_back(Token(TokenType::WHILE, token, line, column)); return true;}
-    else if (token == "for") {m_tokens.emplace_back(Token(TokenType::FOR, token, line, column)); return true;}
-    else if (token == "break") {m_tokens.emplace_back(Token(TokenType::BREAK, token, line, column)); return true;}
-    else if (token == "continue") {m_tokens.emplace_back(Token(TokenType::CONTINUE, token, line, column)); return true;}
+    if (token == "do") {m_tokens.emplace_back(Token(TokenType::DO, token, line)); return true;}
+    else if (token == "while") {m_tokens.emplace_back(Token(TokenType::WHILE, token, line)); return true;}
+    else if (token == "for") {m_tokens.emplace_back(Token(TokenType::FOR, token, line)); return true;}
+    else if (token == "break") {m_tokens.emplace_back(Token(TokenType::BREAK, token, line)); return true;}
+    else if (token == "continue") {m_tokens.emplace_back(Token(TokenType::CONTINUE, token, line)); return true;}
     else return false;
   }
 
   bool isFunction(const string& token){
-    if (token == "func") {m_tokens.emplace_back(Token(TokenType::FUNC, token, line, column)); return true;}
-    else if (token == "return") {m_tokens.emplace_back(Token(TokenType::RETURN, token, line, column)); return true;}
+    if (token == "func") {m_tokens.emplace_back(Token(TokenType::FUNC, token, line)); return true;}
+    else if (token == "return") {m_tokens.emplace_back(Token(TokenType::RETURN, token, line)); return true;}
     else return false;
   }
 
   bool isStruct(const string& token){
-    if (token == "struct") {m_tokens.emplace_back(Token(TokenType::STRUCT, token, line, column)); return true;}
+    if (token == "struct") {m_tokens.emplace_back(Token(TokenType::STRUCT, token, line)); return true;}
     else return false;
   }
 
   bool isBoolean(const string& token){
-    if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line, column)); return true;}
-    else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line, column)); return true;}
+    if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
+    else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
     else return false;
   }
 
   void invalidToken(const char& currentChar){
-    m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar), line, column));
+    m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar), line));
     throw std::runtime_error("Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i)); //ADD ROWS AND COLS
   }
 
@@ -216,8 +214,8 @@ private:
     }
     i--; 
 
-    if (dotCount == 0) m_tokens.emplace_back(Token(TokenType::LITERAL_INTEGER, number, line, column));
-    else m_tokens.emplace_back(Token(TokenType::LITERAL_FLOAT, number, line, column));
+    if (dotCount == 0) m_tokens.emplace_back(Token(TokenType::LITERAL_INTEGER, number, line));
+    else m_tokens.emplace_back(Token(TokenType::LITERAL_FLOAT, number, line));
 
   }
 
@@ -231,7 +229,7 @@ private:
     i++;
 
     token += string(1, character) + string(1, closing);
-    m_tokens.emplace_back(Token(TokenType::LITERAL_CHARACTER, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::LITERAL_CHARACTER, token, line));
   }
 
   void tokenString(const char& currentChar){
@@ -246,7 +244,7 @@ private:
     i++;
 
     token += string(1, closing);
-    m_tokens.emplace_back(Token(TokenType::LITERAL_STRING, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::LITERAL_STRING, token, line));
   }
 
   void tokenParenthesis(const char& currentChar){
@@ -254,27 +252,27 @@ private:
 
     switch (currentChar){
       case '(':
-        m_tokens.emplace_back(Token(TokenType::LPAREN, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::LPAREN, token, line));
         break;
 
       case ')':
-        m_tokens.emplace_back(Token(TokenType::RPAREN, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::RPAREN, token, line));
         break;
 
       case '[':
-        m_tokens.emplace_back(Token(TokenType::LBRACKET, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::LBRACKET, token, line));
         break;
 
       case ']':
-        m_tokens.emplace_back(Token(TokenType::RBRACKET, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::RBRACKET, token, line));
         break;
 
       case '{':
-        m_tokens.emplace_back(Token(TokenType::LCURLY, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::LCURLY, token, line));
         break;
 
       case '}':
-        m_tokens.emplace_back(Token(TokenType::RCURLY, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::RCURLY, token, line));
         break;
       
       default:
@@ -288,23 +286,23 @@ private:
     switch (currentChar)
     {
     case '+':
-      m_tokens.emplace_back(Token(TokenType::ADDITION, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::ADDITION, token, line));
       break;
 
     case '-':
-      m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token, line));
       break;
 
     case '*':
-      m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token, line));
       break;
 
     case '/':
-      m_tokens.emplace_back(Token(TokenType::DIVISION, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::DIVISION, token, line));
       break;
 
     case '%':
-      m_tokens.emplace_back(Token(TokenType::MODULUS, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::MODULUS, token, line));
       break;
 
     default:
@@ -318,7 +316,7 @@ private:
     
     if (currentChar == '=') {
       const string token = string(1, currentChar);
-      m_tokens.emplace_back(Token(TokenType::ASSIGNMENT, token, line, column)); 
+      m_tokens.emplace_back(Token(TokenType::ASSIGNMENT, token, line)); 
     }
 
     else {
@@ -326,23 +324,23 @@ private:
 
       switch (currentChar){
         case '+':
-          m_tokens.emplace_back(Token(TokenType::ADDITION_ASSIGNMENT, token, line, column));
+          m_tokens.emplace_back(Token(TokenType::ADDITION_ASSIGNMENT, token, line));
           break;
 
         case '-':
-          m_tokens.emplace_back(Token(TokenType::SUBTRACTION_ASSIGNMENT, token, line, column));
+          m_tokens.emplace_back(Token(TokenType::SUBTRACTION_ASSIGNMENT, token, line));
           break;
         
         case '*':
-          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION_ASSIGNMENT, token, line, column));
+          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION_ASSIGNMENT, token, line));
           break;
 
         case '/':
-          m_tokens.emplace_back(Token(TokenType::DIVISION_ASSIGNMENT, token, line, column));
+          m_tokens.emplace_back(Token(TokenType::DIVISION_ASSIGNMENT, token, line));
           break;
 
         case '%':
-          m_tokens.emplace_back(Token(TokenType::MODULUS_ASSIGNMENT, token, line, column));
+          m_tokens.emplace_back(Token(TokenType::MODULUS_ASSIGNMENT, token, line));
           break;
 
         default:
@@ -358,30 +356,30 @@ private:
     if (currentChar == '>'){
       if (isNextChar('=')){
         const string token = string(1, currentChar) + "=";
-        m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, token, line));
         i++;
       }
-      else m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar), line, column));
+      else m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar), line));
     }
 
     else if (currentChar == '<'){
       if (isNextChar('=')){
         const string token = string(1, currentChar) + "=";
-        m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, token, line, column));
+        m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, token, line));
         i++;
       }
-      else m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar), line, column));
+      else m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar), line));
     }
 
     else if (currentChar == '=') {
       const string token = string(1, currentChar) + "=";
-      m_tokens.emplace_back(Token(TokenType::EQUALS, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::EQUALS, token, line));
       i++;
     }
 
     else if (currentChar == '!'){
       const string token = string(1, currentChar) + "=";
-      m_tokens.emplace_back(Token(TokenType::NOT_EQUAL, token, line, column));
+      m_tokens.emplace_back(Token(TokenType::NOT_EQUAL, token, line));
       i++;
     }
   }
@@ -393,9 +391,9 @@ private:
       i++;
     }
 
-    if (token == "&&") m_tokens.emplace_back(Token(TokenType::AND, token, line, column));
-    else if (token == "||") m_tokens.emplace_back(Token(TokenType::OR, token, line, column));
-    else if (token == "!") m_tokens.emplace_back(Token(TokenType::NOT, token, line, column));
+    if (token == "&&") m_tokens.emplace_back(Token(TokenType::AND, token, line));
+    else if (token == "||") m_tokens.emplace_back(Token(TokenType::OR, token, line));
+    else if (token == "!") m_tokens.emplace_back(Token(TokenType::NOT, token, line));
     else invalidToken(currentChar);
 
   }
@@ -411,21 +409,21 @@ private:
 
   void tokenSemicolon(const char& currentChar){
     const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::SEMICOLON, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::SEMICOLON, token, line));
   }
 
   void tokenComma(const char& currentChar){
     const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::COMMA, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::COMMA, token, line));
   }
 
   void tokenDot(const char& currentChar){
     const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::DOT, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::DOT, token, line));
   }
 
   void tokenIdentifier(const string& token){
-    m_tokens.emplace_back(Token(TokenType::IDENTIFIER, token, line, column));
+    m_tokens.emplace_back(Token(TokenType::IDENTIFIER, token, line));
   }
 
   bool isKeyword(const string& token){
