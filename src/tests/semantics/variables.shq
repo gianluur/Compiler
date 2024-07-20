@@ -1,1 +1,1 @@
-var int x = 'c';
+var bool x = true && !5;

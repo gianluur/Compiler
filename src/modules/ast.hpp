@@ -117,6 +117,14 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getOperator() const {
+    return m_op;
+  }
+
+  Expression* getOperand() const {
+    return m_operand.get();
+  }
+
 private:
   string m_op;
   unique_ptr<Expression> m_operand;
@@ -156,6 +164,18 @@ public:
     cout << setw(indentation_level + 2) << " " << "right: ";
     m_right->print(indentation_level + 4);
     cout <<  setw(indentation_level) << " " << "} " << endl;
+  }
+
+  string getOperator() const {
+    return m_op;
+  }
+
+  Expression* getLeftOperand() const {
+    return m_left.get();
+  }
+
+  Expression* getRightOperand() const {
+    return m_right.get();
   }
 
 private:
