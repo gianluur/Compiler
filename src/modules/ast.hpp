@@ -513,7 +513,7 @@ public:
   vector<Identifier*> getArguments() const {
     vector<Identifier*> arguments;
     for(const auto& argument : m_arguments){
-      arguments.emplace_back(argument);
+      arguments.emplace_back(argument.get());
     }
     return arguments;
   }

@@ -41,11 +41,7 @@ public:
       else if (Function* function = dynamic_cast<Function*>(current)){
         analyzeFunction(function);
       }
-
-      else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
-        analyzeFunctionCall(call);
-      }
-
+      
       else {
         error("Unknown node type");
       }
@@ -60,9 +56,6 @@ private:
   void error(const string& message){
     cout << message << endl;
     exit(1);
-  }
-
-  void analyzeFunctionCall(FunctionCall* call){
   }
 
   void analyzeFunction(Function* function){
