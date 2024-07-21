@@ -18,7 +18,7 @@ struct Symbol {
   int scopeLevel;
 
   Symbol() : keyword(""), type(""), scopeLevel(0) {} // Default constructor
-  Symbol(string keyword, string type, int ScopeLevel): 
+  Symbol(string keyword, string type, int scopeLevel): 
     keyword(keyword), type(type), scopeLevel(scopeLevel) {}
 };
 
@@ -30,12 +30,24 @@ public:
   void analyze(){
     cout << "------ Semantics Start -----" << endl << endl;
     for(const unique_ptr<ASTNode>& node : m_ast){
-      if (Variable* var = dynamic_cast<Variable*>(node.get())){
-        analyzerVariable(var);
+      ASTNode* current = node.get();
+      if (Variable* variable = dynamic_cast<Variable*>(current)){
+        analyzeVariable(variable);
+      }
+      else if (AssigmentOperator* assignmentOperator = dynamic_cast<AssigmentOperator*>(current)){
+        analyzeAssignmentOperator(assignmentOperator);
+      }
+
+      else if (Function* function = dynamic_cast<Function*>(current)){
+        analyzeFunction(function);
+      }
+
+      else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
+        analyzeFunctionCall(call);
       }
 
       else {
-        error("idk error");
+        error("Unknown node type");
       }
     }
     cout << endl << "------ Semantics End -----" << endl;
@@ -50,98 +62,81 @@ private:
     exit(1);
   }
 
-  void analyzerVariable(Variable* var){
-    string keyword = var->getKeyword();
-    string type = var->getType();
-    string name = var->getName();
-    Expression* value = var->getValue();
-
-    auto result = symbolTable.emplace(name, Symbol(keyword, type, 0));
-    checkVariableRedeclaration(result);
-    checkVariableType(keyword, type, name, value);
+  void analyzeFunctionCall(FunctionCall* call){
   }
 
-  void checkVariableRedeclaration(auto result){
+  void analyzeFunction(Function* function){
+    Identifier* identifier = function->getIdentifier();
+    string type = function->getType();
+
+    auto result = symbolTable.emplace(identifier->getName(), Symbol("func", type, 0));
+    checkIdentifierRedeclaration(result);
+  }
+
+  void analyzeAssignmentOperator(AssigmentOperator* assignmentOperator){
+    Identifier* identifier = assignmentOperator->getIdentifier();
+    Expression* value = assignmentOperator->getValue();
+
+    if (!isIdentifierDeclared(identifier))
+      error("Identifier: " + identifier->getName() + " is not declared");
+
+    const string expectedType = symbolTable[identifier->getName()].type;
+    checkExpressionType(expectedType, value);
+  }
+
+  bool isIdentifierDeclared(Identifier* identifier){
+    return symbolTable.count(identifier->getName()) > 0;
+  }
+
+  void analyzeVariable(Variable* variable){
+    string keyword = variable->getKeyword();
+    string type = variable->getType();
+    string identifier = variable->getName();
+    Expression* value = variable->getValue();
+
+    auto result = symbolTable.emplace(identifier, Symbol(keyword, type, 0));
+    checkIdentifierRedeclaration(result);
+    checkExpressionType(type, value);
+  }
+
+  void declareVariable(Variable* variable){
+    
+  }
+
+  void checkIdentifierRedeclaration(const std::pair<unordered_map<string, Symbol>::iterator, bool>& result){
     if (!result.second){
-      error("Variable redeclaration");
+      error("Identifier is already declared");
     }
   }
 
-  void checkVariableType(const string& keyword, const string& expectedType, const string& name, Expression* value) {
-    if (dynamic_cast<Integer*>(value)){
-      if (expectedType != "int")
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a integer instead");
-    }
+  void checkExpressionType(const string& expectedType, Expression* value) {
+    string valueType = analyzeOperand(value);
 
-    else if (dynamic_cast<Float*>(value)){
-      if (expectedType != "float")
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a float instead");
-    }
-
-    else if (dynamic_cast<Char*>(value)){
-      if (expectedType != "char")
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a char instead");
-    }
-
-    else if (dynamic_cast<String*>(value)){
-      if (expectedType != "string")
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a string instead");
-    }
-
-    else if (dynamic_cast<Boolean*>(value)){
-      if (expectedType != "bool")
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a bool instead");
-    }
-
-    else if (Identifier* identifier = dynamic_cast<Identifier*>(value)){
-      string value_type = getIdentifierType(identifier);
-      if (expectedType != value_type)
-        error("Type Mismatch: In this variable" + keyword + " " + expectedType + " " + name + "was expected a " + expectedType + " but got a " + value_type + "instead");
-    }
-
-    else if (BinaryOperator* binaryOperator = dynamic_cast<BinaryOperator*>(value)){
-      analyzeBinaryOperator(expectedType, binaryOperator);
-    }
-
-    else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(value)){
-      analyzeUnaryOperator(expectedType, unaryOperator);
-    }
-
-    else if (!dynamic_cast<Literal*>(value) && !dynamic_cast<Identifier*>(value)){
-      error("Semantic Error: Unsupported expression type");
+    if (expectedType != valueType) {
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
     }
   }
 
   string getIdentifierType(Identifier* identifier){
     const string name = identifier->getName();
-    if (symbolTable.count(name) > 0){
-      return symbolTable[name].type;
-    }
-    else {
-      error("Unknown identifier");
-      return "";
-    }
+    if (!isIdentifierDeclared(identifier))
+      error("Identifier: " + name + " is not declared");
+    return symbolTable[name].type;
   }
 
-  void analyzeUnaryOperator(const string expectedType, UnaryOperator* unaryOperator){
+  string analyzeUnaryOperator(UnaryOperator* unaryOperator){
     Expression* operand = unaryOperator->getOperand();
-    string operandType = analyzeOperand(operand);
-
-    if (operandType != expectedType){
-      error("Type Mismatch in Unary Operator: Expected " + expectedType + " but got " + operandType);
-    }
+    return analyzeOperand(operand);
   }
 
-  void analyzeBinaryOperator(const string expectedType, BinaryOperator* binaryOperator) {
-    Expression* left = binaryOperator->getLeftOperand();
-    Expression* right = binaryOperator->getRightOperand();
-    string op = binaryOperator->getOperator();
+  string analyzeBinaryOperator(BinaryOperator* binaryOperator) {
+    string leftType = analyzeOperand(binaryOperator->getLeftOperand());
+    string rightType = analyzeOperand(binaryOperator->getRightOperand());
 
-    string leftType = analyzeOperand(left);
-    string rightType = analyzeOperand(right);
+    if (leftType != rightType)
+      error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match");
 
-    if (leftType != expectedType || rightType != expectedType)
-      error("Type Mismatch: In binary operator was expected a " + expectedType + " but got " + leftType + " and " + rightType);
+    return leftType; // Assuming binary operator returns the type of its operands
   }
 
   string analyzeOperand(Expression* operand){
@@ -150,18 +145,17 @@ private:
     else if (dynamic_cast<Char*>(operand)) return "char";
     else if (dynamic_cast<String*>(operand)) return "string";
     else if (dynamic_cast<Boolean*>(operand)) return "bool";
+    else if (dynamic_cast<Null*>(operand)) return "null";
     else if (Identifier* identifier = dynamic_cast<Identifier*>(operand)) return getIdentifierType(identifier);
     else if (BinaryOperator* binaryOperator = dynamic_cast<BinaryOperator*>(operand)){
-      string leftType = analyzeOperand(binaryOperator->getLeftOperand());
-      string rightType = analyzeOperand(binaryOperator->getRightOperand());
-      if (leftType != rightType)
-        error("Type Mismatch: in binary operator was expected " + leftType + " and " + rightType + " do not match");
-      return leftType; // if this returns it means they have the same type
+      return analyzeBinaryOperator(binaryOperator);
     }
     else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(operand)){
-     return analyzeOperand(unaryOperator->getOperand());
+      return analyzeUnaryOperator(unaryOperator);
     }
-    else error("Unknown Type"); return "";
+    else {
+      error("Unknown operand type");
+      return "";
+    }
   }
-
 };

@@ -25,66 +25,104 @@ public:
 class Expression : public ASTNode {};
 class Literal : public Expression {};
 
-class Integer : public Literal {
+class Null: public Literal {
 public:
-  Integer(const Token& token) : m_token(token.lexemes) {}
+  Null() {}
+  
   void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level) << " " << "LiteralInteger { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout << '\n' << setw(indentation_level) << " " << "Null { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: null" << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getType() const {
+    return "null";
+  }
+};
+
+class Integer : public Literal {
+public:
+  Integer(const Token& value) : m_value(value.lexemes) {}
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Integer { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
+    cout <<  setw(indentation_level) << " " << "} " << endl;
+  }
+
+  string getType() const {
+    return "int";
+  }
+
 private:
-  string m_token;
+  string m_value;
 };
 
 class Float : public Literal {
 public:
-  Float(const Token& token) : m_token(token.lexemes) {}
+  Float(const Token& value) : m_value(value.lexemes) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralFloat { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getType() const{
+    return "float";
+  }
+
 private:
-  string m_token;
+  string m_value;
 };
 
 class String: public Literal {
 public:
-  String(const Token& token) : m_token(token.lexemes) {}
+  String(const Token& value) : m_value(value.lexemes) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralString { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
+
+  string getType() const {
+    return "string";
+  }
+
 private:
-  string m_token;
+  string m_value;
 };
 
 class Char : public Literal {
 public:
-  Char(const Token& token) : m_token(token.lexemes) {}
+  Char(const Token& value) : m_value(value.lexemes) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralChar { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
+
+  string getType() const {
+    return "char";
+  }
+
 private:
-  string m_token; 
+  string m_value; 
 };
 
 class Boolean : public Literal {
 public:
-  Boolean(const Token& token) : m_token(token.lexemes) {}
+  Boolean(const Token& value) : m_value(value.lexemes) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralBoolean { " << '\n';
-    cout << setw(indentation_level + 2) << " " << "value: " << m_token << "\n";
+    cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
     cout <<  setw(indentation_level) << " " << "} " << endl;
   }
+
+  string getType() const {
+    return "bool";
+  }
+
 private:
-  string m_token;
+  string m_value;
 };
 
 class Identifier : public Expression {
@@ -145,6 +183,18 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  Identifier* getIdentifier() const {
+    return m_identifier.get();
+  }
+
+  Expression* getValue() const {
+    return m_value.get();
+  }
+
+  string getOperator() const {
+    return m_op;
+  }
+
 private:
   unique_ptr<Identifier> m_identifier;
   string m_op;
@@ -191,7 +241,7 @@ public:
   Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
     m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)) {}
   Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)) {}
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(make_unique<Null>())) {}
 
   void print(int indentation_level = 0) const override {
     if (m_value) {
@@ -405,6 +455,26 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getType() const {
+    return m_returnType;
+  }
+
+  Identifier* getIdentifier() const {
+    return m_name.get();
+  }
+
+  vector<Parameter*> getParameters() const {
+    vector<Parameter*> parameters;
+    for (const auto& parameter: m_parameters){
+      parameters.emplace_back(parameter.get());
+    }
+    return parameters;
+  }
+
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+
 private:
 
   string m_returnType;
@@ -434,6 +504,18 @@ public:
         cout << setw(indentation_level) << " " << "}\n";
       }
     }
+  }
+
+  Identifier* getIdentifier() const {
+    return m_name.get();
+  }
+
+  vector<Identifier*> getArguments() const {
+    vector<Identifier*> arguments;
+    for(const auto& argument : m_arguments){
+      arguments.emplace_back(argument);
+    }
+    return arguments;
   }
 
 private:
