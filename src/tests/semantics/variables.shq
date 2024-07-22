@@ -1,5 +1,3 @@
 func null test(int test, string test){
-  return x;
+  return "test";
 }
-
-test(5, "test");

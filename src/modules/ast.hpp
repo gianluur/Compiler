@@ -324,6 +324,14 @@ public:
     cout << '\n' << setw(indentation_level) << " " << "} " << endl;
   }
 
+  vector<ASTNode*> getStatements() const {
+    vector<ASTNode*> statements;
+    for(const auto& statement: m_statements){
+      statements.emplace_back(statement.get());
+    }
+    return statements;
+  }
+
 private:
   vector<unique_ptr<ASTNode>> m_statements;
 };
@@ -557,6 +565,10 @@ public:
     cout << setw(indentation_level + 2) << " " << "value: ";
     m_value->print(indentation_level + 4);
     cout << setw(indentation_level) << "}\n";
+  }
+
+  Expression* getValue() const {
+    return m_value.get();
   }
 
 private:

@@ -49,8 +49,6 @@ public:
       else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
         analyzeFunctionCall(call);
       }
-
-
       
       else {
         error("Unknown node type");
@@ -86,16 +84,31 @@ private:
       string expectedType = parameters[i]->getType();
       checkExpressionType(expectedType, arguments[i]);
     }
-    
+  }
+
+  void analyzeFunctionBody(BlockStatement* body, string expectedType){
+    vector<ASTNode*> statements = body->getStatements();
+    for(const auto& statement: statements) {
+      if (Return* returnValue = dynamic_cast<Return*>(statement)) {
+        if (expectedType == "null")
+          error("Return statement found in a function returning null");
+
+        checkExpressionType(expectedType, returnValue->getValue());
+        cout << "value match!";
+      }
+      
+    }
   }
 
   void analyzeFunction(Function* function){
     Identifier* identifier = function->getIdentifier();
     string type = function->getType();
     vector<Parameter*> parameters = function->getParameters();
+    BlockStatement* body = function->getBody();
 
     auto result = symbolTable.emplace(identifier->getName(), Symbol("func", type, parameters, 0));
     checkIdentifierRedeclaration(result);
+    analyzeFunctionBody(body, type);
   }
 
   void analyzeAssignmentOperator(AssigmentOperator* assignmentOperator){
