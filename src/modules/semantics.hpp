@@ -46,6 +46,12 @@ public:
         analyzeFunction(function);
       }
       
+      else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
+        analyzeFunctionCall(call);
+      }
+
+
+      
       else {
         error("Unknown node type");
       }
@@ -60,6 +66,27 @@ private:
   void error(const string& message){
     cout << message << endl;
     exit(1);
+  }
+
+  void analyzeFunctionCall(FunctionCall* call){
+    Identifier* identifier = call->getIdentifier();
+    if (!isIdentifierDeclared(call->getIdentifier()))
+      error("Identifier: " + identifier->getName() + " is not declared");
+
+    vector<Expression*> arguments = call->getArguments();
+    const int n_arguments = arguments.size();
+
+    vector<Parameter*> parameters = symbolTable[identifier->getName()].params;
+    const int n_parameters = parameters.size();
+    
+    if (n_arguments != n_parameters)
+      error("Error: Function " + identifier->getName() + " was expecting " + std::to_string(n_parameters) + " but instead got only " + std::to_string(n_arguments));
+    
+    for(int i = 0; i < n_parameters; i++){
+      string expectedType = parameters[i]->getType();
+      checkExpressionType(expectedType, arguments[i]);
+    }
+    
   }
 
   void analyzeFunction(Function* function){

@@ -1,5 +1,5 @@
-func null test(){
+func null test(int test, string test){
   return x;
 }
 
-test(3 + 5, "test", x);
+test(5, "test");

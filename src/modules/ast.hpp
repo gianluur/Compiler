@@ -452,6 +452,10 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getType() const {
+    return m_type;
+  }
+
 private:
   string m_type;
   unique_ptr<Identifier> m_name;
