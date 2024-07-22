@@ -4,8 +4,6 @@
 #include <memory>
 #include <chrono>
 
-#include <llvm/IR/Module.h>
-
 #include "./modules/preprocessing.hpp"  
 #include "./modules/tokenizer.hpp"
 #include "./modules/parser.hpp"
@@ -30,8 +28,8 @@ int main(int argc, char* argv[]){
   Parser parser(tokens);
   const vector<unique_ptr<ASTNode>>& ast = parser.getAST();
 
-  SemanticAnalyzer analysis(ast);
-  analysis.analyze();
+    // SemanticAnalyzer analysis(ast);
+    // analysis.analyze();
 
   auto end = std::chrono::high_resolution_clock::now();
 

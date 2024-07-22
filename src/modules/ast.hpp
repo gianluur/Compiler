@@ -53,6 +53,10 @@ public:
     return "int";
   }
 
+  string getValue() const {
+    return m_value;
+  }
+
 private:
   string m_value;
 };
@@ -68,6 +72,10 @@ public:
 
   string getType() const{
     return "float";
+  }
+
+  string getValue() const {
+    return m_value;
   }
 
 private:
@@ -87,6 +95,10 @@ public:
     return "string";
   }
 
+  string getValue() const {
+    return m_value;
+  }
+
 private:
   string m_value;
 };
@@ -104,6 +116,10 @@ public:
     return "char";
   }
 
+  string getValue() const {
+    return m_value;
+  }
+
 private:
   string m_value; 
 };
@@ -119,6 +135,10 @@ public:
 
   string getType() const {
     return "bool";
+  }
+
+  string getValue() const {
+    return m_value;
   }
 
 private:
@@ -521,6 +541,22 @@ public:
 private:
   unique_ptr<Identifier> m_name;
   vector<unique_ptr<Identifier>> m_arguments;
+};
+
+class Return: public ASTNode {
+public:
+  Return(unique_ptr<Expression> value):
+    m_value(std::move(value)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Return {\n";
+    cout << setw(indentation_level + 2) << " " << "value: ";
+    m_value->print(indentation_level + 4);
+    cout << setw(indentation_level) << "}\n";
+  }
+
+private:
+  unique_ptr<Expression> m_value;
 };
 
 class Struct : public ASTNode {

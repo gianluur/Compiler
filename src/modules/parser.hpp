@@ -142,6 +142,9 @@ bool isValidExpressionToken() {
 
     case TokenType::STRUCT:
       return parseStruct();
+
+    case TokenType::RETURN:
+      return parseReturn();
     
     default:
       error("Couldn't parse the current token: " + token.lexemes);
@@ -149,6 +152,18 @@ bool isValidExpressionToken() {
     }
 
   } 
+
+  unique_ptr<Return> parseReturn(){
+    consumeToken();
+    if (!isValidExpressionToken())
+      error("Expected an expresion/identifier/literal after return keyword");
+    unique_ptr<Expression> value = parseExpression();
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("Expected a semicolon after expression in return statement");
+    consumeToken();
+
+    return make_unique<Return>(std::move(value));
+  }
 
   unique_ptr<Struct> parseStruct(){
     if (!isNextTokenType(TokenType::STRUCT)) 
