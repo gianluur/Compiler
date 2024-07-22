@@ -191,7 +191,8 @@ private:
 
   void invalidToken(const char& currentChar){
     m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar), line));
-    throw std::runtime_error("Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i)); //ADD ROWS AND COLS
+    cout << "Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i); //ADD ROWS AND COLS
+    exit(1);
   }
 
   void tokenNumber(const char& currentChar){

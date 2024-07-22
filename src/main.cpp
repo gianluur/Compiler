@@ -4,6 +4,8 @@
 #include <memory>
 #include <chrono>
 
+#include <llvm/IR/Module.h>
+
 #include "./modules/preprocessing.hpp"  
 #include "./modules/tokenizer.hpp"
 #include "./modules/parser.hpp"
