@@ -506,7 +506,7 @@ private:
 
 class FunctionCall: public ASTNode {
 public:
-  FunctionCall(unique_ptr<Identifier> name,  vector<unique_ptr<Identifier>> arguments):
+  FunctionCall(unique_ptr<Identifier> name,  vector<unique_ptr<Expression>> arguments):
     m_name(std::move(name)), m_arguments(std::move(arguments)) {} 
 
   void print(int indentation_level = 0) const override {
@@ -530,8 +530,8 @@ public:
     return m_name.get();
   }
 
-  vector<Identifier*> getArguments() const {
-    vector<Identifier*> arguments;
+  vector<Expression*> getArguments() const {
+    vector<Expression*> arguments;
     for(const auto& argument : m_arguments){
       arguments.emplace_back(argument.get());
     }
@@ -540,7 +540,7 @@ public:
 
 private:
   unique_ptr<Identifier> m_name;
-  vector<unique_ptr<Identifier>> m_arguments;
+  vector<unique_ptr<Expression>> m_arguments;
 };
 
 class Return: public ASTNode {

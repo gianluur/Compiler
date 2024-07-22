@@ -15,11 +15,15 @@ using std::unique_ptr, std::make_unique;
 struct Symbol {
   string keyword; // var/const/func
   string type;
+  vector<Parameter*> params; // for function
   int scopeLevel;
 
   Symbol() : keyword(""), type(""), scopeLevel(0) {} // Default constructor
   Symbol(string keyword, string type, int scopeLevel): 
     keyword(keyword), type(type), scopeLevel(scopeLevel) {}
+
+  Symbol(string keyword, string type, vector<Parameter*> parameters, int scopeLevel): 
+    keyword(keyword), type(type), params(parameters), scopeLevel(scopeLevel) {}
 };
 
 class SemanticAnalyzer {
@@ -61,8 +65,9 @@ private:
   void analyzeFunction(Function* function){
     Identifier* identifier = function->getIdentifier();
     string type = function->getType();
+    vector<Parameter*> parameters = function->getParameters();
 
-    auto result = symbolTable.emplace(identifier->getName(), Symbol("func", type, 0));
+    auto result = symbolTable.emplace(identifier->getName(), Symbol("func", type, parameters, 0));
     checkIdentifierRedeclaration(result);
   }
 
@@ -144,9 +149,9 @@ private:
       return analyzeBinaryOperator(binaryOperator);
     }
     else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(operand)){
-      return analyzeUnaryOperator(unaryOperator);
-    }
-    else {
+      return analyzeUnaryOperator(unaryOperator); 
+    } 
+    else { 
       error("Unknown operand type");
       return "";
     }

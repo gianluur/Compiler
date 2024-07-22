@@ -186,7 +186,9 @@ bool isValidExpressionToken() {
   unique_ptr<FunctionCall>parseFunctionCall(const Token& name){
     consumeToken();
 
-    vector<unique_ptr<Identifier>> arguments = parseArguments();
+    vector<unique_ptr<Expression>> arguments = parseArguments();
+    i--;
+    
     if (!isNextTokenType(TokenType::RPAREN))
       error("Expected closing parenthesis after arguments in funtion call");
     consumeToken();
@@ -198,14 +200,14 @@ bool isValidExpressionToken() {
     return make_unique<FunctionCall>(std::move(make_unique<Identifier>(name)), std::move(arguments));
   }
 
-  vector<unique_ptr<Identifier>> parseArguments(){
-    vector<unique_ptr<Identifier>> arguments;
-    while (isNextTokenType(TokenType::IDENTIFIER) || isNextTokenType(TokenType::COMMA)) {
-      if (!isNextTokenType(TokenType::IDENTIFIER))
-        error("Expected identifier in function call");
-      const Token& name = consumeToken();
+  vector<unique_ptr<Expression>> parseArguments(){
+    vector<unique_ptr<Expression>> arguments;
+    while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
+      if (!isValidExpressionToken())
+        error("Expected argument in function call");
+      unique_ptr<Expression> argument = parseExpression();
 
-      arguments.emplace_back(make_unique<Identifier>(name));
+      arguments.emplace_back(std::move(argument));
 
       if (isNextTokenType(TokenType::COMMA)) {
         consumeToken();
@@ -448,8 +450,9 @@ bool isValidExpressionToken() {
     vector<Token> output;
 
     while (isValidExpressionToken()) {
-      Token& current = consumeToken();
 
+      Token& current = consumeToken();
+      
       if (isLiteral(current) || current.type == TokenType::IDENTIFIER) {
         output.push_back(current);
       } 
@@ -468,7 +471,7 @@ bool isValidExpressionToken() {
 
     while (!operators.empty()) {
         if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) 
-          error("Mismatched parentheses");
+          error("Mismatched parentheses2");
         
         output.push_back(operators.top());
         operators.pop();
@@ -484,7 +487,9 @@ bool isValidExpressionToken() {
     }
     if (!operators.empty() && operators.top().type == TokenType::LPAREN) {
         operators.pop(); // Pop the left parenthesis
-    } else {
+    } 
+    else {
+        if (!isValidExpressionToken()) return;
         error("Mismatched parentheses");
     }
   }

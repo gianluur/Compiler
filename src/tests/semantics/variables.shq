@@ -1,3 +1,5 @@
 func null test(){
   return x;
 }
+
+test(3 + 5, "test", x);
