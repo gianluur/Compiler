@@ -375,6 +375,12 @@ public:
     cout << setw(indentation_level) << " " << "} ";
   }
 
+  Expression* getCondition() const {
+    return m_condition.get();
+  }
+
+
+
 private:
   unique_ptr<Expression> m_condition;
   unique_ptr<BlockStatement> m_body;
@@ -397,6 +403,10 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  Expression* getCondition() const {
+    return m_condition.get();
+  }
+
 private:
   unique_ptr<Expression> m_condition;
   unique_ptr<BlockStatement> m_body;
@@ -415,6 +425,10 @@ public:
     cout << setw(indentation_level + 2) << " " << "condition: ";
     m_condition->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "}" << '\n';
+  }
+
+  Expression* getCondition() const {
+    return m_condition.get();
   }
 
 private:

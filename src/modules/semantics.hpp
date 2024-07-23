@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "./ast.hpp"
+#include "./scope.hpp"
 
 using std::cout, std::endl;
 using std::vector, std::string, std::unordered_map; 
@@ -49,6 +50,18 @@ public:
       else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
         analyzeFunctionCall(call);
       }
+
+      else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
+        analyzeIfStatement(statement);
+      }
+
+      else if (While* statement = dynamic_cast<While*>(current)){
+        analyzeWhile(statement);
+      }
+
+      else if (Do* statement = dynamic_cast<Do*>(current)){
+        analyzeDo(statement);
+      }
       
       else {
         error("Unknown node type");
@@ -64,6 +77,21 @@ private:
   void error(const string& message){
     cout << message << endl;
     exit(1);
+  }
+
+  void analyzeDo(Do* statement){
+    Expression* condition = statement->getCondition();
+    checkExpressionType("bool", condition);
+  }
+
+  void analyzeWhile(While* statement){
+    Expression* condition = statement->getCondition();
+    checkExpressionType("bool", condition);
+  }
+
+  void analyzeIfStatement(IfStatement* ifstatement){
+    Expression* condition = ifstatement->getCondition();
+    checkExpressionType("bool", condition);
   }
 
   void analyzeFunctionCall(FunctionCall* call){
@@ -96,7 +124,6 @@ private:
         checkExpressionType(expectedType, returnValue->getValue());
         cout << "value match!";
       }
-      
     }
   }
 
@@ -135,10 +162,6 @@ private:
     auto result = symbolTable.emplace(identifier, Symbol(keyword, type, 0));
     checkIdentifierRedeclaration(result);
     checkExpressionType(type, value);
-  }
-
-  void declareVariable(Variable* variable){
-    
   }
 
   void checkIdentifierRedeclaration(const std::pair<unordered_map<string, Symbol>::iterator, bool>& result){

@@ -1,3 +1,0 @@
-func null test(int test, string test){
-  return "test";
-}
