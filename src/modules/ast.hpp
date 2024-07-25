@@ -349,6 +349,10 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+
 private:
   unique_ptr<BlockStatement> m_body;
 };
@@ -379,7 +383,9 @@ public:
     return m_condition.get();
   }
 
-
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
 
 private:
   unique_ptr<Expression> m_condition;
@@ -407,6 +413,10 @@ public:
     return m_condition.get();
   }
 
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+
 private:
   unique_ptr<Expression> m_condition;
   unique_ptr<BlockStatement> m_body;
@@ -431,6 +441,10 @@ public:
     return m_condition.get();
   }
 
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+
 private:
   unique_ptr<BlockStatement> m_body;
   unique_ptr<Expression> m_condition;
@@ -453,12 +467,19 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  Expression* getCondition() const {
+    return m_condition.get();
+  }
+
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+  
 private:
   unique_ptr<Variable> m_initialization;
   unique_ptr<Expression> m_condition;
   unique_ptr<AssigmentOperator> m_update;
   unique_ptr<BlockStatement> m_body;
-
 };
 
 class Parameter: public ASTNode {
@@ -601,6 +622,10 @@ public:
     cout << setw(indentation_level + 2) << " " << "body: ";
     m_body->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+  BlockStatement* getBody() const {
+    return m_body.get();
   }
 
 private:

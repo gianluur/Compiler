@@ -13,96 +13,131 @@ using std::cout, std::endl;
 using std::vector, std::string, std::unordered_map; 
 using std::unique_ptr, std::make_unique;
 
-struct Symbol {
-  string keyword; // var/const/func
-  string type;
-  vector<Parameter*> params; // for function
-  int scopeLevel;
-
-  Symbol() : keyword(""), type(""), scopeLevel(0) {} // Default constructor
-  Symbol(string keyword, string type, int scopeLevel): 
-    keyword(keyword), type(type), scopeLevel(scopeLevel) {}
-
-  Symbol(string keyword, string type, vector<Parameter*> parameters, int scopeLevel): 
-    keyword(keyword), type(type), params(parameters), scopeLevel(scopeLevel) {}
-};
 
 class SemanticAnalyzer {
 public:
   SemanticAnalyzer(const vector<unique_ptr<ASTNode>>& ast): 
-    m_ast(std::move(ast)) {}
+    m_ast(std::move(ast)), m_scopes(make_unique<Scope>()) {}
 
   void analyze(){
     cout << "------ Semantics Start -----" << endl << endl;
     for(const unique_ptr<ASTNode>& node : m_ast){
       ASTNode* current = node.get();
-      if (Variable* variable = dynamic_cast<Variable*>(current)){
-        analyzeVariable(variable);
-      }
-      else if (AssigmentOperator* assignmentOperator = dynamic_cast<AssigmentOperator*>(current)){
-        analyzeAssignmentOperator(assignmentOperator);
-      }
-
-      else if (Function* function = dynamic_cast<Function*>(current)){
-        analyzeFunction(function);
-      }
-      
-      else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
-        analyzeFunctionCall(call);
-      }
-
-      else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
-        analyzeIfStatement(statement);
-      }
-
-      else if (While* statement = dynamic_cast<While*>(current)){
-        analyzeWhile(statement);
-      }
-
-      else if (Do* statement = dynamic_cast<Do*>(current)){
-        analyzeDo(statement);
-      }
-      
-      else {
-        error("Unknown node type");
-      }
+      analyzeNode(current);
     }
     cout << endl << "------ Semantics End -----" << endl;
   }
 
 private:
    const vector<unique_ptr<ASTNode>>& m_ast;
-   unordered_map<string, Symbol> symbolTable;
+   unique_ptr<Scope> m_scopes;
 
   void error(const string& message){
     cout << message << endl;
     exit(1);
   }
 
+  void analyzeNode(ASTNode* current) {
+    if (Variable* variable = dynamic_cast<Variable*>(current)){
+      analyzeVariable(variable);
+    }
+    else if (AssigmentOperator* assignmentOperator = dynamic_cast<AssigmentOperator*>(current)){
+      analyzeAssignmentOperator(assignmentOperator);
+    }
+
+    else if (Function* function = dynamic_cast<Function*>(current)){
+      analyzeFunction(function);
+    }
+    
+    else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
+      analyzeFunctionCall(call);
+    }
+
+    else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
+      analyzeIfStatement(statement);
+    }
+
+    else if (While* statement = dynamic_cast<While*>(current)){
+      analyzeWhile(statement);
+    }
+
+    else if (Do* statement = dynamic_cast<Do*>(current)){
+      analyzeDo(statement);
+    }
+
+    else if (For* statement = dynamic_cast<For*>(current)){
+      analyzeFor(statement);
+    }
+    
+    else {
+      error("Unknown node type");
+    }
+  }
+
+  void analyzeBody(BlockStatement* body) {
+    for(ASTNode* current : body->getStatements()){
+      analyzeNode(current);
+    }
+  }
+
+  void analyzeFor(For* statement){
+
+    Expression* condition = statement->getCondition();
+    checkExpressionType("bool", condition);
+
+    m_scopes->enterScope();
+
+    BlockStatement* body = statement->getBody();
+    analyzeBody(body);
+
+    m_scopes->exitScope();
+  }
+
   void analyzeDo(Do* statement){
     Expression* condition = statement->getCondition();
     checkExpressionType("bool", condition);
+
+    m_scopes->enterScope();
+
+    BlockStatement* body = statement->getBody();
+    analyzeBody(body);
+
+    m_scopes->exitScope();
   }
 
   void analyzeWhile(While* statement){
     Expression* condition = statement->getCondition();
     checkExpressionType("bool", condition);
+
+    m_scopes->enterScope();
+
+    BlockStatement* body = statement->getBody();
+    analyzeBody(body);
+
+    m_scopes->exitScope();
   }
 
-  void analyzeIfStatement(IfStatement* ifstatement){
-    Expression* condition = ifstatement->getCondition();
+  void analyzeIfStatement(IfStatement* statement){
+    Expression* condition = statement->getCondition();
     checkExpressionType("bool", condition);
+
+    m_scopes->enterScope();
+
+    BlockStatement* body = statement->getBody();
+    analyzeBody(body);
+
+    m_scopes->exitScope();
   }
 
   void analyzeFunctionCall(FunctionCall* call){
     Identifier* identifier = call->getIdentifier();
-    if (!isIdentifierDeclared(call->getIdentifier()))
+    if (!m_scopes->isDeclared(call->getIdentifier()->getName()))
       error("Identifier: " + identifier->getName() + " is not declared");
 
     vector<Expression*> arguments = call->getArguments();
     const int n_arguments = arguments.size();
 
-    vector<Parameter*> parameters = symbolTable[identifier->getName()].params;
+    vector<Parameter*> parameters = m_scopes->find(identifier->getName()).params;
     const int n_parameters = parameters.size();
     
     if (n_arguments != n_parameters)
@@ -114,7 +149,7 @@ private:
     }
   }
 
-  void analyzeFunctionBody(BlockStatement* body, string expectedType){
+  void checkReturnType(BlockStatement* body, string expectedType){
     vector<ASTNode*> statements = body->getStatements();
     for(const auto& statement: statements) {
       if (Return* returnValue = dynamic_cast<Return*>(statement)) {
@@ -133,34 +168,32 @@ private:
     vector<Parameter*> parameters = function->getParameters();
     BlockStatement* body = function->getBody();
 
-    auto result = symbolTable.emplace(identifier->getName(), Symbol("func", type, parameters, 0));
-    checkIdentifierRedeclaration(result);
-    analyzeFunctionBody(body, type);
+    m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
+    checkReturnType(body, type);
+
+    m_scopes->enterScope();
+    analyzeBody(body);
+    m_scopes->exitScope();
   }
 
   void analyzeAssignmentOperator(AssigmentOperator* assignmentOperator){
     Identifier* identifier = assignmentOperator->getIdentifier();
     Expression* value = assignmentOperator->getValue();
 
-    if (!isIdentifierDeclared(identifier))
+    if (!m_scopes->isDeclared(identifier->getName()))
       error("Identifier: " + identifier->getName() + " is not declared");
 
-    const string expectedType = symbolTable[identifier->getName()].type;
+    const string expectedType = m_scopes->find(identifier->getName()).type;
     checkExpressionType(expectedType, value);
-  }
-
-  bool isIdentifierDeclared(Identifier* identifier){
-    return symbolTable.count(identifier->getName()) > 0;
   }
 
   void analyzeVariable(Variable* variable){
     string keyword = variable->getKeyword();
     string type = variable->getType();
-    string identifier = variable->getName();
+    string name = variable->getName();
     Expression* value = variable->getValue();
 
-    auto result = symbolTable.emplace(identifier, Symbol(keyword, type, 0));
-    checkIdentifierRedeclaration(result);
+    m_scopes->declare(name, Symbol(keyword, type));
     checkExpressionType(type, value);
   }
 
@@ -180,9 +213,9 @@ private:
 
   string getIdentifierType(Identifier* identifier){
     const string name = identifier->getName();
-    if (!isIdentifierDeclared(identifier))
+    if (!m_scopes->isDeclared(name))
       error("Identifier: " + name + " is not declared");
-    return symbolTable[name].type;
+    return m_scopes->find(name).type;
   }
 
   string analyzeUnaryOperator(UnaryOperator* unaryOperator){
