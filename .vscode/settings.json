@@ -51,6 +51,9 @@
     "chrono": "cpp",
     "unordered_set": "cpp",
     "optional": "cpp",
-    "ratio": "cpp"
+    "ratio": "cpp",
+    "cstring": "cpp",
+    "list": "cpp",
+    "cinttypes": "cpp"
   }
 }

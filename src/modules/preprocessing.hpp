@@ -11,8 +11,34 @@ using std::string, std::stringstream, std::ifstream;
 using std::remove_if, std::size_t;
 
 class Preprocessor {
+public:
+  Preprocessor(int argc, char* argv[]) {
+    cout << "----- Preprocessing -----\n\n";
+    
+    preprocess(argc, argv);
+
+    cout << "-------------------------\n\n";
+  }
+
+  string getSrc() const { 
+    return m_src;
+  }
+
 private:  
   string m_src;
+
+  void preprocess(int argc, char* argv[]) {
+    checkSourcePath(argc);
+
+    m_src = getSourceContents(argv[1]);
+    removeComments(m_src);
+
+    print();
+  }
+
+  void print() const {
+    cout << m_src << "\n\n";
+  }
 
   void checkSourcePath(int argc){
     if (argc != 2){
@@ -54,14 +80,4 @@ private:
       src.erase(start, end - start);
     }
   }
-
-public:
-  Preprocessor(int argc, char* argv[]) {
-    checkSourcePath(argc);
-
-    m_src = getSourceContents(argv[1]);
-    removeComments(m_src);
-  }
-
-  string getSrc() const { return m_src; }
 };

@@ -6,36 +6,36 @@
 #include <unordered_map>
 #include <memory>
 
-#include "./ast.hpp"
-#include "./scope.hpp"
+#include "ast.hpp"
+#include "scope.hpp"
+#include "error.hpp"
 
 using std::cout, std::endl;
 using std::vector, std::string, std::unordered_map; 
 using std::unique_ptr, std::make_unique;
 
 
-class SemanticAnalyzer {
+class Semantics {
 public:
-  SemanticAnalyzer(const vector<unique_ptr<ASTNode>>& ast): 
-    m_ast(std::move(ast)), m_scopes(make_unique<Scope>()) {}
+  Semantics(const vector<unique_ptr<ASTNode>>& ast): 
+    m_ast(std::move(ast)), m_scopes(make_unique<Scope>()) {
+      analyze();
+    }
 
   void analyze(){
-    cout << "------ Semantics Start -----" << endl << endl;
     for(const unique_ptr<ASTNode>& node : m_ast){
       ASTNode* current = node.get();
       analyzeNode(current);
     }
-    cout << endl << "------ Semantics End -----" << endl;
+  }
+
+  const vector<unique_ptr<ASTNode>>& getAST() const{
+    return m_ast;
   }
 
 private:
    const vector<unique_ptr<ASTNode>>& m_ast;
    unique_ptr<Scope> m_scopes;
-
-  void error(const string& message){
-    cout << message << endl;
-    exit(1);
-  }
 
   void analyzeNode(ASTNode* current) {
     if (Variable* variable = dynamic_cast<Variable*>(current)){
@@ -80,10 +80,16 @@ private:
     }
   }
 
-  void analyzeFor(For* statement){
+  void analyzeFor(For* statement){  
+    
+    Variable* initialization = statement->getInitialization();
+    analyzeVariable(initialization);
 
     Expression* condition = statement->getCondition();
     checkExpressionType("bool", condition);
+
+    AssigmentOperator* update = statement->getUpdate();
+    analyzeAssignmentOperator(update);
 
     m_scopes->enterScope();
 

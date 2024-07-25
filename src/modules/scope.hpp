@@ -26,17 +26,14 @@ public:
   ~Scope() {exitScope(); }
 
   void enterScope() {
-    cout << "Entering scope\n";
     scopes.emplace_back();
   }
 
   void exitScope(){
-    cout << "Exiting scope\n";
     scopes.pop_back();
   }
 
   void declare(const string& name, const Symbol& symbol) {
-    cout << "Declaring " + name << endl;
     if (isRedeclared(name))
       error("Identifier: " + name + " is already declared");
     scopes.back().emplace(name, symbol);
@@ -58,6 +55,7 @@ public:
       if (scopes[i].count(name) > 0) return scopes[i].at(name);
     }
     error("Identifier: " + name + " is not declared");
+    return Symbol();
   }
 private:
   vector<unordered_map<string, Symbol>> scopes;

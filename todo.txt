@@ -1,0 +1,3 @@
+//add variable declaration
+//allows semantics expression to be int and bool
+//remove the assigment to constants

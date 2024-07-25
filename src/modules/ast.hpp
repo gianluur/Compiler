@@ -467,8 +467,16 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  Variable* getInitialization() const {
+    return m_initialization.get();
+  }
+
   Expression* getCondition() const {
     return m_condition.get();
+  }
+
+  AssigmentOperator* getUpdate() const {
+    return m_update.get();
   }
 
   BlockStatement* getBody() const {

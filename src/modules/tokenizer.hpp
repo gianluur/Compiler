@@ -4,15 +4,22 @@
 #include <stdexcept>
 
 #include "token.hpp"
+#include "error.hpp"
 
 #undef NULL
 
-using std::cout, std::cerr, std::endl;
+using std::cout, std::cerr;
 using std::string, std::vector;
 
 class Tokenizer{
 public:
-  Tokenizer(string& src): m_src(src), i(0), line(0) { tokenize(); }
+  Tokenizer(const string& src): m_src(src), i(0), line(1) { 
+    cout << "----- Tokenizer -----\n\n";
+    
+    tokenize(); 
+
+    cout << "\n---------------------\n\n";
+  }
 
   vector<Token> getTokens() const { return m_tokens; }
 
@@ -49,16 +56,16 @@ public:
       else if (isText(currentChar)) tokenText(currentChar); 
 
       else invalidToken(currentChar);
-
     }
+    m_tokens.emplace_back(Token(TokenType::EOF, "\0", line));
+
+    print();
   }
 
-  void print(){
-    cout << "----- Tokenizer start -----" << endl;
-    for(Token& token : m_tokens){
-      cout << "< Type: " << int(token.type) << " Lexemes: " << token.lexemes << " Line: " << token.line << " >\n\n" ;
+  void print() const {
+    for(const Token& token : m_tokens){
+      cout << "< Type: " << int(token.type) << " Lexemes: " << token.lexemes << " Line: " << token.line << " >\n" ;
     }
-    cout << "----- Tokenizer end -----" << endl << endl;
   }
 
 private:
@@ -191,8 +198,7 @@ private:
 
   void invalidToken(const char& currentChar){
     m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar), line));
-    cout << "Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i); //ADD ROWS AND COLS
-    exit(1);
+    error("Error: Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i));
   }
 
   void tokenNumber(const char& currentChar){

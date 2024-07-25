@@ -7,8 +7,9 @@
 #include <optional>
 #include <stack>
 
-#include "./token.hpp"
-#include "./ast.hpp"
+#include "token.hpp"
+#include "ast.hpp"
+#include "error.hpp"
 
 using std::cout, std::endl;
 using std::stoi, std::stod;
@@ -16,20 +17,22 @@ using std::vector, std::unordered_map, std::stack;
 
 class Parser {
 public:
-  Parser(vector<Token> tokens) : m_tokens(std::move(tokens)), i(0) { parse(); }
+  Parser(vector<Token> tokens) : m_tokens(std::move(tokens)), i(0) {
+    cout << "----- AST Start -----\n";
+
+    parse(); 
+    
+    cout << "\n-------------------\n\n";
+  }
 
   void parse() {
     while (i < m_tokens.size()){
+      if (m_tokens.at(i).type == TokenType::EOF) break;
+
       unique_ptr<ASTNode> node = parseASTNode();
       m_ast.push_back(std::move(node));
     }
-
-    cout << "----- AST Start -----" << endl;
-    for (auto& node : m_ast) {
-      node->print();
-    }
-    cout << "\n----- AST End -----" << endl << endl;
-    
+    print();
   }
 
   const vector<unique_ptr<ASTNode>>& getAST() const{
@@ -41,18 +44,21 @@ private:
   vector<Token> m_tokens;
   size_t i;
 
-  void error(const string& message) {
-    cout << message << endl;
-    exit(1);
+  void print() const {
+    for (const auto& node : m_ast) {
+      node->print();
+    }
   }
 
   Token& consumeToken() {
-    if (i >= m_tokens.size()) error("ConsumeToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
+    if (i >= m_tokens.size()) 
+      error("ConsumeToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
     return m_tokens.at(i++);
   }
 
   Token& nextToken() {
-    if (i >= m_tokens.size()) error("nextToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
+    if (i >= m_tokens.size()) 
+      error("nextToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes);
     return m_tokens.at(i);
   }
 
@@ -145,39 +151,36 @@ bool isValidExpressionToken() {
 
     case TokenType::RETURN:
       return parseReturn();
-    
+
     default:
       error("Couldn't parse the current token: " + token.lexemes);
       return unique_ptr<ASTNode>();
     }
-
   } 
 
   unique_ptr<Return> parseReturn(){
     consumeToken();
     if (!isValidExpressionToken())
-      error("Expected an expresion/identifier/literal after return keyword");
+      error("Expected an expresion/identifier/literal after return keyword", nextToken().line);
     unique_ptr<Expression> value = parseExpression();
     if (!isNextTokenType(TokenType::SEMICOLON))
-      error("Expected a semicolon after expression in return statement");
+      error("Expected a semicolon after expression in return statement", nextToken().line);
     consumeToken();
 
     return make_unique<Return>(std::move(value));
   }
 
   unique_ptr<Struct> parseStruct(){
-    if (!isNextTokenType(TokenType::STRUCT)) 
-      error("Expected struct");
     consumeToken();
 
     if (!isNextTokenType(TokenType::IDENTIFIER)) 
-      error("Expected identifier after struct");
+      error("Expected identifier after struct", nextToken().line);
     const Token& name = consumeToken();
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
-      error("Expected identifier after struct");
+      error("Expected semicolon after struct", nextToken().line);
     consumeToken();
     
     return make_unique<Struct>(std::move(make_unique<Identifier>(name)), std::move(body));
@@ -190,11 +193,11 @@ bool isValidExpressionToken() {
     i--;
     
     if (!isNextTokenType(TokenType::RPAREN))
-      error("Expected closing parenthesis after arguments in funtion call");
+      error("Expected closing parenthesis after arguments in funtion call", nextToken().line);
     consumeToken();
 
     if (!isNextTokenType(TokenType::SEMICOLON))
-      error("Expected semicolon after closing parenthesis in function call");
+      error("Expected semicolon after closing parenthesis in function call", nextToken().line);
     consumeToken();
 
     return make_unique<FunctionCall>(std::move(make_unique<Identifier>(name)), std::move(arguments));
@@ -204,7 +207,7 @@ bool isValidExpressionToken() {
     vector<unique_ptr<Expression>> arguments;
     while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
       if (!isValidExpressionToken())
-        error("Expected argument in function call");
+        error("Expected argument in function call", nextToken().line);
       unique_ptr<Expression> argument = parseExpression();
 
       arguments.emplace_back(std::move(argument));
@@ -212,7 +215,7 @@ bool isValidExpressionToken() {
       if (isNextTokenType(TokenType::COMMA)) {
         consumeToken();
         if (isNextTokenType(TokenType::RPAREN)) 
-          error("Expected another argument after comma in function call");
+          error("Expected another argument after comma in function call", nextToken().line);
       }
     }
     return arguments;
@@ -223,11 +226,11 @@ bool isValidExpressionToken() {
 
     while (isNextTokenType(TokenType::IDENTIFIER) || isType(nextToken()) || isNextTokenType(TokenType::COMMA)){
       if (!isType(nextToken())) 
-        error("Expected a type in parameter");
+        error("Expected a type in parameter", nextToken().line);
       const Token& type = consumeToken();
 
       if (!isNextTokenType(TokenType::IDENTIFIER)) 
-        error("Expected identifier after type in paramerter");
+        error("Expected identifier after type in paramerter", nextToken().line);
       const Token& name = consumeToken();
 
       parameters.emplace_back(std::move(make_unique<Parameter>(type, std::move(make_unique<Identifier>(name)))));
@@ -235,7 +238,7 @@ bool isValidExpressionToken() {
       if (isNextTokenType(TokenType::COMMA)) {
         consumeToken();
         if (isNextTokenType(TokenType::RPAREN)) 
-          error("Expected another parameter after comma in function declaration");
+          error("Expected another parameter after comma in function declaration", nextToken().line);
       }
     }
 
@@ -243,26 +246,24 @@ bool isValidExpressionToken() {
   }
 
   unique_ptr<Function> parseFunction() {
-    if (!isNextTokenType(TokenType::FUNC))  
-      error("Expected function statement");
     consumeToken();
 
     if (!isType(nextToken())) 
-      error("Expected type after function statement");
+      error("Expected type after function statement", nextToken().line);
     const Token& returnType = consumeToken();
 
     if (!isNextTokenType(TokenType::IDENTIFIER)) 
-      error("Expected identifier after func");
+      error("Expected identifier after func", nextToken().line);
     const Token& name = consumeToken();
 
     if (!isNextTokenType(TokenType::LPAREN)) 
-      error("Expected open parenethesis for parameters after func");
+      error("Expected open parenethesis for parameters after func", nextToken().line);
     consumeToken();
 
     vector<unique_ptr<Parameter>> parameters = parseParameters();
 
     if (!isNextTokenType(TokenType::RPAREN)) 
-      error("Expected open parenethesis for parameters after func");
+      error("Expected open parenethesis for parameters after func", nextToken().line);
     consumeToken();
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
@@ -272,30 +273,30 @@ bool isValidExpressionToken() {
   }
 
   unique_ptr<Do> parseDoStatement(){
-    if (!isNextTokenType(TokenType::DO)) 
-      error("Expected do-while statement");
     consumeToken();
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
 
     if (!isNextTokenType(TokenType::WHILE)) 
-      error("Expected while after do in do-while statement");
+      error("Expected while after do in do-while statement", nextToken().line);
     consumeToken();
 
+    if (!isValidExpressionToken())
+      error("Expected a condition after while keyword in do-while statement", nextToken().line);
     unique_ptr<Expression> condition = parseExpression();
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
-      error("Expected semicolon at the end of do-while statement");
+      error("Expected semicolon at the end of do-while statement", nextToken().line);
     consumeToken();
 
     return make_unique<Do>(std::move(body), std::move(condition));
   }
 
   unique_ptr<While> parseWhileStatement(){
-    if (!isNextTokenType(TokenType::WHILE)) 
-      error("Expected while statement");
     consumeToken();
 
+    if(!isValidExpressionToken())
+      error("Expected condition after while keyword", nextToken().line);
     unique_ptr<Expression> condition = parseExpression();
 
     unique_ptr<BlockStatement> block = parseBlockStatement();
@@ -316,29 +317,33 @@ bool isValidExpressionToken() {
     Token& op = consumeToken();
 
     if (!isValidExpressionToken())
-      error("Expected a literal/expression/identifier after assigment operator in variable initialization");
+      error("Expected a literal/expression/identifier after assigment operator in variable initialization", nextToken().line);
     unique_ptr<Expression> value = parseExpression();
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
-      error("In this variable decleration: '" + identifier.lexemes  + "'; was expected a semicolon.  last token is: " + m_tokens.at(i).lexemes);
+      error("In this variable decleration: '" + identifier.lexemes  + "' was expected a semicolon", nextToken().line);
     consumeToken();
 
     return make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
   }
 
   unique_ptr<For> parseForStatement(){
-    if (!isNextTokenType(TokenType::FOR)) 
-      error("Expected for statement");
     consumeToken();
 
+    if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+      error("Expected variable initialization after for keyword", nextToken().line);
     unique_ptr<Variable> initialization = parseVariable();
-
+    
+    if (!isValidExpressionToken())
+      error("Expected a condition after variable initialization in for statement", nextToken().line);
     unique_ptr<Expression> condition = parseExpression();
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
-      error("Expected semicolon after condition in for loop");
+      error("Expected semicolon after condition in for loop", nextToken().line);
     consumeToken();
 
+    if (!isAssigmentOperator(nextToken()))
+      error("Expected assigment operator after condition in for statement", nextToken().line);
     unique_ptr<AssigmentOperator> update = parseAssigmentOperator();
 
     unique_ptr<BlockStatement> block = parseBlockStatement();  
@@ -348,7 +353,9 @@ bool isValidExpressionToken() {
 
   unique_ptr<IfStatement> parseIfStatement(){
     consumeToken();
-
+    
+    if(!isValidExpressionToken())
+      error("Expected condition after if keyword", nextToken().line);
     unique_ptr<Expression> condition = parseExpression();
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
@@ -366,18 +373,18 @@ bool isValidExpressionToken() {
 
   unique_ptr<BlockStatement> parseBlockStatement(){
     if (!isNextTokenType(TokenType::LCURLY)) 
-      error("Expected open bracket after if statement");
+      error("Expected open bracket for block statement", nextToken().line);
     consumeToken();
 
     vector<unique_ptr<ASTNode>> statements;
     while (!isNextTokenType(TokenType::RCURLY)){
       if (i + 1 >= m_tokens.size()) 
-        error("No closing bracket if block statement");
+        error("No closing bracket in block statement", nextToken().line);
       statements.emplace_back(parseASTNode());
     }
 
     if (!isNextTokenType(TokenType::RCURLY)) 
-      error("Expected closing bracket after if statement");
+      error("Expected closing bracket after if statement", nextToken().line);
     consumeToken();
 
     return make_unique<BlockStatement>(std::move(statements));
@@ -401,15 +408,15 @@ bool isValidExpressionToken() {
     Token& keyword = consumeToken();
     
     if (i >= m_tokens.size() || !isType(nextToken())) 
-      error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected type after " + keyword.lexemes + " keyword."); 
+      error("Expected type after " + keyword.lexemes + " keyword.", nextToken().line); 
     
     else if (isNextTokenType(TokenType::NULL))
-      error("Line " + getLine(keyword.line) + " -> Syntax Error: Null is not a valid type for a variable");
+      error("Null is not a valid type for a variable", nextToken().line);
 
     Token& type = consumeToken();
 
     if (i >= m_tokens.size() || !isNextTokenType(TokenType::IDENTIFIER)) 
-      error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected identifier after variable declaration");
+      error("Error: Expected identifier after type in variable declaration", nextToken().line);
     Token& name = consumeToken();
 
     if (isNextTokenType(TokenType::SEMICOLON)){
@@ -422,19 +429,19 @@ bool isValidExpressionToken() {
       consumeToken();
 
       if (!isValidExpressionToken())
-        error("Line " + getLine(keyword.line) + " -> Syntax Error: Expected a literal/expression/identifier after assigment operator in variable initialization");
+        error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", nextToken().line);
         
       unique_ptr<Expression> value = parseExpression();
 
       if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
-        error("Line " + getLine(keyword.line) + "-> Syntax Error: In this variable decleration: '" + keyword.lexemes + " " + name.lexemes  + "'; was expected a semicolon.");
+        error("Error: In this variable decleration: '" + keyword.lexemes + " " + name.lexemes  + "'; was expected a semicolon.", nextToken().line);
       consumeToken();
 
       return make_unique<Variable>(keyword, type, make_unique<Identifier>(name), std::move(value));
     }
 
     else {
-      error("Line " + getLine(keyword.line) + "-> Syntax Error: Expected semicolon after identifier in variable declaration");
+      error("Error: Expected semicolon after identifier in variable declaration", nextToken().line);
       return unique_ptr<Variable>();
     }
   } 
@@ -466,12 +473,12 @@ bool isValidExpressionToken() {
         handleClosingParenthesis(operators, output);
       }
       else 
-        error("Unexpected token: " + current.lexemes);
+        error("Unexpected token: " + current.lexemes, current.line);
     }
 
     while (!operators.empty()) {
         if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) 
-          error("Mismatched parentheses2");
+          error("Mismatched parentheses", operators.top().line);
         
         output.push_back(operators.top());
         operators.pop();
@@ -490,7 +497,7 @@ bool isValidExpressionToken() {
     } 
     else {
         if (!isValidExpressionToken()) return;
-        error("Mismatched parentheses");
+        error("Mismatched parentheses", nextToken().line);
     }
   }
 
