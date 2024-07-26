@@ -183,7 +183,7 @@ bool isValidExpressionToken() {
       error("Expected semicolon after struct", nextToken().line);
     consumeToken();
     
-    return make_unique<Struct>(std::move(make_unique<Identifier>(name)), std::move(body));
+    return make_unique<Struct>(make_unique<Identifier>(name), std::move(body));
   }
 
   unique_ptr<FunctionCall>parseFunctionCall(const Token& name){
@@ -200,7 +200,7 @@ bool isValidExpressionToken() {
       error("Expected semicolon after closing parenthesis in function call", nextToken().line);
     consumeToken();
 
-    return make_unique<FunctionCall>(std::move(make_unique<Identifier>(name)), std::move(arguments));
+    return make_unique<FunctionCall>(make_unique<Identifier>(name), std::move(arguments));
   }
 
   vector<unique_ptr<Expression>> parseArguments(){
@@ -233,7 +233,7 @@ bool isValidExpressionToken() {
         error("Expected identifier after type in paramerter", nextToken().line);
       const Token& name = consumeToken();
 
-      parameters.emplace_back(std::move(make_unique<Parameter>(type, std::move(make_unique<Identifier>(name)))));
+      parameters.emplace_back(make_unique<Parameter>(type, make_unique<Identifier>(name)));
 
       if (isNextTokenType(TokenType::COMMA)) {
         consumeToken();
@@ -268,7 +268,7 @@ bool isValidExpressionToken() {
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
 
-    return make_unique<Function>(returnType, std::move(make_unique<Identifier>(name)), std::move(parameters), std::move(body));
+    return make_unique<Function>(returnType, make_unique<Identifier>(name), std::move(parameters), std::move(body));
 
   }
 
@@ -365,7 +365,7 @@ bool isValidExpressionToken() {
 
       unique_ptr<BlockStatement> elseBody = parseBlockStatement();
 
-      return make_unique<IfStatement>(std::move(condition), std::move(body), std::move(make_unique<ElseStatement>(std::move(elseBody))));
+      return make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
     }
 
     return make_unique<IfStatement>(std::move(condition), std::move(body));

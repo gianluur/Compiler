@@ -121,7 +121,7 @@ private:
   }
 
   bool isLogicalOperator(const char& currentChar){
-    return contains("!&|", currentChar) || (currentChar == '!') && !isNextChar('=');
+    return contains("!&|", currentChar) || ((currentChar == '!') && !isNextChar('='));
   }
 
   bool isText(const char& currentChar){

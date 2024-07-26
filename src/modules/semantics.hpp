@@ -20,6 +20,10 @@ public:
   Semantics(const vector<unique_ptr<ASTNode>>& ast): 
     m_ast(std::move(ast)), m_scopes(make_unique<Scope>()) {
       analyze();
+      cout << "-0000000000000----\n\n";
+      for (const auto& node : m_ast) {
+        node->print();
+      }
     }
 
   void analyze(){
@@ -86,7 +90,11 @@ private:
     analyzeVariable(initialization);
 
     Expression* condition = statement->getCondition();
-    checkExpressionType("bool", condition);
+    const string expectedType = "bool";
+    const string valueType = checkExpressionType("bool", condition);
+
+    if (expectedType != valueType) 
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
 
     AssigmentOperator* update = statement->getUpdate();
     analyzeAssignmentOperator(update);
@@ -101,7 +109,11 @@ private:
 
   void analyzeDo(Do* statement){
     Expression* condition = statement->getCondition();
-    checkExpressionType("bool", condition);
+    const string expectedType = "bool";
+    const string valueType = checkExpressionType(expectedType, condition);
+
+    if (expectedType != valueType) 
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
 
     m_scopes->enterScope();
 
@@ -113,7 +125,11 @@ private:
 
   void analyzeWhile(While* statement){
     Expression* condition = statement->getCondition();
-    checkExpressionType("bool", condition);
+    const string expectedType = "bool";
+    const string valueType = checkExpressionType(expectedType, condition);
+
+    if (expectedType != valueType) 
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
 
     m_scopes->enterScope();
 
@@ -125,7 +141,11 @@ private:
 
   void analyzeIfStatement(IfStatement* statement){
     Expression* condition = statement->getCondition();
-    checkExpressionType("bool", condition);
+    const string expectedType = "bool";
+    const string valueType = checkExpressionType(expectedType, condition);
+
+    if (expectedType != valueType) 
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
 
     m_scopes->enterScope();
 
@@ -151,7 +171,9 @@ private:
     
     for(int i = 0; i < n_parameters; i++){
       string expectedType = parameters[i]->getType();
-      checkExpressionType(expectedType, arguments[i]);
+      string valueType = checkExpressionType(expectedType, arguments[i]);
+      if (expectedType != valueType) 
+        error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
     }
   }
 
@@ -162,8 +184,9 @@ private:
         if (expectedType == "null")
           error("Return statement found in a function returning null");
 
-        checkExpressionType(expectedType, returnValue->getValue());
-        cout << "value match!";
+        const string valueType = checkExpressionType(expectedType, returnValue->getValue());
+        if (expectedType != valueType) 
+          error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
       }
     }
   }
@@ -188,9 +211,16 @@ private:
 
     if (!m_scopes->isDeclared(identifier->getName()))
       error("Identifier: " + identifier->getName() + " is not declared");
+    
+    if (m_scopes->find(identifier->getName()).keyword == "const")
+      error("Can't reassign to a constant");
 
     const string expectedType = m_scopes->find(identifier->getName()).type;
-    checkExpressionType(expectedType, value);
+    const string valueType = checkExpressionType(expectedType, value);
+
+    if (expectedType != valueType) 
+      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
+    
   }
 
   void analyzeVariable(Variable* variable){
@@ -200,21 +230,28 @@ private:
     Expression* value = variable->getValue();
 
     m_scopes->declare(name, Symbol(keyword, type));
-    checkExpressionType(type, value);
+
+    string valueType;
+    if (!dynamic_cast<Null*>(value))        // if value type is null there's no need to validate the variable type
+      valueType = checkExpressionType(type, value);
+      if (type == "int" && valueType == "float"){
+        unique_ptr<Expression> valueToCast(variable->relaseValue());
+        auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
+        variable->setValue(std::move(toCast));
+      }
+      else if (type == "float" && valueType == "int"){
+        unique_ptr<Expression> valueToCast(variable->relaseValue());
+        auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
+        variable->setValue(std::move(toCast));
+      }
+    else if (type != valueType) 
+      error("Type Mismatch: Expected " + type + " but got " + valueType);
+    
   }
 
-  void checkIdentifierRedeclaration(const std::pair<unordered_map<string, Symbol>::iterator, bool>& result){
-    if (!result.second){
-      error("Identifier is already declared");
-    }
-  }
-
-  void checkExpressionType(const string& expectedType, Expression* value) {
-    string valueType = analyzeOperand(value);
-
-    if (expectedType != valueType) {
-      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
-    }
+  string checkExpressionType(const string& expectedType, Expression* value) {
+    const string valueType = analyzeOperand(value);
+    return valueType;
   }
 
   string getIdentifierType(Identifier* identifier){
@@ -232,7 +269,29 @@ private:
   string analyzeBinaryOperator(BinaryOperator* binaryOperator) {
     string leftType = analyzeOperand(binaryOperator->getLeftOperand());
     string rightType = analyzeOperand(binaryOperator->getRightOperand());
+    string op = binaryOperator->getOperator();
 
+    if ((string("+-*/%").find(op)) != string::npos) {
+      if (!(op == "+") && (leftType == "string" && rightType == "string"))
+        error("String concatenation isn't possible with operators other than '+'");
+
+      if ((leftType != "int" && rightType != "int") && (leftType != "float" && rightType != "float") )
+        error("Math operations is allowed only for type integer and float");
+
+      if ((leftType == "int" && rightType == "float")){
+        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "float");
+        binaryOperator->setLeftOperand(std::move(toCast));
+        leftType = "float";
+      }
+      else {
+        unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "float");
+        binaryOperator->setRightOperand(std::move(toCast));
+        rightType = "float";
+      }
+    }
+    
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match");
 

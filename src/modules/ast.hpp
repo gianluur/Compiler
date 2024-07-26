@@ -145,6 +145,32 @@ private:
   string m_value;
 };
 
+class Cast : public Expression {
+public:
+  Cast(unique_ptr<Expression> expr, const string& targetType) 
+    : m_expr(std::move(expr)), m_targetType(targetType) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Cast {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "targetType: " << m_targetType << '\n';
+    cout << setw(indentation_level + 2) << " " << "expression: ";
+    m_expr->print(indentation_level + 4);
+    cout << setw(indentation_level) << " " << "}" << endl;
+  }
+
+  string getTargetType() const {
+    return m_targetType;
+  }
+
+  Expression* getExpression() const {
+    return m_expr.get();
+  }
+
+private:
+  unique_ptr<Expression> m_expr;
+  string m_targetType;
+};
+
 class Identifier : public Expression {
 public:
   Identifier(const Token& name) : m_name(name.lexemes) {}
@@ -248,6 +274,22 @@ public:
     return m_right.get();
   }
 
+  void setLeftOperand(unique_ptr<Expression> left)  {
+    m_left = std::move(left);
+  }
+
+  void setRightOperand(unique_ptr<Expression> right)  {
+    m_right = std::move(right);
+  }
+
+  Expression* releaseLeftOperand() {
+      return m_left.release();
+    }
+
+    Expression* releaseRightOperand() {
+      return m_right.release();
+    }
+
 private:
   unique_ptr<Expression> m_left;
   string m_op;
@@ -261,7 +303,7 @@ public:
   Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
     m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)) {}
   Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(make_unique<Null>())) {}
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(make_unique<Null>()) {}
 
   void print(int indentation_level = 0) const override {
     if (m_value) {
@@ -297,8 +339,16 @@ public:
     return m_name.get()->getName();
   }
 
+  void setValue(unique_ptr<Expression> value){
+    m_value = std::move(value);
+  }
+
   Expression* getValue() const {
     return m_value.get();
+  }
+
+  Expression* relaseValue() {
+    return m_value.release();
   }
 
 private:

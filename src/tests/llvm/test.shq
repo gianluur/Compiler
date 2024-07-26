@@ -1,3 +1,1 @@
-struct name {
-  
-}
+var int x = 5 + 3.3;
