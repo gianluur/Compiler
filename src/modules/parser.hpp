@@ -304,14 +304,16 @@ bool isValidExpressionToken() {
     return make_unique<While>(std::move(condition), std::move(block));
   }
 
-  unique_ptr<AssigmentOperator> parseAssigmentOperator(std::optional<Token> optIdentifier = {}){    
+  unique_ptr<AssigmentOperator>  parseAssigmentOperator(std::optional<Token> optIdentifier = {}){    
 
     //Getting the identifier if present
     Token identifier;
     if (optIdentifier) {
       identifier = optIdentifier.value();
-    } else {
-      identifier = consumeToken();
+    } 
+    else {
+      if (isNextTokenType(TokenType::IDENTIFIER))
+        identifier = consumeToken();
     }
 
     Token& op = consumeToken();
@@ -342,7 +344,7 @@ bool isValidExpressionToken() {
       error("Expected semicolon after condition in for loop", nextToken().line);
     consumeToken();
 
-    if (!isAssigmentOperator(nextToken()))
+    if (!isAssigmentOperator(nextToken()) && !isValidExpressionToken())
       error("Expected assigment operator after condition in for statement", nextToken().line);
     unique_ptr<AssigmentOperator> update = parseAssigmentOperator();
 

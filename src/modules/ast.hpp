@@ -236,6 +236,14 @@ public:
   Expression* getValue() const {
     return m_value.get();
   }
+  
+  Expression* relaseValue() {
+    return m_value.release();
+  }
+
+  void setValue(unique_ptr<Expression> value){
+    m_value = std::move(value);
+  }
 
   string getOperator() const {
     return m_op;
@@ -459,6 +467,10 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  Expression* relaseCondition() {
+    return m_condition.release();
+  }
+
   Expression* getCondition() const {
     return m_condition.get();
   }
@@ -485,6 +497,10 @@ public:
     cout << setw(indentation_level + 2) << " " << "condition: ";
     m_condition->print(indentation_level + 4);
     cout << setw(indentation_level) << " " << "}" << '\n';
+  }
+
+  Expression* relaseCondition() {
+    return m_condition.release();
   }
 
   Expression* getCondition() const {
@@ -531,6 +547,10 @@ public:
 
   BlockStatement* getBody() const {
     return m_body.get();
+  }
+
+  Expression* relaseCondition() {
+    return m_condition.release();
   }
   
 private:
@@ -662,6 +682,14 @@ public:
 
   Expression* getValue() const {
     return m_value.get();
+  }
+
+  Expression* relaseValue(){
+    return m_value.release();
+  }
+
+  void setValue(unique_ptr<Expression> value) {
+    m_value = std::move(value);
   }
 
 private:

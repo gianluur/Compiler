@@ -1,1 +1,5 @@
-var int x = 5 + 3.3;
+func bool test(){
+  return 5;
+}
+
+var int x = test();
