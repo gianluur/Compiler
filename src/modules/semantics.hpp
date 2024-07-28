@@ -253,12 +253,15 @@ private:
     const string expectedType = "bool";
     const string valueType = checkExpressionType(expectedType, condition);
 
-    if (valueType == "int" || valueType == "float") {
-        unique_ptr<Expression> condition(statement->releaseCondition());
-        auto valueToCast = make_unique<Cast>(std::move(condition), expectedType);
-        statement->setCondition(std::move(valueToCast));
-    } else {
-        error("Error: condition must always evaluate to boolean");
+    if (valueType != expectedType){
+      if (valueType == "int" || valueType == "float") {
+          unique_ptr<Expression> condition(statement->releaseCondition());
+          auto valueToCast = make_unique<Cast>(std::move(condition), expectedType);
+          statement->setCondition(std::move(valueToCast));
+      } 
+      else {
+          error("Error: condition must always evaluate to boolean");
+      }
     }
   }
 
