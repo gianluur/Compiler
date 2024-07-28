@@ -490,6 +490,9 @@ bool isValidExpressionToken() {
         operators.pop();
     }
 
+    if (output.size() == 0)
+      error("Invalid expression", nextToken().line);
+
     return expressionToNode(output);
   } 
 
@@ -554,4 +557,3 @@ bool isValidExpressionToken() {
     return std::move(nodes.top());
   }
 };
-
