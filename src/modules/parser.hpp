@@ -190,7 +190,6 @@ bool isValidExpressionToken() {
     consumeToken();
 
     vector<unique_ptr<Expression>> arguments = parseArguments();
-    i--;
     
     if (!isNextTokenType(TokenType::RPAREN))
       error("Expected closing parenthesis after arguments in funtion call", nextToken().line);
@@ -205,6 +204,10 @@ bool isValidExpressionToken() {
 
   vector<unique_ptr<Expression>> parseArguments(){
     vector<unique_ptr<Expression>> arguments;
+    if (isNextTokenType(TokenType::RPAREN)) {
+      return arguments;
+    }
+
     while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
       if (!isValidExpressionToken())
         error("Expected argument in function call", nextToken().line);
@@ -218,6 +221,7 @@ bool isValidExpressionToken() {
           error("Expected another argument after comma in function call", nextToken().line);
       }
     }
+    i--;
     return arguments;
   }
 
@@ -494,6 +498,7 @@ bool isValidExpressionToken() {
         output.push_back(operators.top());
         operators.pop();
     }
+    
     if (!operators.empty() && operators.top().type == TokenType::LPAREN) {
         operators.pop(); // Pop the left parenthesis
     } 

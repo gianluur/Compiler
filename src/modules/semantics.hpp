@@ -61,116 +61,61 @@ private:
     }
 
     else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
-      analyzeIfStatement(statement);
+      analyzeConditionalStatement(statement);
     }
 
     else if (While* statement = dynamic_cast<While*>(current)){
-      analyzeWhile(statement);
+      analyzeConditionalStatement(statement);
     }
 
     else if (Do* statement = dynamic_cast<Do*>(current)){
-      analyzeDo(statement);
+      analyzeConditionalStatement(statement);
     }
 
     else if (For* statement = dynamic_cast<For*>(current)){
       analyzeFor(statement);
     }
-
-    else if (Return* statement = dynamic_cast<Return*>(current)){
-      cout << "Return\n";
-    }
-  }
-
-  void analyzeBody(BlockStatement* body) {
-    for(ASTNode* current : body->getStatements()){
-      analyzeNode(current);
-    }
   }
 
   void analyzeFor(For* statement){  
-    
     Variable* initialization = statement->getInitialization();
     analyzeVariable(initialization);
 
-    Expression* condition = statement->getCondition();
-    const string expectedType = "bool";
-    const string valueType = checkExpressionType("bool", condition);
-
-    if (expectedType != valueType) 
-      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
+    analyzeCondition(statement);      
 
     AssigmentOperator* update = statement->getUpdate();
     analyzeAssignmentOperator(update);
 
     m_scopes->enterScope();
 
-    BlockStatement* body = statement->getBody();
-    analyzeBody(body);
+    analyzeBody(statement);
 
     m_scopes->exitScope();
   }
 
-  void analyzeDo(Do* statement){
-    Expression* condition = statement->getCondition();
-    const string expectedType = "bool";
-    const string valueType = checkExpressionType(expectedType, condition);
-
-    if (expectedType != valueType) 
-      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
-
+  template <typename T>
+  void analyzeConditionalStatement(T* statement){
+    analyzeCondition(statement);
     m_scopes->enterScope();
-
-    BlockStatement* body = statement->getBody();
-    analyzeBody(body);
-
-    m_scopes->exitScope();
-  }
-
-  void analyzeWhile(While* statement){
-    Expression* condition = statement->getCondition();
-    const string expectedType = "bool";
-    const string valueType = checkExpressionType(expectedType, condition);
-
-    if (expectedType != valueType) 
-      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
-
-    m_scopes->enterScope();
-
-    BlockStatement* body = statement->getBody();
-    analyzeBody(body);
-
-    m_scopes->exitScope();
-  }
-
-  void analyzeIfStatement(IfStatement* statement){
-    Expression* condition = statement->getCondition();
-    const string expectedType = "bool";
-    const string valueType = checkExpressionType(expectedType, condition);
-
-    if (expectedType != valueType) 
-      error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
-
-    m_scopes->enterScope();
-
-    BlockStatement* body = statement->getBody();
-    analyzeBody(body);
-
+    analyzeBody(statement);
     m_scopes->exitScope();
   }
 
   void analyzeFunctionCall(FunctionCall* call){
     Identifier* identifier = call->getIdentifier();
-    if (!m_scopes->isDeclared(call->getIdentifier()->getName()))
-      error("Identifier: " + identifier->getName() + " is not declared");
+    const string name = identifier->getName();
+
+    if (!m_scopes->isDeclared(name))
+      error("Identifier: " + name + " is not declared");
 
     vector<Expression*> arguments = call->getArguments();
     const int n_arguments = arguments.size();
 
-    vector<Parameter*> parameters = m_scopes->find(identifier->getName()).params;
+    vector<Parameter*> parameters = m_scopes->find(name).params;
     const int n_parameters = parameters.size();
     
     if (n_arguments != n_parameters)
-      error("Error: Function " + identifier->getName() + " was expecting " + std::to_string(n_parameters) + " but instead got only " + std::to_string(n_arguments));
+      error("Error: Function " + name + " was expecting " + std::to_string(n_parameters) + " but instead got only " + std::to_string(n_arguments));
     
     for(int i = 0; i < n_parameters; i++){
       string expectedType = parameters[i]->getType();
@@ -222,7 +167,7 @@ private:
     checkReturnType(body, type);
 
     m_scopes->enterScope();
-    analyzeBody(body);
+    analyzeBody(function);
     m_scopes->exitScope();
   }
 
@@ -294,8 +239,27 @@ private:
     }        
   }
 
-  void castCondition(){
+  template <typename T>
+  void analyzeBody(T* statement) {
+    BlockStatement* body = statement->getBody();
+    for(ASTNode* current : body->getStatements()){
+      analyzeNode(current);
+    }
+  }
 
+  template <typename T>
+  void analyzeCondition(T* statement) {
+    auto* condition = statement->getCondition();
+    const string expectedType = "bool";
+    const string valueType = checkExpressionType(expectedType, condition);
+
+    if (valueType == "int" || valueType == "float") {
+        unique_ptr<Expression> condition(statement->releaseCondition());
+        auto valueToCast = make_unique<Cast>(std::move(condition), expectedType);
+        statement->setCondition(std::move(valueToCast));
+    } else {
+        error("Error: condition must always evaluate to boolean");
+    }
   }
 
   string checkExpressionType(const string& expectedType, Expression* value) {

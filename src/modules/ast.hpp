@@ -437,12 +437,20 @@ public:
     cout << setw(indentation_level) << " " << "} ";
   }
 
+  Expression* releaseCondition() {
+    return m_condition.release();
+  }
+
   Expression* getCondition() const {
     return m_condition.get();
   }
 
   BlockStatement* getBody() const {
     return m_body.get();
+  }
+
+  void setCondition(unique_ptr<Expression> condition){
+    m_condition = std::move(condition);
   }
 
 private:
@@ -467,7 +475,7 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
-  Expression* relaseCondition() {
+  Expression* releaseCondition() {
     return m_condition.release();
   }
 
@@ -477,6 +485,10 @@ public:
 
   BlockStatement* getBody() const {
     return m_body.get();
+  }
+
+  void setCondition(unique_ptr<Expression> condition){
+    m_condition = std::move(condition);
   }
 
 private:
@@ -499,7 +511,7 @@ public:
     cout << setw(indentation_level) << " " << "}" << '\n';
   }
 
-  Expression* relaseCondition() {
+  Expression* releaseCondition() {
     return m_condition.release();
   }
 
@@ -509,6 +521,10 @@ public:
 
   BlockStatement* getBody() const {
     return m_body.get();
+  }
+
+  void setCondition(unique_ptr<Expression> condition){
+    m_condition = std::move(condition);
   }
 
 private:
@@ -549,8 +565,12 @@ public:
     return m_body.get();
   }
 
-  Expression* relaseCondition() {
+  Expression* releaseCondition() {
     return m_condition.release();
+  }
+
+  void setCondition(unique_ptr<Expression> condition){
+    m_condition = std::move(condition);
   }
   
 private:

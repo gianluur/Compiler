@@ -28,7 +28,7 @@ public:
     const vector<unique_ptr<ASTNode>>& raw_ast = parser.getAST();
 
     Semantics analysis(raw_ast);
-    const vector<unique_ptr<ASTNode>>& ast = analysis.getAST();
+    //const vector<unique_ptr<ASTNode>>& ast = analysis.getAST();
   }
 
 private:
