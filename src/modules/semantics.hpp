@@ -87,15 +87,14 @@ private:
     analyzeAssignmentOperator(update);
 
     m_scopes->enterScope();
-
     analyzeBody(statement);
-
     m_scopes->exitScope();
   }
 
   template <typename T>
   void analyzeConditionalStatement(T* statement){
     analyzeCondition(statement);
+
     m_scopes->enterScope();
     analyzeBody(statement);
     m_scopes->exitScope();
@@ -125,34 +124,15 @@ private:
     }
   }
 
-  void checkReturnType(BlockStatement* body, string expectedType){
+  void checkReturnType(BlockStatement* body, string type){
     vector<ASTNode*> statements = body->getStatements();
-    for(const auto& statement: statements) {
-      if (Return* returnValue = dynamic_cast<Return*>(statement)) {
-        if (expectedType == "null")
+    for(const auto& current: statements) {
+      if (Return* statement = dynamic_cast<Return*>(current)) {
+        if (type == "null")
           error("Return statement found in a function returning null");
 
-        const string valueType = checkExpressionType(expectedType, returnValue->getValue());
-
-        if ((expectedType == "int" && valueType == "float") || (expectedType == "int" && valueType == "bool")){
-          unique_ptr<Expression> valueToCast(returnValue->relaseValue());
-          auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
-          returnValue->setValue(std::move(toCast));
-        }
-        else if (expectedType == "float" && valueType == "int"){
-          unique_ptr<Expression> valueToCast(returnValue->relaseValue());
-          auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
-          returnValue->setValue(std::move(toCast));
-        }
-
-        else if (expectedType == "bool" && valueType == "int"){
-          unique_ptr<Expression> valueToCast(returnValue->relaseValue());
-          auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
-          returnValue->setValue(std::move(toCast));
-        }  
-
-        else if (expectedType != valueType) 
-          error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
+        const string valueType = checkExpressionType(type, statement->getValue());
+        castValueIfNeeeded(statement, type, valueType);
       }
     }
   }
@@ -171,9 +151,9 @@ private:
     m_scopes->exitScope();
   }
 
-  void analyzeAssignmentOperator(AssigmentOperator* assignmentOperator){
-    Identifier* identifier = assignmentOperator->getIdentifier();
-    Expression* value = assignmentOperator->getValue();
+  void analyzeAssignmentOperator(AssigmentOperator* statement){
+    Identifier* identifier = statement->getIdentifier();
+    Expression* value = statement->getValue();
 
     if (!m_scopes->isDeclared(identifier->getName()))
       error("Identifier: " + identifier->getName() + " is not declared");
@@ -183,26 +163,7 @@ private:
 
     const string type = m_scopes->find(identifier->getName()).type;
     const string valueType = checkExpressionType(type, value);
-    
-    if ((type == "int" && valueType == "float") || (type == "int" && valueType == "bool")){
-      unique_ptr<Expression> valueToCast(assignmentOperator->relaseValue());
-      auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
-      assignmentOperator->setValue(std::move(toCast));
-    }
-    else if (type == "float" && valueType == "int"){
-      unique_ptr<Expression> valueToCast(assignmentOperator->relaseValue());
-      auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
-      assignmentOperator->setValue(std::move(toCast));
-    }
-
-    else if (type == "bool" && valueType == "int"){
-      unique_ptr<Expression> valueToCast(assignmentOperator->relaseValue());
-      auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
-      assignmentOperator->setValue(std::move(toCast));
-    }  
-
-    else if (type != valueType) 
-      error("Type Mismatch: Expected " + type + " but got " + valueType);
+    castValueIfNeeeded(statement, type, valueType);
     
   }
 
@@ -217,25 +178,7 @@ private:
     string valueType;
     if (!dynamic_cast<Null*>(value)){
       valueType = checkExpressionType(type, value);
-      if ((type == "int" && valueType == "float") || (type == "int" && valueType == "bool")){
-        unique_ptr<Expression> valueToCast(variable->relaseValue());
-        auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
-        variable->setValue(std::move(toCast));
-      }
-      else if (type == "float" && valueType == "int"){
-        unique_ptr<Expression> valueToCast(variable->relaseValue());
-        auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
-        variable->setValue(std::move(toCast));
-      }
-
-      else if (type == "bool" && valueType == "int"){
-        unique_ptr<Expression> valueToCast(variable->relaseValue());
-        auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
-        variable->setValue(std::move(toCast));
-      }
-      
-      else if (type != valueType) 
-        error("Type Mismatch: Expected " + type + " but got " + valueType);
+      castValueIfNeeeded(variable, type, valueType);
     }        
   }
 
@@ -263,6 +206,27 @@ private:
           error("Error: condition must always evaluate to boolean");
       }
     }
+  }
+
+  template <typename T>
+  void castValueIfNeeeded(T* statement, const string& type, const string& valueType){
+    if ((type == "int" && valueType == "float") || (type == "int" && valueType == "bool")){
+      unique_ptr<Expression> valueToCast(statement->relaseValue());
+      auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
+      statement->setValue(std::move(toCast));
+    }
+    else if (type == "float" && valueType == "int"){
+      unique_ptr<Expression> valueToCast(statement->relaseValue());
+      auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
+      statement->setValue(std::move(toCast));
+    }
+    else if (type == "bool" && valueType == "int"){
+      unique_ptr<Expression> valueToCast(statement->relaseValue());
+      auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
+      statement->setValue(std::move(toCast));
+    }
+    else if (type != valueType) 
+      error("Type Mismatch: Expected " + type + " but got " + valueType);
   }
 
   string checkExpressionType(const string& expectedType, Expression* value) {
