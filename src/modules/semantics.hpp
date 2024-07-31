@@ -14,7 +14,6 @@ using std::cout, std::endl;
 using std::vector, std::string, std::unordered_map; 
 using std::unique_ptr, std::make_unique;
 
-
 class Semantics {
 public:
   Semantics(const vector<unique_ptr<ASTNode>>& ast): 
@@ -75,16 +74,16 @@ private:
     else if (For* statement = dynamic_cast<For*>(current)){
       analyzeFor(statement);
     }
+
+    // else if (Struct* statement = dynamic_cast<Struct*>(current)){
+    //   cout << "struct "; //TODO
+    // }
   }
 
   void analyzeFor(For* statement){  
-    Variable* initialization = statement->getInitialization();
-    analyzeVariable(initialization);
-
+    analyzeVariable(statement->getInitialization());
     analyzeCondition(statement);      
-
-    AssigmentOperator* update = statement->getUpdate();
-    analyzeAssignmentOperator(update);
+    analyzeAssignmentOperator(statement->getUpdate());
 
     m_scopes->enterScope();
     analyzeBody(statement);
@@ -175,9 +174,8 @@ private:
 
     m_scopes->declare(name, Symbol(keyword, type));
 
-    string valueType;
     if (!dynamic_cast<Null*>(value)){
-      valueType = checkExpressionType(type, value);
+      const string valueType = checkExpressionType(type, value);
       castValueIfNeeeded(variable, type, valueType);
     }        
   }

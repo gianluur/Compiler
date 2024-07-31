@@ -1,7 +1,7 @@
-; ModuleID = 'my_module'
-source_filename = "my_module"
+; ModuleID = 'MyModule'
+source_filename = "MyModule"
 
-define i32 @main(i32 %0) {
+define i32 @main() {
 entry:
-  ret i32 1
+  ret i32 69
 }

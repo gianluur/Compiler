@@ -1,2 +1,1 @@
-//allows semantics expression to be int and bool 
-//allow certian type to use some operators but not others;
+//allow declarations to be only on the same line

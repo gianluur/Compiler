@@ -28,13 +28,8 @@ public:
     const vector<unique_ptr<ASTNode>>& raw_ast = parser.getAST();
 
     Semantics analysis(raw_ast);
-    //const vector<unique_ptr<ASTNode>>& ast = analysis.getAST();
-  }
+    const vector<unique_ptr<ASTNode>>& ast = analysis.getAST();
 
-private:
-  unique_ptr<Preprocessor> preprocessor;
-  unique_ptr<Tokenizer> tokenizer;
-  unique_ptr<Parser> parser;
-  unique_ptr<Semantics> semantics;
-  //codegen
+    Codegen codegen(ast);
+  }
 };
