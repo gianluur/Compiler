@@ -260,7 +260,7 @@ private:
         binaryOperator->setLeftOperand(std::move(toCast));
         leftType = "float";
         }
-        else {
+        else if (leftType == "float" && rightType == "int") {
           unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
           auto toCast = make_unique<Cast>(std::move(operand), "float");
           binaryOperator->setRightOperand(std::move(toCast));
@@ -283,7 +283,6 @@ private:
         rightType = "bool";
       }
     }
-    
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match");
 

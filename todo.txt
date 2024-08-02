@@ -1,1 +1,0 @@
-//allow declarations to be only on the same line
