@@ -28,9 +28,9 @@ public:
   llvm::Value* getLLVMValue(Expression* node){
     if (Integer* statement = dynamic_cast<Integer*>(node)) 
       return builder.getInt32(std::stoi(statement->getValue()));
-    
+
     else if (Float* statement = dynamic_cast<Float*>(node)) 
-      return llvm::ConstantFP::get(context, llvm::APFloat(std::stof(statement->getValue())));
+      return llvm::ConstantFP::get(llvm::Type::getFloatTy(context), std::stod(statement->getValue()));
     
     else if (Char* statement = dynamic_cast<Char*>(node)) 
       return builder.getInt8(static_cast<int>(statement->getValue()[0]));
@@ -39,7 +39,10 @@ public:
       return builder.getInt1(statement->getValue() == "true");
     
     else if (BinaryOperator* statement = dynamic_cast<BinaryOperator*>(node)) 
-      return generateBinaryExpression(statement);
+      return generateBinaryOperator(statement);
+
+    else if (Cast* statement = dynamic_cast<Cast*>(node))
+      return generateCast(statement);
 
     else if (dynamic_cast<Null*>(node)) 
       return llvm::Constant::getNullValue(getLLVMType("null"));
@@ -50,18 +53,48 @@ public:
     }
   }
 
-  llvm::Value* generateBinaryExpression(BinaryOperator* binExpr) {
-    llvm::Value* leftValue = getLLVMValue(binExpr->getLeftOperand());
-    llvm::Value* rightValue = getLLVMValue(binExpr->getRightOperand());
+  llvm::Value* generateCast(Cast* statement){
+    llvm::Value* value = getLLVMValue(statement->getExpression());
+    llvm::Type* targetType = getLLVMType(statement->getTargetType());
+    llvm::Type* actualType = value->getType();
+
+    if (actualType->isIntegerTy() && targetType->isFloatTy())
+      return builder.CreateSIToFP(value, targetType, "intToFloat");
+    else if (actualType->isFloatTy() && targetType->isIntegerTy())
+      return builder.CreateFPToSI(value, targetType, "floatToInt");
+  }
+
+  llvm::Value* generateBinaryOperator(BinaryOperator* statement) {
+    llvm::Value* leftValue = getLLVMValue(statement->getLeftOperand());
+    llvm::Value* rightValue = getLLVMValue(statement->getRightOperand());
+    const string op = statement->getOperator();
     
-    if (binExpr->getOperator() == "+") 
-      return builder.CreateAdd(leftValue, rightValue, "addtmp");
-    else if (binExpr->getOperator() == "-") 
-      return builder.CreateSub(leftValue, rightValue, "subtmp");
-    else if (binExpr->getOperator() == "*") 
-      return builder.CreateMul(leftValue, rightValue, "multmp");
-    else if (binExpr->getOperator() == "/") 
-      return builder.CreateSDiv(leftValue, rightValue, "divtmp");
+    if (op == "+"){
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFAdd(leftValue, rightValue, "faddtmp");
+      else 
+        return builder.CreateAdd(leftValue, rightValue, "addtmp");
+    }
+    else if (op == "-") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFSub(leftValue, rightValue, "faddtmp");
+      else 
+        return builder.CreateSub(leftValue, rightValue, "addtmp");
+    else if (op == "*") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFMul(leftValue, rightValue, "faddtmp");
+      else 
+        return builder.CreateMul(leftValue, rightValue, "addtmp");
+    else if (op == "/") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFDiv(leftValue, rightValue, "faddtmp");
+      else 
+        return builder.CreateSDiv(leftValue, rightValue, "addtmp");
+    else if (op == "%")
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFRem(leftValue, rightValue, "faddtmp");
+      else 
+        return builder.CreateSRem(leftValue, rightValue, "addtmp");
     else {
       error("Unknown binary operator");
       return nullptr;

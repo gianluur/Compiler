@@ -3,5 +3,5 @@ source_filename = "MyModule"
 
 define i32 @main() {
 entry:
-  ret i32 7
+  ret i32 1
 }
