@@ -252,13 +252,13 @@ private:
           binaryOperator->setRightOperand(std::move(toCast));
           rightType = "float";
         }
-        else if (leftType == "char" && rightType == "int"){
+        else if ((leftType == "char" || leftType == "bool") && rightType == "int"){
           unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
           auto toCast = make_unique<Cast>(std::move(operand), "int");
           binaryOperator->setLeftOperand(std::move(toCast));
           leftType = "int";
         }
-        else if (leftType == "int" && rightType == "char"){
+        else if (leftType == "int" && (rightType == "char" || rightType == "bool")){
           unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
           auto toCast = make_unique<Cast>(std::move(operand), "int");
           binaryOperator->setRightOperand(std::move(toCast));

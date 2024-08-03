@@ -5,6 +5,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
 
+#include "error.hpp"
+
 // I'm using the singleton pattern because i want to pass this class to a lot of class without reinitializing the members everytime
 class LLVM {
 public:
@@ -60,12 +62,23 @@ public:
 
     if (actualType->isIntegerTy() && targetType->isFloatTy())
       return builder.CreateSIToFP(value, targetType, "intToFloat");
+
     else if (actualType->isFloatTy() && targetType->isIntegerTy())
       return builder.CreateFPToSI(value, targetType, "floatToInt");
+
     else if (actualType == llvm::Type::getInt8Ty(context) && targetType == llvm::Type::getInt32Ty(context))
       return builder.CreateZExt(value, targetType, "charToInt");
+
     else if (actualType == llvm::Type::getInt32Ty(context) && targetType == llvm::Type::getInt8Ty(context))
       return builder.CreateTrunc(value, targetType, "intToChar");
+
+    else if (actualType->isIntegerTy() && targetType == llvm::Type::getInt1Ty(context))
+      return builder.CreateICmpNE(value, llvm::ConstantInt::get(actualType, 0), "intToBool");
+      
+    else if (actualType == llvm::Type::getInt1Ty(context) && targetType->isIntegerTy())
+      return builder.CreateZExt(value, targetType, "boolToInt");
+    else
+      error("Couldn't generate a cast expression");
   }
 
   llvm::Value* generateBinaryOperator(BinaryOperator* statement) {

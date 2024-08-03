@@ -1,0 +1,7 @@
+func int main() {
+  return 3 * false;
+}
+
+func bool test() {
+  return 0;
+}

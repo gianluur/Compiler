@@ -25,8 +25,8 @@ public:
     const vector<Token> tokens = tokenizer.getTokens();
 
     Parser parser(tokens);
-    const vector<unique_ptr<ASTNode>>& raw_ast = parser.getAST();
+    const vector<unique_ptr<ASTNode>>& ast = parser.getAST();
 
-    //Codegen codegen(ast);
+    Codegen codegen(ast);
   }
 };

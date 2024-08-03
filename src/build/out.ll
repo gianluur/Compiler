@@ -6,7 +6,7 @@ entry:
   ret i32 0
 }
 
-define i32 @test() {
+define i1 @test() {
 entry:
-  ret i32 70
+  ret i1 false
 }
