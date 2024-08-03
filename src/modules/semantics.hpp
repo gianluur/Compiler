@@ -264,6 +264,17 @@ private:
           binaryOperator->setRightOperand(std::move(toCast));
           rightType = "int";
         }
+        else if ((leftType == "char" && rightType == "float") || (rightType == "char" && leftType == "float")){
+          unique_ptr<Expression> left(binaryOperator->releaseLeftOperand());
+          auto toCastLeft = make_unique<Cast>(std::move(left), "int");
+          binaryOperator->setLeftOperand(std::move(toCastLeft));
+          leftType = "int";
+
+          unique_ptr<Expression> right(binaryOperator->releaseRightOperand());
+          auto toCastRight = make_unique<Cast>(std::move(right), "int");
+          binaryOperator->setRightOperand(std::move(toCastRight));
+          rightType = "int";
+        }
       } 
     }
     else{
