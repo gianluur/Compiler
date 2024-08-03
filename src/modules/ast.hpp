@@ -449,6 +449,10 @@ public:
     return m_body.get();
   }
 
+  ElseStatement* getElseStatement() const {
+    return m_else.get();
+  }
+
   void setCondition(unique_ptr<Expression> condition){
     m_condition = std::move(condition);
   }

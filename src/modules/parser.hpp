@@ -391,7 +391,7 @@ bool isValidExpressionToken() {
     }
 
     auto ifStatement = make_unique<IfStatement>(std::move(condition), std::move(body));
-    m_semantics->analyzeConditionalStatement(ifStatement.get());
+    m_semantics->analyzeIfStatement(ifStatement.get());
     return ifStatement;
   }
 

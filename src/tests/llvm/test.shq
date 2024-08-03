@@ -1,7 +1,8 @@
-func int main() {
-  return 0;
-}
+var int x = 5;
 
-func int test(){
-  return 'A' + 5;
+if true {
+  
+}
+else {
+  x = "string";
 }

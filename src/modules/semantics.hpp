@@ -86,6 +86,13 @@ public:
     }
   }
 
+  void analyzeIfStatement(IfStatement* statement){
+    analyzeConditionalStatement(statement);
+    ElseStatement* elseStatement = statement->getElseStatement();
+    if (elseStatement != nullptr)
+      analyzeBody(elseStatement);
+  }
+
   template <typename T>
   void analyzeConditionalStatement(T* statement){
     analyzeCondition(statement);
