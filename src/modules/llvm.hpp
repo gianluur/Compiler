@@ -32,8 +32,8 @@ public:
     else if (Float* statement = dynamic_cast<Float*>(node)) 
       return llvm::ConstantFP::get(llvm::Type::getFloatTy(context), std::stod(statement->getValue()));
     
-    else if (Char* statement = dynamic_cast<Char*>(node)) 
-      return builder.getInt8(static_cast<int>(statement->getValue()[0]));
+    else if (Char* statement = dynamic_cast<Char*>(node)){
+      return builder.getInt8(static_cast<int>(statement->getValue()[1]));} // ...getValue()[1] <-- Ex. the char 'A' is at pos 1, true for all chars
     
     else if (Boolean* statement = dynamic_cast<Boolean*>(node)) 
       return builder.getInt1(statement->getValue() == "true");
@@ -62,6 +62,8 @@ public:
       return builder.CreateSIToFP(value, targetType, "intToFloat");
     else if (actualType->isFloatTy() && targetType->isIntegerTy())
       return builder.CreateFPToSI(value, targetType, "floatToInt");
+    else if (actualType == llvm::Type::getInt8Ty(context) && targetType == llvm::Type::getInt32Ty(context))
+      return builder.CreateZExt(value, targetType, "charToInt");
   }
 
   llvm::Value* generateBinaryOperator(BinaryOperator* statement) {
@@ -96,7 +98,7 @@ public:
       else 
         return builder.CreateSRem(leftValue, rightValue, "addtmp");
     else {
-      error("Unknown binary operator");
+      error("Unknown binary operator"); 
       return nullptr;
     }
   }

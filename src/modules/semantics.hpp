@@ -208,7 +208,7 @@ private:
 
   template <typename T>
   void castValueIfNeeeded(T* statement, const string& type, const string& valueType){
-    if ((type == "int" && valueType == "float") || (type == "int" && valueType == "bool")){
+    if ((type == "int" && valueType == "float") || (type == "int" && valueType == "bool") || (type == "int" && valueType == "char")){
       unique_ptr<Expression> valueToCast(statement->relaseValue());
       auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
       statement->setValue(std::move(toCast));
@@ -221,6 +221,11 @@ private:
     else if (type == "bool" && valueType == "int"){
       unique_ptr<Expression> valueToCast(statement->relaseValue());
       auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
+      statement->setValue(std::move(toCast));
+    }
+    else if (type == "char" && valueType == "int"){
+      unique_ptr<Expression> valueToCast(statement->relaseValue());
+      auto toCast = make_unique<Cast>(std::move(valueToCast), "char");
       statement->setValue(std::move(toCast));
     }
     else if (type != valueType) 
@@ -255,16 +260,28 @@ private:
 
       else {
         if ((leftType == "int" && rightType == "float")){
-        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
-        auto toCast = make_unique<Cast>(std::move(operand), "float");
-        binaryOperator->setLeftOperand(std::move(toCast));
-        leftType = "float";
+          unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+          auto toCast = make_unique<Cast>(std::move(operand), "float");
+          binaryOperator->setLeftOperand(std::move(toCast));
+          leftType = "float";
         }
         else if (leftType == "float" && rightType == "int") {
           unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
           auto toCast = make_unique<Cast>(std::move(operand), "float");
           binaryOperator->setRightOperand(std::move(toCast));
           rightType = "float";
+        }
+        else if (leftType == "char" && rightType == "int"){
+          unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+          auto toCast = make_unique<Cast>(std::move(operand), "int");
+          binaryOperator->setLeftOperand(std::move(toCast));
+          leftType = "int";
+        }
+        else if (leftType == "int" && rightType == "char"){
+          unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
+          auto toCast = make_unique<Cast>(std::move(operand), "char");
+          binaryOperator->setRightOperand(std::move(toCast));
+          rightType = "char";
         }
       } 
     }
