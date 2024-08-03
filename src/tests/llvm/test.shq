@@ -3,5 +3,5 @@ func int main() {
 }
 
 func int test(){
-  return 3.5 + 'c';
+  return 'A' + 5;
 }

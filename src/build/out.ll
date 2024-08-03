@@ -8,5 +8,5 @@ entry:
 
 define i32 @test() {
 entry:
-  ret i32 102
+  ret i32 70
 }

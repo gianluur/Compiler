@@ -56,7 +56,7 @@ private:
     if (i >= m_tokens.size()) 
       error("ConsumeToken: Unexpected end of input. Last token was: " + m_tokens.at(i - 1).lexemes, m_line);
     Token& token = m_tokens.at(i++);
-    m_line = token.line;
+    m_line = token.line - 1;
     return token;
   }
 

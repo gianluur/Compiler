@@ -213,6 +213,64 @@ private:
       error("Type Mismatch: Expected " + type + " but got " + valueType, m_line);
   }
 
+  void castBinaryOperatorOperands(BinaryOperator* binaryOperator, string& leftType, string& rightType, const string& op){
+    if ((string("+-*/%").find(op)) != string::npos) {
+      if ((leftType == "int" && rightType == "float")){
+        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "float");
+        binaryOperator->setLeftOperand(std::move(toCast));
+        leftType = "float";
+      }
+      else if (leftType == "float" && rightType == "int") {
+        unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "float");
+        binaryOperator->setRightOperand(std::move(toCast));
+        rightType = "float";
+      }
+      else if ((leftType == "char" || leftType == "bool") && rightType == "int"){
+        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "int");
+        binaryOperator->setLeftOperand(std::move(toCast));
+        leftType = "int";
+      }
+      else if (leftType == "int" && (rightType == "char" || rightType == "bool")){
+        unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "int");
+        binaryOperator->setRightOperand(std::move(toCast));
+        rightType = "int";
+      }
+      else if ((leftType == "char" && (rightType == "float" || rightType == "bool")) || (rightType == "char" && (leftType == "float" || leftType == "bool"))){
+        unique_ptr<Expression> left(binaryOperator->releaseLeftOperand());
+        auto toCastLeft = make_unique<Cast>(std::move(left), "int");
+        binaryOperator->setLeftOperand(std::move(toCastLeft));
+        leftType = "int";
+
+        unique_ptr<Expression> right(binaryOperator->releaseRightOperand());
+        auto toCastRight = make_unique<Cast>(std::move(right), "int");
+        binaryOperator->setRightOperand(std::move(toCastRight));
+        rightType = "int";
+      }
+      else  
+        error("Math operations is allowed only for int/floats or type castable into them", m_line); 
+    }
+    else
+    {
+      if (leftType == "int"){
+        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "bool");
+        binaryOperator->setLeftOperand(std::move(toCast));
+        leftType = "bool";
+      }
+
+      if (rightType == "int"){
+        unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
+        auto toCast = make_unique<Cast>(std::move(operand), "bool");
+        binaryOperator->setRightOperand(std::move(toCast));
+        rightType = "bool";
+      }
+    }
+  }
+
   string checkExpressionType(const string& expectedType, Expression* value) {
     const string valueType = analyzeOperand(value);
     return valueType;
@@ -235,63 +293,8 @@ private:
     string rightType = analyzeOperand(binaryOperator->getRightOperand());
     string op = binaryOperator->getOperator();
 
-    if ((string("+-*/%").find(op)) != string::npos) {
-      if ((leftType != "int" && rightType != "int") && (leftType != "float" && rightType != "float"))
-        error("Math operations is allowed only for type integer and float", m_line);
+    castBinaryOperatorOperands(binaryOperator, leftType, rightType, op);
 
-      else {
-        if ((leftType == "int" && rightType == "float")){
-          unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
-          auto toCast = make_unique<Cast>(std::move(operand), "float");
-          binaryOperator->setLeftOperand(std::move(toCast));
-          leftType = "float";
-        }
-        else if (leftType == "float" && rightType == "int") {
-          unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
-          auto toCast = make_unique<Cast>(std::move(operand), "float");
-          binaryOperator->setRightOperand(std::move(toCast));
-          rightType = "float";
-        }
-        else if ((leftType == "char" || leftType == "bool") && rightType == "int"){
-          unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
-          auto toCast = make_unique<Cast>(std::move(operand), "int");
-          binaryOperator->setLeftOperand(std::move(toCast));
-          leftType = "int";
-        }
-        else if (leftType == "int" && (rightType == "char" || rightType == "bool")){
-          unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
-          auto toCast = make_unique<Cast>(std::move(operand), "int");
-          binaryOperator->setRightOperand(std::move(toCast));
-          rightType = "int";
-        }
-        else if ((leftType == "char" && rightType == "float") || (rightType == "char" && leftType == "float")){
-          unique_ptr<Expression> left(binaryOperator->releaseLeftOperand());
-          auto toCastLeft = make_unique<Cast>(std::move(left), "int");
-          binaryOperator->setLeftOperand(std::move(toCastLeft));
-          leftType = "int";
-
-          unique_ptr<Expression> right(binaryOperator->releaseRightOperand());
-          auto toCastRight = make_unique<Cast>(std::move(right), "int");
-          binaryOperator->setRightOperand(std::move(toCastRight));
-          rightType = "int";
-        }
-      } 
-    }
-    else{
-      if (leftType == "int"){
-        unique_ptr<Expression> operand(binaryOperator->releaseLeftOperand());
-        auto toCast = make_unique<Cast>(std::move(operand), "bool");
-        binaryOperator->setLeftOperand(std::move(toCast));
-        leftType = "bool";
-      }
-
-      if (rightType == "int"){
-        unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
-        auto toCast = make_unique<Cast>(std::move(operand), "bool");
-        binaryOperator->setRightOperand(std::move(toCast));
-        rightType = "bool";
-      }
-    }
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match", m_line);
 
