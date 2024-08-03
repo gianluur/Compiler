@@ -27,9 +27,6 @@ public:
     Parser parser(tokens);
     const vector<unique_ptr<ASTNode>>& raw_ast = parser.getAST();
 
-    Semantics analysis(raw_ast);
-    const vector<unique_ptr<ASTNode>>& ast = analysis.getAST();
-
-    Codegen codegen(ast);
+    //Codegen codegen(ast);
   }
 };

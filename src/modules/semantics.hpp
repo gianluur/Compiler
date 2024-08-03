@@ -10,36 +10,104 @@
 #include "scope.hpp"
 #include "error.hpp"
 
-using std::cout, std::endl;
+using std::cout;
 using std::vector, std::string, std::unordered_map; 
 using std::unique_ptr, std::make_unique;
 
 class Semantics {
 public:
-  Semantics(const vector<unique_ptr<ASTNode>>& ast): 
-    m_ast(std::move(ast)), m_scopes(make_unique<Scope>()) {
-      analyze();
-      cout << "-------Semantic Analysis---------\n\n";
-      for (const auto& node : m_ast) {
-        node->print();
-      }
-      cout << "------------------------------------\n\n";
-    }
+  Semantics(size_t& line): m_scopes(make_unique<Scope>()), m_line(line) {}
 
-  void analyze(){
-    for(const unique_ptr<ASTNode>& node : m_ast){
-      ASTNode* current = node.get();
-      analyzeNode(current);
+  void analyzeVariable(Variable* variable){
+    string keyword = variable->getKeyword();
+    string type = variable->getType();
+    string name = variable->getName();
+    Expression* value = variable->getValue();
+
+    m_scopes->declare(name, Symbol(keyword, type));
+
+    if (!dynamic_cast<Null*>(value)){
+      const string valueType = checkExpressionType(type, value);
+      castValueIfNeeeded(variable, type, valueType);
+    }        
+  }
+
+  void analyzeAssignmentOperator(AssigmentOperator* statement){
+    Identifier* identifier = statement->getIdentifier();
+    Expression* value = statement->getValue();
+
+    if (!m_scopes->isDeclared(identifier->getName()))
+      error("Identifier: " + identifier->getName() + " is not declared", m_line);
+    
+    if (m_scopes->find(identifier->getName()).keyword == "const")
+      error("Can't reassign to a constant", m_line);
+
+    const string type = m_scopes->find(identifier->getName()).type;
+    const string valueType = checkExpressionType(type, value);
+    castValueIfNeeeded(statement, type, valueType);
+    
+  }
+
+  void analyzeFunction(Function* function){
+    Identifier* identifier = function->getIdentifier();
+    string type = function->getType();
+    vector<Parameter*> parameters = function->getParameters();
+    BlockStatement* body = function->getBody();
+
+    m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
+    checkReturnType(body, type);
+
+    m_scopes->enterScope();
+    analyzeBody(function);
+    m_scopes->exitScope();
+  }
+
+  void analyzeFunctionCall(FunctionCall* call){
+    Identifier* identifier = call->getIdentifier();
+    const string name = identifier->getName();
+
+    if (!m_scopes->isDeclared(name))
+      error("Identifier: " + name + " is not declared", m_line);
+
+    vector<Expression*> arguments = call->getArguments();
+    const int n_arguments = arguments.size();
+
+    vector<Parameter*> parameters = m_scopes->find(name).params;
+    const int n_parameters = parameters.size();
+    
+    if (n_arguments != n_parameters)
+      error("Error: Function " + name + " was expecting " + std::to_string(n_parameters) + " but instead got only " + std::to_string(n_arguments), m_line);
+    
+    for(int i = 0; i < n_parameters; i++){
+      string expectedType = parameters[i]->getType();
+      string valueType = checkExpressionType(expectedType, arguments[i]); 
+      if (expectedType != valueType) 
+        error("Type Mismatch: Expected " + expectedType + " but got " + valueType, m_line);
     }
   }
 
-  const vector<unique_ptr<ASTNode>>& getAST() const{
-    return m_ast;
+  template <typename T>
+  void analyzeConditionalStatement(T* statement){
+    analyzeCondition(statement);
+
+    m_scopes->enterScope();
+    analyzeBody(statement);
+    m_scopes->exitScope();
+  }
+
+  void analyzeFor(For* statement){  
+    analyzeVariable(statement->getInitialization());
+    analyzeCondition(statement);      
+    analyzeAssignmentOperator(statement->getUpdate());
+
+    m_scopes->enterScope();
+    analyzeBody(statement);
+    m_scopes->exitScope();
   }
 
 private:
-   const vector<unique_ptr<ASTNode>>& m_ast;
    unique_ptr<Scope> m_scopes;
+   size_t& m_line;
 
   void analyzeNode(ASTNode* current) {
     if (current == nullptr) return; 
@@ -80,104 +148,17 @@ private:
     // }
   }
 
-  void analyzeFor(For* statement){  
-    analyzeVariable(statement->getInitialization());
-    analyzeCondition(statement);      
-    analyzeAssignmentOperator(statement->getUpdate());
-
-    m_scopes->enterScope();
-    analyzeBody(statement);
-    m_scopes->exitScope();
-  }
-
-  template <typename T>
-  void analyzeConditionalStatement(T* statement){
-    analyzeCondition(statement);
-
-    m_scopes->enterScope();
-    analyzeBody(statement);
-    m_scopes->exitScope();
-  }
-
-  void analyzeFunctionCall(FunctionCall* call){
-    Identifier* identifier = call->getIdentifier();
-    const string name = identifier->getName();
-
-    if (!m_scopes->isDeclared(name))
-      error("Identifier: " + name + " is not declared");
-
-    vector<Expression*> arguments = call->getArguments();
-    const int n_arguments = arguments.size();
-
-    vector<Parameter*> parameters = m_scopes->find(name).params;
-    const int n_parameters = parameters.size();
-    
-    if (n_arguments != n_parameters)
-      error("Error: Function " + name + " was expecting " + std::to_string(n_parameters) + " but instead got only " + std::to_string(n_arguments));
-    
-    for(int i = 0; i < n_parameters; i++){
-      string expectedType = parameters[i]->getType();
-      string valueType = checkExpressionType(expectedType, arguments[i]); 
-      if (expectedType != valueType) 
-        error("Type Mismatch: Expected " + expectedType + " but got " + valueType);
-    }
-  }
-
   void checkReturnType(BlockStatement* body, string type){
     vector<ASTNode*> statements = body->getStatements();
     for(const auto& current: statements) {
       if (Return* statement = dynamic_cast<Return*>(current)) {
         if (type == "null")
-          error("Return statement found in a function returning null");
+          error("Return statement found in a function returning null", m_line);
 
         const string valueType = checkExpressionType(type, statement->getValue());
         castValueIfNeeeded(statement, type, valueType);
       }
     }
-  }
-
-  void analyzeFunction(Function* function){
-    Identifier* identifier = function->getIdentifier();
-    string type = function->getType();
-    vector<Parameter*> parameters = function->getParameters();
-    BlockStatement* body = function->getBody();
-
-    m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
-    checkReturnType(body, type);
-
-    m_scopes->enterScope();
-    analyzeBody(function);
-    m_scopes->exitScope();
-  }
-
-  void analyzeAssignmentOperator(AssigmentOperator* statement){
-    Identifier* identifier = statement->getIdentifier();
-    Expression* value = statement->getValue();
-
-    if (!m_scopes->isDeclared(identifier->getName()))
-      error("Identifier: " + identifier->getName() + " is not declared");
-    
-    if (m_scopes->find(identifier->getName()).keyword == "const")
-      error("Can't reassign to a constant");
-
-    const string type = m_scopes->find(identifier->getName()).type;
-    const string valueType = checkExpressionType(type, value);
-    castValueIfNeeeded(statement, type, valueType);
-    
-  }
-
-  void analyzeVariable(Variable* variable){
-    string keyword = variable->getKeyword();
-    string type = variable->getType();
-    string name = variable->getName();
-    Expression* value = variable->getValue();
-
-    m_scopes->declare(name, Symbol(keyword, type));
-
-    if (!dynamic_cast<Null*>(value)){
-      const string valueType = checkExpressionType(type, value);
-      castValueIfNeeeded(variable, type, valueType);
-    }        
   }
 
   template <typename T>
@@ -201,7 +182,7 @@ private:
           statement->setCondition(std::move(valueToCast));
       } 
       else {
-          error("Error: condition must always evaluate to boolean");
+          error("Condition must always evaluate to boolean", m_line);
       }
     }
   }
@@ -229,7 +210,7 @@ private:
       statement->setValue(std::move(toCast));
     }
     else if (type != valueType) 
-      error("Type Mismatch: Expected " + type + " but got " + valueType);
+      error("Type Mismatch: Expected " + type + " but got " + valueType, m_line);
   }
 
   string checkExpressionType(const string& expectedType, Expression* value) {
@@ -240,7 +221,7 @@ private:
   string getIdentifierType(Identifier* identifier){
     const string name = identifier->getName();
     if (!m_scopes->isDeclared(name))
-      error("Identifier: " + name + " is not declared");
+      error("Identifier: " + name + " is not declared", m_line);
     return m_scopes->find(name).type;
   }
 
@@ -256,7 +237,7 @@ private:
 
     if ((string("+-*/%").find(op)) != string::npos) {
       if ((leftType != "int" && rightType != "int") && (leftType != "float" && rightType != "float"))
-        error("Math operations is allowed only for type integer and float");
+        error("Math operations is allowed only for type integer and float", m_line);
 
       else {
         if ((leftType == "int" && rightType == "float")){
@@ -279,9 +260,9 @@ private:
         }
         else if (leftType == "int" && rightType == "char"){
           unique_ptr<Expression> operand(binaryOperator->releaseRightOperand());
-          auto toCast = make_unique<Cast>(std::move(operand), "char");
+          auto toCast = make_unique<Cast>(std::move(operand), "int");
           binaryOperator->setRightOperand(std::move(toCast));
-          rightType = "char";
+          rightType = "int";
         }
       } 
     }
@@ -301,7 +282,7 @@ private:
       }
     }
     if (leftType != rightType)
-      error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match");
+      error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match", m_line);
 
     return leftType; // Assuming binary operator returns the type of its operands
   }
@@ -321,7 +302,7 @@ private:
       return analyzeUnaryOperator(unaryOperator); 
     } 
     else { 
-      error("Unknown operand type");
+      error("Unknown operand type", m_line);
       return "";
     }
   }

@@ -64,6 +64,8 @@ public:
       return builder.CreateFPToSI(value, targetType, "floatToInt");
     else if (actualType == llvm::Type::getInt8Ty(context) && targetType == llvm::Type::getInt32Ty(context))
       return builder.CreateZExt(value, targetType, "charToInt");
+    else if (actualType == llvm::Type::getInt32Ty(context) && targetType == llvm::Type::getInt8Ty(context))
+      return builder.CreateTrunc(value, targetType, "intToChar");
   }
 
   llvm::Value* generateBinaryOperator(BinaryOperator* statement) {
@@ -77,26 +79,31 @@ public:
       else 
         return builder.CreateAdd(leftValue, rightValue, "addtmp");
     }
+
     else if (op == "-") 
       if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
         return builder.CreateFSub(leftValue, rightValue, "faddtmp");
       else 
         return builder.CreateSub(leftValue, rightValue, "addtmp");
+
     else if (op == "*") 
       if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
         return builder.CreateFMul(leftValue, rightValue, "faddtmp");
       else 
         return builder.CreateMul(leftValue, rightValue, "addtmp");
+
     else if (op == "/") 
       if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
         return builder.CreateFDiv(leftValue, rightValue, "faddtmp");
       else 
         return builder.CreateSDiv(leftValue, rightValue, "addtmp");
+
     else if (op == "%")
       if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
         return builder.CreateFRem(leftValue, rightValue, "faddtmp");
       else 
         return builder.CreateSRem(leftValue, rightValue, "addtmp");
+        
     else {
       error("Unknown binary operator"); 
       return nullptr;
