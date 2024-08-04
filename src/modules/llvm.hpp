@@ -47,6 +47,10 @@ public:
       return generateUnaryOperator(statement);
     }
 
+    else if (Identifier* statement = dynamic_cast<Identifier*>(node)){
+      return generateIdentifier(statement);
+    }
+
     else if (Cast* statement = dynamic_cast<Cast*>(node))
       return generateCast(statement);
 
@@ -59,6 +63,16 @@ public:
     }
   }
   
+  llvm::Value* generateIdentifier(Identifier* statement){
+    const string name = statement->getName();
+    llvm::GlobalVariable* variable = module->getGlobalVariable(name.c_str());
+
+    if (!variable)
+      error("Global variable: " + name + " not found");
+
+    return builder.CreateLoad(variable->getValueType(), variable, name.c_str());
+  }
+
   llvm::Value* generateCast(Cast* statement){
     llvm::Value* value = getLLVMValue(statement->getExpression());
     llvm::Type* targetType = getLLVMType(statement->getTargetType());
@@ -85,8 +99,10 @@ public:
     else if (actualType->isFloatTy() && targetType == llvm::Type::getInt1Ty(context))
       return builder.CreateFCmpONE(value, llvm::ConstantFP::get(actualType, 0.0), "floatToBool");
     
-    else
+    else {
       error("Couldn't generate a cast expression");
+      return nullptr;
+    }
   }
 
   llvm::Value* generateUnaryOperator(UnaryOperator* statement){
@@ -95,8 +111,11 @@ public:
 
     if (type == llvm::Type::getInt1Ty(context)) { // Check if the type is boolean
       // For boolean, we use icmp to compare with 0 and then zext to ensure the result is a proper boolean
-      llvm::Value *cmp = builder.CreateICmpEQ(value, llvm::ConstantInt::get(type, 0));
-      return cmp;
+      return builder.CreateICmpEQ(value, llvm::ConstantInt::get(type, 0));
+    }
+    else {
+      error("Couldn't generate unary expression");
+      return nullptr;
     }
   }
 

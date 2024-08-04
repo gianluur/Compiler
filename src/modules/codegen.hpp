@@ -8,7 +8,8 @@
 #include "ast.hpp"
 #include "error.hpp"
 
-#include "IRGeneration/function.hpp"
+#include "IRGeneration/functions.hpp"
+#include "IRGeneration/variables.hpp"
 
 using std::vector, std::unique_ptr, std::make_unique;
 
@@ -23,6 +24,10 @@ public:
       if (Function* statement = dynamic_cast<Function*>(current)) {
         FuncGen function(statement);
       } 
+      else if (Variable* statement = dynamic_cast<Variable*>(current)) {
+        VarGen variable(statement, false);
+      }
+
       else 
         error("Current node isn't handled yet");
     }

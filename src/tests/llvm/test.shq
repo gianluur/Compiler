@@ -1,7 +1,5 @@
-func int main(){
-  return 0;
-}
+var char test = 'A';
 
-func float test(){
-  return ;
+func int main(){
+  return test;
 }
