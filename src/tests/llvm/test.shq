@@ -1,8 +1,7 @@
-var int x = 5;
-
-if true {
-  
+func int main(){
+  return 0;
 }
-else {
-  x = "string";
+
+func float test(){
+  return ;
 }

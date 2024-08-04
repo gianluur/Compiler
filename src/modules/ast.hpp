@@ -10,12 +10,6 @@
 using std::cout, std::endl, std::setw;
 using std::unique_ptr, std::make_unique;
 
-enum class ASTNodeType {
-  INVALID,
-  NUMBER,
-  BINARY_OPERATOR,
-};
-
 class ASTNode {
 public:
   virtual ~ASTNode() = default;
@@ -207,6 +201,14 @@ public:
 
   Expression* getOperand() const {
     return m_operand.get();
+  }
+
+  void setOperand(unique_ptr<Expression> operand)  {
+    m_operand = std::move(operand);
+  }
+
+  Expression* releaseOperand(){
+    return m_operand.release();
   }
 
 private:

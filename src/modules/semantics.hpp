@@ -201,17 +201,17 @@ private:
       auto toCast = make_unique<Cast>(std::move(valueToCast), "int");
       statement->setValue(std::move(toCast));
     }
-    else if (type == "float" && valueType == "int"){
+    else if (type == "float" && (valueType == "int" || valueType == "bool")){
       unique_ptr<Expression> valueToCast(statement->relaseValue());
       auto toCast = make_unique<Cast>(std::move(valueToCast), "float");
       statement->setValue(std::move(toCast));
     }
-    else if (type == "bool" && valueType == "int"){
+    else if (type == "bool" && (valueType == "int" || valueType == "float")){
       unique_ptr<Expression> valueToCast(statement->relaseValue());
       auto toCast = make_unique<Cast>(std::move(valueToCast), "bool");
       statement->setValue(std::move(toCast));
     }
-    else if (type == "char" && valueType == "int"){
+    else if (type == "char" && (valueType == "int" || valueType == "bool")){
       unique_ptr<Expression> valueToCast(statement->relaseValue());
       auto toCast = make_unique<Cast>(std::move(valueToCast), "char");
       statement->setValue(std::move(toCast));
@@ -291,8 +291,15 @@ private:
   }
 
   string analyzeUnaryOperator(UnaryOperator* unaryOperator){
-    Expression* operand = unaryOperator->getOperand();
-    return analyzeOperand(operand);
+    string type = analyzeOperand(unaryOperator->getOperand());
+    if (type == "int" || type == "float" || type == "char"){
+      unique_ptr<Expression> operand(unaryOperator->releaseOperand());
+      auto toCast = make_unique<Cast>(std::move(operand), "bool");
+      unaryOperator->setOperand(std::move(toCast));
+      type = "bool";
+    }
+    return type;
+
   }
 
   string analyzeBinaryOperator(BinaryOperator* binaryOperator) {

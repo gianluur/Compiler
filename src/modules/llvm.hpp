@@ -42,6 +42,10 @@ public:
     
     else if (BinaryOperator* statement = dynamic_cast<BinaryOperator*>(node)) 
       return generateBinaryOperator(statement);
+    
+    else if (UnaryOperator* statement = dynamic_cast<UnaryOperator*>(node)){
+      return generateUnaryOperator(statement);
+    }
 
     else if (Cast* statement = dynamic_cast<Cast*>(node))
       return generateCast(statement);
@@ -54,7 +58,7 @@ public:
       return nullptr;
     }
   }
-
+  
   llvm::Value* generateCast(Cast* statement){
     llvm::Value* value = getLLVMValue(statement->getExpression());
     llvm::Type* targetType = getLLVMType(statement->getTargetType());
@@ -63,7 +67,7 @@ public:
     if (actualType->isIntegerTy() && targetType->isFloatTy())
       return builder.CreateSIToFP(value, targetType, "intToFloat");
 
-    else if (actualType->isFloatTy() && targetType->isIntegerTy())
+    else if (actualType->isFloatTy() && targetType == llvm::Type::getInt32Ty(context))
       return builder.CreateFPToSI(value, targetType, "floatToInt");
 
     else if (actualType == llvm::Type::getInt8Ty(context) && targetType == llvm::Type::getInt32Ty(context))
@@ -74,11 +78,26 @@ public:
 
     else if (actualType->isIntegerTy() && targetType == llvm::Type::getInt1Ty(context))
       return builder.CreateICmpNE(value, llvm::ConstantInt::get(actualType, 0), "intToBool");
-      
+    
     else if (actualType == llvm::Type::getInt1Ty(context) && targetType->isIntegerTy())
       return builder.CreateZExt(value, targetType, "boolToInt");
+    
+    else if (actualType->isFloatTy() && targetType == llvm::Type::getInt1Ty(context))
+      return builder.CreateFCmpONE(value, llvm::ConstantFP::get(actualType, 0.0), "floatToBool");
+    
     else
       error("Couldn't generate a cast expression");
+  }
+
+  llvm::Value* generateUnaryOperator(UnaryOperator* statement){
+    llvm::Value* value = getLLVMValue(statement->getOperand());
+    llvm::Type* type = value->getType();
+
+    if (type == llvm::Type::getInt1Ty(context)) { // Check if the type is boolean
+      // For boolean, we use icmp to compare with 0 and then zext to ensure the result is a proper boolean
+      llvm::Value *cmp = builder.CreateICmpEQ(value, llvm::ConstantInt::get(type, 0));
+      return cmp;
+    }
   }
 
   llvm::Value* generateBinaryOperator(BinaryOperator* statement) {
