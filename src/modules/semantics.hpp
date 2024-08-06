@@ -307,7 +307,8 @@ private:
     string rightType = analyzeOperand(binaryOperator->getRightOperand());
     string op = binaryOperator->getOperator();
 
-    castBinaryOperatorOperands(binaryOperator, leftType, rightType, op);
+    if (leftType != rightType)
+      castBinaryOperatorOperands(binaryOperator, leftType, rightType, op);
 
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match", m_line);

@@ -15,7 +15,8 @@ using std::vector, std::unique_ptr, std::make_unique;
 
 class Codegen {
 public:
-  Codegen(const vector<unique_ptr<ASTNode>>& ast): m_ast(ast), llvm(LLVM::getInstance()) { generateIR(); }
+  Codegen(const vector<unique_ptr<ASTNode>>& ast): 
+    m_ast(ast), llvm(LLVM::getInstance()) { generateIR(); }
 
   void generateIR() {
     for (const unique_ptr<ASTNode>& node : m_ast) {

@@ -6,5 +6,6 @@ source_filename = "MyModule"
 define i32 @main() {
 entry:
   %test = load i32, ptr @test, align 4
-  ret i32 %test
+  %addtmp = add i32 %test, 1
+  ret i32 %addtmp
 }

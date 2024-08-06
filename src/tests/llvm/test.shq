@@ -1,6 +1,5 @@
-var int test = 5;
-
 
 func int main(){
+  var int test;
   return test;
 }
