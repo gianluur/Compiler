@@ -1,0 +1,4 @@
+var float FLOAT_DOUBLEDOT = 3.5.5;
+var char CHAR_MISSINGQUOTE = 'c
+var string STRING_ONEQUOTE = "tes"t"; 
+var string STRING_WEIRDQUOTE = "te"dsadas"st"; // really weird edge case not even C++ handles it properly

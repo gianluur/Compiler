@@ -196,9 +196,11 @@ private:
     else return false;
   }
 
-  void invalidToken(const char& currentChar){
-    m_tokens.emplace_back(Token(TokenType::INVALID, string(1, currentChar), line));
-    error("Error: Invalid token detected: " + string(1, currentChar) + " index: " + std::to_string(i));
+  void invalidToken(const char& currentChar, const string& message = ""){
+    if (message == "")
+      error("Invalid token detected: '" + string(1, currentChar) + "'", line);
+    else 
+      error(message, line);
   }
 
   void tokenNumber(const char& currentChar){
@@ -213,7 +215,7 @@ private:
     for (; i < m_src.size() && (isDigit(m_src.at(i)) || (m_src.at(i) == '.')); i++) {
         if (m_src.at(i) == '.') {
             if (++dotCount > 1) {
-                invalidToken(currentChar);
+                invalidToken(currentChar, "Floats can only have one decimal point");
                 break; 
             }
         }
@@ -232,7 +234,7 @@ private:
     i++;
 
     char closing = nextChar();
-    if (closing != '\'') invalidToken(currentChar);
+    if (closing != '\'') invalidToken(currentChar, "Missing char closing quote");
     i++;
 
     token += string(1, character) + string(1, closing);
@@ -247,7 +249,7 @@ private:
     }
 
     char closing = nextChar();
-    if (closing != '\"') invalidToken(currentChar);
+    if (closing != '\"') invalidToken(currentChar, "Missing string closing quote");
     i++;
 
     token += string(1, closing);
@@ -283,7 +285,7 @@ private:
         break;
       
       default:
-        invalidToken(currentChar);
+        invalidToken(currentChar, "Invalid parenthesis in tokenizer, this error should never pop up");
         break;
     }
   }
@@ -315,8 +317,6 @@ private:
     default:
       break;
     }
-
-
   }
 
   void tokenAssignmentOperator(const char& currentChar){
@@ -351,7 +351,7 @@ private:
           break;
 
         default:
-          invalidToken(currentChar);
+          invalidToken(currentChar, "Invalid assignment operator in tokenizer, this error should never pop up");
           break;
       }
       i++;
@@ -401,7 +401,7 @@ private:
     if (token == "&&") m_tokens.emplace_back(Token(TokenType::AND, token, line));
     else if (token == "||") m_tokens.emplace_back(Token(TokenType::OR, token, line));
     else if (token == "!") m_tokens.emplace_back(Token(TokenType::NOT, token, line));
-    else invalidToken(currentChar);
+    else invalidToken(currentChar, "Invalid logical operator in tokenizer, this error should never pop up");
 
   }
 

@@ -158,18 +158,6 @@ bool isValidExpressionToken() {
     }
   } 
 
-  unique_ptr<Return> parseReturn(){
-    consumeToken();
-    if (!isValidExpressionToken())
-      error("Expected an expresion/identifier/literal after return keyword", m_line);
-    unique_ptr<Expression> value = parseExpression();
-    if (!isNextTokenType(TokenType::SEMICOLON))
-      error("Expected a semicolon after expression in return statement", m_line);
-    consumeToken();
-
-    return make_unique<Return>(std::move(value));
-  }
-
   unique_ptr<Struct> parseStruct(){
     consumeToken();
 
@@ -250,6 +238,18 @@ bool isValidExpressionToken() {
     }
 
     return parameters;
+  }
+
+  unique_ptr<Return> parseReturn(){
+    consumeToken();
+    if (!isValidExpressionToken())
+      error("Expected an expresion/identifier/literal after return keyword", m_line);
+    unique_ptr<Expression> value = parseExpression();
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("Expected a semicolon after expression in return statement", m_line);
+    consumeToken();
+
+    return make_unique<Return>(std::move(value));
   }
 
   unique_ptr<Function> parseFunction() {
