@@ -4,9 +4,11 @@
 #include <vector>
 #include <memory>
 
-#include "../llvm.hpp"
+#include "./llvm.hpp"
 #include "../ast.hpp"
 #include "../error.hpp"
+
+#include "variables.hpp"
 
 class FuncGen {
 public:
@@ -29,13 +31,23 @@ private:
     llvm::Function* function = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, m_name, llvm.module.get());
     llvm::BasicBlock* entry = llvm::BasicBlock::Create(llvm.context, "entry", function);
     llvm.builder.SetInsertPoint(entry);
+    llvm.scope.enterScope();
 
     for (ASTNode* current : m_body) {
       if (Return* returnNode = dynamic_cast<Return*>(current)) {
         generateReturnValue(returnNode);
       }
+      else if (Function* statement = dynamic_cast<Function*>(current)) {
+      FuncGen function(statement);
+      }
+      else if (Variable* statement = dynamic_cast<Variable*>(current)){
+        VarGen variable(statement, false);
+      }
+      else  
+        error("Couldn't node isn't implemented yet"); 
     }
     llvm::verifyFunction(*function);
+    llvm.scope.exitScope();
   }
 
   void generateReturnValue(Return* node) {

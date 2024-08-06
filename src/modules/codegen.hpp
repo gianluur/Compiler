@@ -4,10 +4,10 @@
 #include <vector>
 #include <memory>
 
-#include "llvm.hpp"
 #include "ast.hpp"
 #include "error.hpp"
 
+#include "IRGeneration/llvm.hpp"
 #include "IRGeneration/functions.hpp"
 #include "IRGeneration/variables.hpp"
 
@@ -19,17 +19,7 @@ public:
 
   void generateIR() {
     for (const unique_ptr<ASTNode>& node : m_ast) {
-      ASTNode* current = node.get();
-
-      if (Function* statement = dynamic_cast<Function*>(current)) {
-        FuncGen function(statement);
-      } 
-      else if (Variable* statement = dynamic_cast<Variable*>(current)) {
-        VarGen variable(statement, false);
-      }
-
-      else 
-        error("Current node isn't handled yet");
+      generateIRStatement(node.get());
     }
     saveIRtoFile();
     printIR();
@@ -38,6 +28,18 @@ public:
 private:
   const vector<unique_ptr<ASTNode>>& m_ast;
   LLVM& llvm;
+  
+  void generateIRStatement(ASTNode* current){
+    if (Function* statement = dynamic_cast<Function*>(current)) {
+      FuncGen function(statement);
+    }
+    else if (Variable* statement = dynamic_cast<Variable*>(current)){
+      VarGen variable(statement, false);
+    }
+
+    else 
+      error("Current node isn't handled yet");
+  }
 
   void printIR() const {
     std::cout << "----- IR Generator -----\n";

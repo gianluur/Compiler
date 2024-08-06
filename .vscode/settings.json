@@ -54,6 +54,8 @@
     "ratio": "cpp",
     "cstring": "cpp",
     "list": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "*.def": "cpp",
+    "*.inc": "cpp"
   }
 }

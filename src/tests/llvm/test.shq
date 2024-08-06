@@ -1,4 +1,5 @@
-var char test = 'A';
+var int test = 5;
+
 
 func int main(){
   return test;

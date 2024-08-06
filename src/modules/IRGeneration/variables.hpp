@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include "../llvm.hpp"
+#include "./llvm.hpp"
 #include "../ast.hpp"
 #include "../error.hpp"
 
@@ -28,7 +28,14 @@ private:
   LLVM& llvm;
 
   void localVariable(){
-    
+    llvm::Type* type = llvm.getLLVMType(m_type);
+    llvm::AllocaInst* variable = llvm.builder.CreateAlloca(type, nullptr, m_name);
+
+    if (!(dynamic_cast<Null*>(m_value))){
+      llvm::Value* value = llvm.getLLVMValue(m_value);
+      llvm.builder.CreateStore(llvm::cast<llvm::Constant>(value), variable);
+    }
+    llvm.scope.declare(m_name, variable);
   }
 
 void globalVariable(){
@@ -36,8 +43,5 @@ void globalVariable(){
     llvm::Constant* value = llvm::cast<llvm::Constant>(llvm.getLLVMValue(m_value));
     llvm::Type* type = llvm.getLLVMType(m_type);
     new llvm::GlobalVariable(*llvm.module, type, isConstant, llvm::GlobalValue::ExternalLinkage, value, m_name);
-}
-
-
-
+  }
 };

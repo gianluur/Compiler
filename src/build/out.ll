@@ -1,11 +1,10 @@
 ; ModuleID = 'MyModule'
 source_filename = "MyModule"
 
-@test = global i8 65
+@test = global i32 5
 
 define i32 @main() {
 entry:
-  %test = load i8, ptr @test, align 1
-  %charToInt = zext i8 %test to i32
-  ret i32 %charToInt
+  %test = load i32, ptr @test, align 4
+  ret i32 %test
 }
