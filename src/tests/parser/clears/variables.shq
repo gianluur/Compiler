@@ -20,3 +20,9 @@ var string INITIALIZATION_STRING_NORMAL = "test";
 var string INITIALIZATION_STRINGS_SINGLEQUOTE = "tes't'";
 
 var int INITIALIZATION_WITH_VARIABLE = INITIALIZATION_INTEGERS_POSITVE;
+
+var int CAST_INT = int(3.5);
+var float CAST_FLOAT = float(3);
+var char CAST_CHAR = char(65);
+var bool CAST_BOOL = bool(1);
+var string CAST_STRING = string(123);

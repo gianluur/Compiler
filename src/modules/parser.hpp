@@ -454,8 +454,8 @@ bool isValidExpressionToken() {
     else if (isNextTokenType(TokenType::ASSIGNMENT)){
       consumeToken();
 
-      if (!isValidExpressionToken())
-        error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
+      // if (!isValidExpressionToken())
+      //   error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
         
       unique_ptr<Expression> value = parseExpression();
 
@@ -480,6 +480,21 @@ bool isValidExpressionToken() {
         {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
         {"!", 3}, {"&&", 2}, {"||", 1}
     };
+    
+    string castType = "";
+
+    if (isType(nextToken())){
+      const Token& typeToken = consumeToken();
+
+      if (typeToken.type == TokenType::NULL)
+        error("Can't type cast a value to null");
+
+      if (!isNextTokenType(TokenType::LPAREN))
+        error("Expected a opening parenthesis after initializing a cast");
+      consumeToken();
+
+      castType = typeToken.lexemes;
+    }
 
     stack<Token> operators;
     vector<Token> output;
@@ -515,7 +530,7 @@ bool isValidExpressionToken() {
     if (output.size() == 0)
       error("Invalid expression", m_line);
 
-    return expressionToNode(output);
+    return expressionToNode(output, castType);
   } 
 
   void handleClosingParenthesis(stack<Token>& operators, vector<Token>& output) {
@@ -542,7 +557,7 @@ bool isValidExpressionToken() {
     operators.push(current);
   }
 
-   unique_ptr<Expression> expressionToNode(const vector<Token>& postfixExpression) {
+   unique_ptr<Expression> expressionToNode(const vector<Token>& postfixExpression, const string& castType) {
     stack<unique_ptr<Expression>> nodes;
 
     for (const Token& token : postfixExpression) {
@@ -576,6 +591,17 @@ bool isValidExpressionToken() {
         }
       }
     }
-    return std::move(nodes.top());
+    
+    if (castType != ""){
+      i--;
+      if (!isNextTokenType(TokenType::RPAREN)){
+        cout << "Next: " << nextToken().lexemes;
+        error("Expected closing parenthesis after the expression in cast expression");
+      }
+      consumeToken();
+      return make_unique<Cast>(std::move(nodes.top()), castType);
+    }
+    else
+      return std::move(nodes.top());
   }
 };

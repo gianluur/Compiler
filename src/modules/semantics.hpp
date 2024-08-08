@@ -330,6 +330,9 @@ private:
     else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(operand)){
       return analyzeUnaryOperator(unaryOperator); 
     } 
+    else if (Cast* cast = dynamic_cast<Cast*>(operand)){
+      return cast->getTargetType();
+    }
     else { 
       error("Unknown operand type", m_line);
       return "";
