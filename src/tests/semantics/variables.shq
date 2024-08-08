@@ -1,1 +1,1 @@
-var int x = 5;
+var int8 x = 5;

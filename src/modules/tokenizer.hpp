@@ -151,23 +151,41 @@ private:
   bool isVariable(const string& token){
     if (token == "var" ) {m_tokens.emplace_back(Token(TokenType::VAR, token, line)); return true;}
     else if (token == "const") {m_tokens.emplace_back(Token(TokenType::CONST, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
   
   bool isType(const string& token){
-    if (token == "int") {m_tokens.emplace_back(Token(TokenType::INT, token, line)); return true;}
+    if (token == "int8") {m_tokens.emplace_back(Token(TokenType::INT8, token, line)); return true;}
+    else if (token == "int16") {m_tokens.emplace_back(Token(TokenType::INT16, token, line)); return true;}
+    else if (token == "int32") {m_tokens.emplace_back(Token(TokenType::INT32, token, line)); return true;}
+    else if (token == "int64") {m_tokens.emplace_back(Token(TokenType::INT64, token, line)); return true;}
+
+    else if (token == "int") {m_tokens.emplace_back(Token(TokenType::INT, token, line)); return true;}
+
+    else if (token == "uint8") {m_tokens.emplace_back(Token(TokenType::UINT8, token, line)); return true;}
+    else if (token == "uint16") {m_tokens.emplace_back(Token(TokenType::UINT16, token, line)); return true;}
+    else if (token == "uint32") {m_tokens.emplace_back(Token(TokenType::UINT32, token, line)); return true;}
+    else if (token == "uint64") {m_tokens.emplace_back(Token(TokenType::UINT64, token, line)); return true;}
+
+    else if (token == "float32") {m_tokens.emplace_back(Token(TokenType::FLOAT32, token, line)); return true;}
+    else if (token == "float64") {m_tokens.emplace_back(Token(TokenType::FLOAT64, token, line)); return true;}
     else if (token == "float") {m_tokens.emplace_back(Token(TokenType::FLOAT, token, line)); return true;}
+    
     else if (token == "char") {m_tokens.emplace_back(Token(TokenType::CHAR, token, line)); return true;}
     else if (token == "string") {m_tokens.emplace_back(Token(TokenType::STRING, token, line)); return true;}
     else if (token == "bool") {m_tokens.emplace_back(Token(TokenType::BOOL, token, line)); return true;}
     else if (token == "null") {m_tokens.emplace_back(Token(TokenType::NULL, token, line)); return true;}
-    else return false;
+    
+    else 
+      return false;
   }
 
   bool isIfStatement(const string& token){
     if (token == "if") {m_tokens.emplace_back(Token(TokenType::IF, token, line)); return true;}
     else if (token == "else") {m_tokens.emplace_back(Token(TokenType::ELSE, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
 
   bool isLoopStatement(const string& token){
@@ -176,24 +194,28 @@ private:
     else if (token == "for") {m_tokens.emplace_back(Token(TokenType::FOR, token, line)); return true;}
     else if (token == "break") {m_tokens.emplace_back(Token(TokenType::BREAK, token, line)); return true;}
     else if (token == "continue") {m_tokens.emplace_back(Token(TokenType::CONTINUE, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
 
   bool isFunction(const string& token){
     if (token == "func") {m_tokens.emplace_back(Token(TokenType::FUNC, token, line)); return true;}
     else if (token == "return") {m_tokens.emplace_back(Token(TokenType::RETURN, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
 
   bool isStruct(const string& token){
     if (token == "struct") {m_tokens.emplace_back(Token(TokenType::STRUCT, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
 
   bool isBoolean(const string& token){
     if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
     else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
-    else return false;
+    else 
+      return false;
   }
 
   void invalidToken(const char& currentChar, const string& message = ""){
@@ -223,8 +245,10 @@ private:
     }
     i--; 
 
-    if (dotCount == 0) m_tokens.emplace_back(Token(TokenType::LITERAL_INTEGER, number, line));
-    else m_tokens.emplace_back(Token(TokenType::LITERAL_FLOAT, number, line));
+    if (dotCount == 0) 
+      m_tokens.emplace_back(Token(TokenType::LITERAL_INTEGER, number, line));
+    else 
+      m_tokens.emplace_back(Token(TokenType::LITERAL_FLOAT, number, line));
 
   }
 
@@ -234,7 +258,8 @@ private:
     i++;
 
     char closing = nextChar();
-    if (closing != '\'') invalidToken(currentChar, "Missing char closing quote");
+    if (closing != '\'') 
+      invalidToken(currentChar, "Missing char closing quote");
     i++;
 
     token += string(1, character) + string(1, closing);
@@ -249,7 +274,8 @@ private:
     }
 
     char closing = nextChar();
-    if (closing != '\"') invalidToken(currentChar, "Missing string closing quote");
+    if (closing != '\"') 
+      invalidToken(currentChar, "Missing string closing quote");
     i++;
 
     token += string(1, closing);
@@ -366,7 +392,8 @@ private:
         m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, token, line));
         i++;
       }
-      else m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar), line));
+      else 
+        m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar), line));
     }
 
     else if (currentChar == '<'){
@@ -375,7 +402,8 @@ private:
         m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, token, line));
         i++;
       }
-      else m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar), line));
+      else 
+        m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar), line));
     }
 
     else if (currentChar == '=') {

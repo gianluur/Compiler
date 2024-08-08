@@ -37,6 +37,7 @@ public:
 class Integer : public Literal {
 public:
   Integer(const Token& value) : m_value(value.lexemes) {}
+  
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Integer { " << '\n';
     cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
@@ -58,6 +59,7 @@ private:
 class Float : public Literal {
 public:
   Float(const Token& value) : m_value(value.lexemes) {}
+
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralFloat { " << '\n';
     cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
@@ -79,6 +81,7 @@ private:
 class String: public Literal {
 public:
   String(const Token& value) : m_value(value.lexemes) {}
+
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralString { " << '\n';
     cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
@@ -100,6 +103,7 @@ private:
 class Char : public Literal {
 public:
   Char(const Token& value) : m_value(value.lexemes) {}
+
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralChar { " << '\n';
     cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";
@@ -121,6 +125,7 @@ private:
 class Boolean : public Literal {
 public:
   Boolean(const Token& value) : m_value(value.lexemes) {}
+
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "LiteralBoolean { " << '\n';
     cout << setw(indentation_level + 2) << " " << "value: " << m_value << "\n";

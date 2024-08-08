@@ -1,11 +1,12 @@
 #pragma once
 
+#include <string>
+
 //REMOVING SOME ANNOYING MACROS, THAT FILL MY NAMESPACE
 
 #undef NULL 
 #undef EOF
 
-#include <string>
 using std::string;
 
 enum class TokenType {
@@ -19,9 +20,28 @@ enum class TokenType {
   DOT,
   IDENTIFIER,
 
-  //TYPES
+  //TYPES 
+  ARRAY_INT,
+  ARRAY_FLOAT,
+  ARRAY_CHAR,
+  ARRAY_STRING,
+  ARRAY_BOOL,
+  
   INT,
+  INT8,
+  INT16,
+  INT32,
+  INT64,
+
+  UINT8,
+  UINT16,
+  UINT32,
+  UINT64,
+
   FLOAT,
+  FLOAT32,
+  FLOAT64,
+
   CHAR,
   STRING,
   BOOL,

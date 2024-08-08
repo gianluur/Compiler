@@ -200,7 +200,7 @@ bool isValidExpressionToken() {
     }
 
     while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
-      if (!isValidExpressionToken())
+      if (!isValidExpressionToken() && !isType(nextToken()))
         error("Expected argument in function call", m_line);
       unique_ptr<Expression> argument = parseExpression();
 
@@ -242,7 +242,7 @@ bool isValidExpressionToken() {
 
   unique_ptr<Return> parseReturn(){
     consumeToken();
-    if (!isValidExpressionToken())
+    if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected an expresion/identifier/literal after return keyword", m_line);
     unique_ptr<Expression> value = parseExpression();
     if (!isNextTokenType(TokenType::SEMICOLON))
@@ -290,7 +290,7 @@ bool isValidExpressionToken() {
       error("Expected while after do in do-while statement", m_line);
     consumeToken();
 
-    if (!isValidExpressionToken())
+    if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected a condition after while keyword in do-while statement", m_line);
     unique_ptr<Expression> condition = parseExpression();
 
@@ -306,7 +306,7 @@ bool isValidExpressionToken() {
   unique_ptr<While> parseWhileStatement(){
     consumeToken();
 
-    if(!isValidExpressionToken())
+    if(!isValidExpressionToken() && !isType(nextToken()))
       error("Expected condition after while keyword", m_line);
     unique_ptr<Expression> condition = parseExpression();
 
@@ -332,7 +332,7 @@ bool isValidExpressionToken() {
     //add a check here
     Token& op = consumeToken();
 
-    if (!isValidExpressionToken())
+    if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
     unique_ptr<Expression> value = parseExpression();
 
@@ -352,7 +352,7 @@ bool isValidExpressionToken() {
       error("Expected variable initialization after for keyword", m_line);
     unique_ptr<Variable> initialization = parseVariable();
     
-    if (!isValidExpressionToken())
+    if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected a condition after variable initialization in for statement", m_line);
     unique_ptr<Expression> condition = parseExpression();
 
@@ -374,7 +374,7 @@ bool isValidExpressionToken() {
   unique_ptr<IfStatement> parseIfStatement(){
     consumeToken();
     
-    if(!isValidExpressionToken())
+    if(!isValidExpressionToken() && !isType(nextToken()))
       error("Expected condition after if keyword", m_line);
     unique_ptr<Expression> condition = parseExpression();
 
@@ -440,7 +440,7 @@ bool isValidExpressionToken() {
     Token& type = consumeToken();
 
     if (i >= m_tokens.size() || !isNextTokenType(TokenType::IDENTIFIER)) 
-      error("Error: Expected identifier after type in variable declaration", m_line);
+      error("Expected identifier after type in variable declaration", m_line);
     Token& name = consumeToken();
 
     if (isNextTokenType(TokenType::SEMICOLON)){
@@ -454,13 +454,13 @@ bool isValidExpressionToken() {
     else if (isNextTokenType(TokenType::ASSIGNMENT)){
       consumeToken();
 
-      // if (!isValidExpressionToken())
-      //   error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
+      if (!isValidExpressionToken() && !isType(nextToken()))
+        error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
         
       unique_ptr<Expression> value = parseExpression();
 
       if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
-        error("Error: In this variable decleration: '" + keyword.lexemes + " " + name.lexemes  + "'; was expected a semicolon.", m_line);
+        error("In this variable decleration: '" + keyword.lexemes + " " + name.lexemes  + "'; was expected a semicolon.", m_line);
       consumeToken();
 
       auto variable = make_unique<Variable>(keyword, type, make_unique<Identifier>(name), std::move(value));
@@ -469,7 +469,7 @@ bool isValidExpressionToken() {
     }
 
     else {
-      error("Error: Expected semicolon after identifier in variable declaration", m_line);
+      error("Expected semicolon after identifier in variable declaration", m_line);
       return unique_ptr<Variable>();
     }
   } 
