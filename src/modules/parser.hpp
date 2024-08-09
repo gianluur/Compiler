@@ -299,6 +299,7 @@ bool isType(const Token& token) const {
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("Missing semicolon after " + keyword);
     consumeToken();
+    
     auto loopJump = make_unique<LoopJumps>(keyword);
     m_semantics->analyzeLoopJumps(loopJump.get(), isLoopScoped);
     return loopJump;

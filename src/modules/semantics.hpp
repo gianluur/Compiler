@@ -28,7 +28,7 @@ public:
 
     if (!dynamic_cast<Null*>(value)){
       const string valueType = getExpressionType(type, value);
-      if (valueType != type && isSmallerType(type, valueType))
+      if (valueType != type && !isSmallerType(type, valueType))
         error("Expected " + type + " in variable declaration but got " + valueType + " instead", m_line);
     }        
   }
@@ -45,22 +45,20 @@ public:
 
     const string type = m_scopes->find(identifier->getName()).type;
     const string valueType = getExpressionType(type, value);
-    if (valueType != type && isSmallerType(type, valueType))
+    if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
     
   }
 
   void analyzeFunction(Function* function){
     Identifier* identifier = function->getIdentifier();
-    string type = function->getType();
+    const string type = function->getType();
     vector<Parameter*> parameters = function->getParameters();
-    BlockStatement* body = function->getBody();
 
     m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
-    checkReturnType(body, type);
 
     m_scopes->enterScope();
-    analyzeBody(function);
+    analyzeBody(function, type);
     m_scopes->exitScope();
   }
 
@@ -114,10 +112,19 @@ public:
     m_scopes->exitScope();
   }
 
-  void analyzeLoopJumps(LoopJumps* statement, const bool isScoped){
-    if (!isScoped)
+  void analyzeLoopJumps(LoopJumps* statement, const bool isLoopScoped){
+    if (!isLoopScoped)
       error("You can't use " + statement->getKeyword() + " outside of a loop", m_line);
   } 
+
+  void analyzeReturn(Return* statement, const string& type){
+    if (type == "null")
+      error("Return statement found in a function returning null", m_line);
+
+    const string valueType = getExpressionType(type, statement->getValue());
+    if (valueType != type && !isSmallerType(type, valueType))
+      error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
+  }
 
 private:
    unique_ptr<Scope> m_scopes;
@@ -163,26 +170,15 @@ private:
 
   }
 
-  void checkReturnType(BlockStatement* body, string type){
-    vector<ASTNode*> statements = body->getStatements();
-    for(const auto& current: statements) {
-      if (Return* statement = dynamic_cast<Return*>(current)) {
-        if (type == "null")
-          error("Return statement found in a function returning null", m_line);
-
-        const string valueType = getExpressionType(type, statement->getValue());
-
-        if (valueType != type && isSmallerType(type, valueType))
-          error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
-      }
-    }
-  }
-
   template <typename T>
-  void analyzeBody(T* statement) {
+  void analyzeBody(T* statement, const string functionType = "error") {
     BlockStatement* body = statement->getBody();
     for(ASTNode* current : body->getStatements()){
       analyzeNode(current);
+
+      if (Return* statement = dynamic_cast<Return*>(current)){
+        analyzeReturn(statement, functionType);
+      }
     }
   }
 
@@ -196,13 +192,21 @@ private:
       error("Conditions must always evaluate to boolean", m_line);
   }
 
-  bool isSmallerType(const string& expectedType, const string& type){
-    if (expectedType == "int" && (type == "int8" || type == "int16" || type == "int32" || type == "int64" || type == "uint8" || type == "uint16" || type == "uint32" || type == "uint64"))
-      return true;
+  bool isSmallerType(const string& expectedType, const string& valueType){
+    if ((expectedType == "int" || expectedType == "int8" || expectedType == "int16" || 
+         expectedType == "int32" || expectedType == "int64" || 
+         expectedType == "uint8" || expectedType == "uint16" || 
+         expectedType == "uint32" || expectedType == "uint64") &&
+        (valueType == "int" || valueType == "int8" || valueType == "int16" ||
+         valueType == "int32" || valueType == "int64" || 
+         valueType == "uint8" || valueType == "uint16" || 
+         valueType == "uint32" || valueType == "uint64")
+        ) return true;
 
-    if (expectedType == "float" && (type == "float32" || type == "float64"))
-      return true;
-    
+    if ((expectedType == "float" || expectedType == "float32" || expectedType == "float64") &&
+        (valueType == "float" || valueType == "float32" || valueType == "float64")) {
+        return true;
+    }
     return false;
   }
 
