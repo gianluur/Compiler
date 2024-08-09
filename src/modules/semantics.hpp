@@ -228,6 +228,15 @@ private:
     string leftType = analyzeOperand(binaryOperator->getLeftOperand());
     string rightType = analyzeOperand(binaryOperator->getRightOperand());
     string op = binaryOperator->getOperator();
+    
+    if (string("+-*/%").find(op) != string::npos){
+      if (leftType == "string" && rightType == "string" && op != "+")
+        error("String concatenation can be done only with the '+' operator, everything else isn't allowed");
+    }
+    else {
+      leftType = "bool"; rightType = "bool";
+    }
+
 
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match", m_line);

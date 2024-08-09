@@ -11,8 +11,6 @@ do {
 
 var int x = 5;
 
-for var int i = 0; true; x += 5; {
+for var int i = 0; 5 < 3; x += 5; {
   break;
 }
-
-continue;
