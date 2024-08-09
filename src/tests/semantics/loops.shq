@@ -1,7 +1,18 @@
 while true {
   break;
-}
-
-while true {
   continue;
 }
+
+do {
+  break;
+  continue;
+
+}while true;
+
+var int x = 5;
+
+for var int i = 0; true; x += 5; {
+  break;
+}
+
+continue;

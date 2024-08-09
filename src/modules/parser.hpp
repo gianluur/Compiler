@@ -127,7 +127,7 @@ bool isType(const Token& token) const {
            token.type == TokenType::LITERAL_BOOLEAN;
   }
 
-  unique_ptr<ASTNode> parseASTNode(){
+  unique_ptr<ASTNode> parseASTNode(const bool isLoopScoped = false){
     Token& token = nextToken();
 
     switch (token.type)
@@ -162,7 +162,7 @@ bool isType(const Token& token) const {
 
     case TokenType::BREAK:
     case TokenType::CONTINUE:
-      return parseJumps(); //break and continue
+      return parseJumps(isLoopScoped); //break and continue
 
     default:
       error("Couldn't parse the current token: " + token.lexemes, m_line);
@@ -293,19 +293,21 @@ bool isType(const Token& token) const {
 
   }
 
-  unique_ptr<LoopJumps> parseJumps() {
+  unique_ptr<LoopJumps> parseJumps(const bool isLoopScoped) {
     const string keyword = consumeToken().lexemes;
 
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("Missing semicolon after " + keyword);
     consumeToken();
-    return make_unique<LoopJumps>(keyword);
+    auto loopJump = make_unique<LoopJumps>(keyword);
+    m_semantics->analyzeLoopJumps(loopJump.get(), isLoopScoped);
+    return loopJump;
   }
 
   unique_ptr<Do> parseDoStatement(){
     consumeToken();
 
-    unique_ptr<BlockStatement> body = parseBlockStatement();
+    unique_ptr<BlockStatement> body = parseBlockStatement(true);
 
     if (!isNextTokenType(TokenType::WHILE)) 
       error("Expected while after do in do-while statement", m_line);
@@ -319,8 +321,8 @@ bool isType(const Token& token) const {
       error("Expected semicolon at the end of do-while statement", m_line);
     consumeToken();
 
-    auto doStatement =  make_unique<Do>(std::move(body), std::move(condition));
-    m_semantics->analyzeConditionalStatement(doStatement.get());
+    auto doStatement = make_unique<Do>(std::move(body), std::move(condition));
+    m_semantics->analyzeBasicLoop(doStatement.get());
     return doStatement;
   }
 
@@ -331,10 +333,10 @@ bool isType(const Token& token) const {
       error("Expected condition after while keyword", m_line);
     unique_ptr<Expression> condition = parseExpression();
 
-    unique_ptr<BlockStatement> block = parseBlockStatement();
+    unique_ptr<BlockStatement> block = parseBlockStatement(true);
 
     auto whileStatement = make_unique<While>(std::move(condition), std::move(block));
-    m_semantics->analyzeConditionalStatement(whileStatement.get());
+    m_semantics->analyzeBasicLoop(whileStatement.get());
     return whileStatement;
   }
 
@@ -385,7 +387,7 @@ bool isType(const Token& token) const {
       error("Expected assigment operator after condition in for statement", m_line);
     unique_ptr<AssigmentOperator> update = parseAssigmentOperator();
 
-    unique_ptr<BlockStatement> block = parseBlockStatement();  
+    unique_ptr<BlockStatement> block = parseBlockStatement(true);  
 
     auto forStatement = make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
     m_semantics->analyzeFor(forStatement.get());
@@ -407,7 +409,7 @@ bool isType(const Token& token) const {
       unique_ptr<BlockStatement> elseBody = parseBlockStatement();
 
       auto ifStatement = make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
-      m_semantics->analyzeConditionalStatement(ifStatement.get());
+      m_semantics->analyzeIfStatement(ifStatement.get());
       return ifStatement;
     }
 
@@ -416,7 +418,7 @@ bool isType(const Token& token) const {
     return ifStatement;
   }
 
-  unique_ptr<BlockStatement> parseBlockStatement(){
+  unique_ptr<BlockStatement> parseBlockStatement(const bool isLoopScoped = false){
     if (!isNextTokenType(TokenType::LCURLY)) 
       error("Expected open bracket for block statement", m_line);
     consumeToken();
@@ -425,7 +427,7 @@ bool isType(const Token& token) const {
     while (!isNextTokenType(TokenType::RCURLY)){
       if (i + 1 >= m_tokens.size()) 
         error("No closing bracket in block statement", m_line);
-      statements.emplace_back(parseASTNode());
+      statements.emplace_back(parseASTNode(isLoopScoped));
     }
 
     if (!isNextTokenType(TokenType::RCURLY)) 

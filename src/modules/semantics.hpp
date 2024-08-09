@@ -28,7 +28,7 @@ public:
 
     if (!dynamic_cast<Null*>(value)){
       const string valueType = getExpressionType(type, value);
-      if (valueType != type && handleSmallerTypes(type, valueType))
+      if (valueType != type && isSmallerType(type, valueType))
         error("Expected " + type + " in variable declaration but got " + valueType + " instead", m_line);
     }        
   }
@@ -45,7 +45,7 @@ public:
 
     const string type = m_scopes->find(identifier->getName()).type;
     const string valueType = getExpressionType(type, value);
-    if (valueType != type && handleSmallerTypes(type, valueType))
+    if (valueType != type && isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
     
   }
@@ -89,14 +89,14 @@ public:
   }
 
   void analyzeIfStatement(IfStatement* statement){
-    analyzeConditionalStatement(statement);
+    analyzeBasicLoop(statement);
     ElseStatement* elseStatement = statement->getElseStatement();
     if (elseStatement != nullptr)
       analyzeBody(elseStatement);
   }
 
   template <typename T>
-  void analyzeConditionalStatement(T* statement){
+  void analyzeBasicLoop(T* statement){
     analyzeCondition(statement);
 
     m_scopes->enterScope();
@@ -105,14 +105,19 @@ public:
   }
 
   void analyzeFor(For* statement){  
+    m_scopes->enterScope();
     analyzeVariable(statement->getInitialization());
     analyzeCondition(statement);      
     analyzeAssignmentOperator(statement->getUpdate());
 
-    m_scopes->enterScope();
     analyzeBody(statement);
     m_scopes->exitScope();
   }
+
+  void analyzeLoopJumps(LoopJumps* statement, const bool isScoped){
+    if (!isScoped)
+      error("You can't use " + statement->getKeyword() + " outside of a loop", m_line);
+  } 
 
 private:
    unique_ptr<Scope> m_scopes;
@@ -137,15 +142,15 @@ private:
     }
 
     else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
-      analyzeConditionalStatement(statement);
+      analyzeIfStatement(statement);
     }
 
     else if (While* statement = dynamic_cast<While*>(current)){
-      analyzeConditionalStatement(statement);
+      analyzeBasicLoop(statement);
     }
 
     else if (Do* statement = dynamic_cast<Do*>(current)){
-      analyzeConditionalStatement(statement);
+      analyzeBasicLoop(statement);
     }
 
     else if (For* statement = dynamic_cast<For*>(current)){
@@ -155,6 +160,7 @@ private:
     // else if (Struct* statement = dynamic_cast<Struct*>(current)){
     //   cout << "struct "; //TODO
     // }
+
   }
 
   void checkReturnType(BlockStatement* body, string type){
@@ -166,7 +172,7 @@ private:
 
         const string valueType = getExpressionType(type, statement->getValue());
 
-        if (valueType != type && handleSmallerTypes(type, valueType))
+        if (valueType != type && isSmallerType(type, valueType))
           error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
       }
     }
@@ -190,7 +196,7 @@ private:
       error("Conditions must always evaluate to boolean", m_line);
   }
 
-  bool handleSmallerTypes(const string& expectedType, const string& type){
+  bool isSmallerType(const string& expectedType, const string& type){
     if (expectedType == "int" && (type == "int8" || type == "int16" || type == "int32" || type == "int64" || type == "uint8" || type == "uint16" || type == "uint32" || type == "uint64"))
       return true;
 

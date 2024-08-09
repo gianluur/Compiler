@@ -601,6 +601,10 @@ public:
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
+  string getKeyword() const {
+    return m_keyword;
+  }
+
 private:
   string m_keyword;
 };
