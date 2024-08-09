@@ -160,6 +160,10 @@ bool isType(const Token& token) const {
     case TokenType::RETURN:
       return parseReturn();
 
+    case TokenType::BREAK:
+    case TokenType::CONTINUE:
+      return parseJumps(); //break and continue
+
     default:
       error("Couldn't parse the current token: " + token.lexemes, m_line);
       return unique_ptr<ASTNode>();
@@ -287,6 +291,15 @@ bool isType(const Token& token) const {
     m_semantics->analyzeFunction(function.get());
     return function;
 
+  }
+
+  unique_ptr<LoopJumps> parseJumps() {
+    const string keyword = consumeToken().lexemes;
+
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("Missing semicolon after " + keyword);
+    consumeToken();
+    return make_unique<LoopJumps>(keyword);
   }
 
   unique_ptr<Do> parseDoStatement(){

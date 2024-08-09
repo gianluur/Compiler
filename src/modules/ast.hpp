@@ -591,6 +591,20 @@ private:
   unique_ptr<BlockStatement> m_body;
 };
 
+class LoopJumps: public Loops {
+public:
+  LoopJumps(const string& keyword): m_keyword(keyword) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Loop Jumps { \n";
+    cout << setw(indentation_level + 2) << " " << m_keyword << '\n';
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  string m_keyword;
+};
+
 class Parameter: public ASTNode {
 public:
   Parameter(const Token& type, unique_ptr<Identifier> name):

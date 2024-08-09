@@ -45,7 +45,7 @@ public:
 
     const string type = m_scopes->find(identifier->getName()).type;
     const string valueType = getExpressionType(type, value);
-    if (valueType != type)
+    if (valueType != type && handleSmallerTypes(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
     
   }
@@ -166,7 +166,7 @@ private:
 
         const string valueType = getExpressionType(type, statement->getValue());
 
-        if (valueType != type)
+        if (valueType != type && handleSmallerTypes(type, valueType))
           error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
       }
     }

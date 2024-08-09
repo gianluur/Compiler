@@ -1,4 +1,3 @@
 TODO: Add array
-TODO: Add other integers and float types
 TODO: Add checks for overflow for smaller integers / float
 TODO: Implement checks for break and continue in semantic analisys  
