@@ -28,7 +28,7 @@ public:
 
     if (!dynamic_cast<Null*>(value)){
       const string valueType = getExpressionType(type, value);
-      if (valueType != type)
+      if (valueType != type && handleSmallerTypes(type, valueType))
         error("Expected " + type + " in variable declaration but got " + valueType + " instead", m_line);
     }        
   }
@@ -188,6 +188,16 @@ private:
 
     if (valueType != expectedType)
       error("Conditions must always evaluate to boolean", m_line);
+  }
+
+  bool handleSmallerTypes(const string& expectedType, const string& type){
+    if (expectedType == "int" && (type == "int8" || type == "int16" || type == "int32" || type == "int64" || type == "uint8" || type == "uint16" || type == "uint32" || type == "uint64"))
+      return true;
+
+    if (expectedType == "float" && (type == "float32" || type == "float64"))
+      return true;
+    
+    return false;
   }
 
   string getExpressionType(const string& expectedType, Expression* value) {

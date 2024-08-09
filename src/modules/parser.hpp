@@ -105,11 +105,19 @@ bool isValidExpressionToken() {
          token.type == TokenType::LPAREN || token.type == TokenType::RPAREN;
 }
 
-  bool isType(const Token& token) const {
-    return token.type == TokenType::INT  || token.type == TokenType::FLOAT  ||
+bool isType(const Token& token) const {
+    return token.type == TokenType::INT  || 
+           token.type == TokenType::INT8 || token.type == TokenType::INT16 || 
+           token.type == TokenType::INT32 || token.type == TokenType::INT64 || 
+           token.type == TokenType::UINT8 || token.type == TokenType::UINT16 || 
+           token.type == TokenType::UINT32 || token.type == TokenType::UINT64 || 
+
+           token.type == TokenType::FLOAT || 
+           token.type == TokenType::FLOAT32 || token.type == TokenType::FLOAT64 ||
+           
            token.type == TokenType::CHAR || token.type == TokenType::STRING ||
            token.type == TokenType::BOOL || token.type == TokenType::NULL;
-  }
+}
 
   bool isLiteral(const Token& token) const {
     return token.type == TokenType::LITERAL_INTEGER || 
@@ -456,7 +464,6 @@ bool isValidExpressionToken() {
 
       if (!isValidExpressionToken() && !isType(nextToken()))
         error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
-        
       unique_ptr<Expression> value = parseExpression();
 
       if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
@@ -500,7 +507,6 @@ bool isValidExpressionToken() {
     vector<Token> output;
 
     while (isValidExpressionToken()) {
-
       Token& current = consumeToken();
       
       if (isLiteral(current) || current.type == TokenType::IDENTIFIER) {
