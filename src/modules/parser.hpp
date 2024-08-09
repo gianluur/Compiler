@@ -127,7 +127,7 @@ bool isType(const Token& token) const {
            token.type == TokenType::LITERAL_BOOLEAN;
   }
 
-  unique_ptr<ASTNode> parseASTNode(const bool isLoopScoped = false){
+  unique_ptr<ASTNode> parseASTNode(const bool isScoped = false){
     Token& token = nextToken();
 
     switch (token.type)
@@ -158,11 +158,11 @@ bool isType(const Token& token) const {
       return parseStruct();
 
     case TokenType::RETURN:
-      return parseReturn();
+      return parseReturn(isScoped);
 
     case TokenType::BREAK:
     case TokenType::CONTINUE:
-      return parseJumps(isLoopScoped); //break and continue
+      return parseJumps(isScoped); //break and continue
 
     default:
       error("Couldn't parse the current token: " + token.lexemes, m_line);
@@ -252,7 +252,7 @@ bool isType(const Token& token) const {
     return parameters;
   }
 
-  unique_ptr<Return> parseReturn(){
+  unique_ptr<Return> parseReturn(const bool isScoped){
     consumeToken();
     if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected an expresion/identifier/literal after return keyword", m_line);
@@ -261,7 +261,9 @@ bool isType(const Token& token) const {
       error("Expected a semicolon after expression in return statement", m_line);
     consumeToken();
 
-    return make_unique<Return>(std::move(value));
+    auto statement = make_unique<Return>(std::move(value));
+    m_semantics->isNodeScoped(statement.get(), isScoped);
+    return statement;
   }
 
   unique_ptr<Function> parseFunction() {
@@ -285,7 +287,7 @@ bool isType(const Token& token) const {
       error("Expected open parenethesis for parameters after func", m_line);
     consumeToken();
 
-    unique_ptr<BlockStatement> body = parseBlockStatement();
+    unique_ptr<BlockStatement> body = parseBlockStatement(true);
 
     auto function = make_unique<Function>(returnType, make_unique<Identifier>(name), std::move(parameters), std::move(body));
     m_semantics->analyzeFunction(function.get());
@@ -293,7 +295,7 @@ bool isType(const Token& token) const {
 
   }
 
-  unique_ptr<LoopJumps> parseJumps(const bool isLoopScoped) {
+  unique_ptr<LoopJumps> parseJumps(const bool isScoped) {
     const string keyword = consumeToken().lexemes;
 
     if (!isNextTokenType(TokenType::SEMICOLON))
@@ -301,7 +303,7 @@ bool isType(const Token& token) const {
     consumeToken();
     
     auto loopJump = make_unique<LoopJumps>(keyword);
-    m_semantics->analyzeLoopJumps(loopJump.get(), isLoopScoped);
+    m_semantics->isNodeScoped(loopJump.get(), isScoped);
     return loopJump;
   }
 
@@ -419,7 +421,7 @@ bool isType(const Token& token) const {
     return ifStatement;
   }
 
-  unique_ptr<BlockStatement> parseBlockStatement(const bool isLoopScoped = false){
+  unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false){
     if (!isNextTokenType(TokenType::LCURLY)) 
       error("Expected open bracket for block statement", m_line);
     consumeToken();
@@ -428,7 +430,7 @@ bool isType(const Token& token) const {
     while (!isNextTokenType(TokenType::RCURLY)){
       if (i + 1 >= m_tokens.size()) 
         error("No closing bracket in block statement", m_line);
-      statements.emplace_back(parseASTNode(isLoopScoped));
+      statements.emplace_back(parseASTNode(isScoped));
     }
 
     if (!isNextTokenType(TokenType::RCURLY)) 

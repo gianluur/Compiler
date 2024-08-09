@@ -741,6 +741,10 @@ public:
     m_value = std::move(value);
   }
 
+  string getKeyword() const {
+    return "return";
+  }
+
 private:
   unique_ptr<Expression> m_value;
 };

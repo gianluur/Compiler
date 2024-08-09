@@ -47,7 +47,6 @@ public:
     const string valueType = getExpressionType(type, value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
-    
   }
 
   void analyzeFunction(Function* function){
@@ -87,7 +86,7 @@ public:
   }
 
   void analyzeIfStatement(IfStatement* statement){
-    analyzeBasicLoop(statement);
+    analyzeBasicLoop(statement); //checks condition and body :P
     ElseStatement* elseStatement = statement->getElseStatement();
     if (elseStatement != nullptr)
       analyzeBody(elseStatement);
@@ -110,6 +109,16 @@ public:
 
     analyzeBody(statement);
     m_scopes->exitScope();
+  }
+
+  template <typename T>
+  void isNodeScoped(T* statement, const bool isScoped){
+    string keyword, scope;
+    if (!isScoped){
+      keyword = statement->getKeyword();
+      scope = (keyword == "return") ? "function body" : "loop";
+      error("You can't use " + keyword + " outside a " + scope, m_line);
+    }
   }
 
   void analyzeLoopJumps(LoopJumps* statement, const bool isLoopScoped){
