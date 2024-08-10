@@ -32,12 +32,12 @@ private:
   const vector<unique_ptr<ASTNode>>& m_ast;
   LLVM& llvm;
   
-  void generateIRStatement(ASTNode* current){
+  void generateIRStatement(ASTNode* current, const bool isLocal = false){
     if (Function* statement = dynamic_cast<Function*>(current)) {
       generateFunction(statement);
     }
     else if (Variable* statement = dynamic_cast<Variable*>(current)){
-      generateVariable(statement);
+      generateVariable(statement, isLocal);
     }
     else if (Return* statement = dynamic_cast<Return*>(current)){
       generateReturn(statement);
@@ -58,7 +58,7 @@ private:
 
     llvm.scope.enterScope();
     for(ASTNode* current: statement->getBody()->getStatements()){
-      generateIRStatement(current);
+      generateIRStatement(current, true);
     }
     llvm.scope.exitScope();
 
@@ -79,7 +79,11 @@ private:
     llvm.builder.CreateRet(value);
   }
 
-  void generateVariable(Variable* statement){
+  void generateVariable(Variable* statement, const bool isLocal){
+    isLocal ? generateLocalVariable(statement) : generateGlobalVariable(statement);
+  }
+
+  void generateLocalVariable(Variable* statement){
     const string name = statement->getName();
     llvm::Type* type = llvm.getLLVMType(statement->getType());
 
@@ -91,6 +95,13 @@ private:
     }
 
     llvm.scope.declare(name, variable);
+  }
+
+  void generateGlobalVariable(Variable* statement){
+    bool isConstant = (statement->getKeyword() == "const");
+    llvm::Constant* value = llvm::cast<llvm::Constant>(llvm.getLLVMValue(statement->getValue()));
+    llvm::Type* type = llvm.getLLVMType(statement->getType());
+    new llvm::GlobalVariable(*llvm.module, type, isConstant, llvm::GlobalValue::ExternalLinkage, value, statement->getName());
   }
 
   void printIR() const {
