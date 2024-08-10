@@ -1,4 +1,5 @@
+
 func int main(){
   var int test = 5;
-  return test;
+  return 0;
 }

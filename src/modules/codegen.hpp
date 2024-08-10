@@ -15,19 +15,21 @@ using std::vector, std::unique_ptr, std::make_unique;
 class Codegen {
 public:
   Codegen(const vector<unique_ptr<ASTNode>>& ast): 
-    m_ast(ast), scopes(), llvm(LLVM::getInstance()) { generateIR(); }
+    m_ast(ast), llvm(LLVM::getInstance()) { generateIR(); }
 
   void generateIR() {
+    llvm.scope.enterScope();
     for (const unique_ptr<ASTNode>& node : m_ast) {
       generateIRStatement(node.get());
     }
+    llvm.scope.exitScope();
+
     saveIRtoFile();
     printIR();
   }
 
 private:
   const vector<unique_ptr<ASTNode>>& m_ast;
-  IRScope scopes;
   LLVM& llvm;
   
   void generateIRStatement(ASTNode* current){
@@ -40,7 +42,6 @@ private:
     else if (Return* statement = dynamic_cast<Return*>(current)){
       generateReturn(statement);
     }
-
     else 
       error("Current node isn't handled yet");
   }
@@ -55,9 +56,11 @@ private:
     llvm::BasicBlock* BB = llvm::BasicBlock::Create(llvm.context, "entry", function);
     llvm.builder.SetInsertPoint(BB);
 
+    llvm.scope.enterScope();
     for(ASTNode* current: statement->getBody()->getStatements()){
       generateIRStatement(current);
     }
+    llvm.scope.exitScope();
 
   }
 
@@ -87,7 +90,7 @@ private:
       llvm.builder.CreateStore(value, variable);
     }
 
-    scopes.declare(name, variable);
+    llvm.scope.declare(name, variable);
   }
 
   void printIR() const {

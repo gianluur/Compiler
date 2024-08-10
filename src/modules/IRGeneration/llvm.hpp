@@ -48,11 +48,9 @@ public:
     else if (UnaryOperator* statement = dynamic_cast<UnaryOperator*>(node)){
       return generateUnaryOperator(statement);
     }
-
     else if (Identifier* statement = dynamic_cast<Identifier*>(node)){
       return generateIdentifier(statement);
     }
-
     else if (Cast* statement = dynamic_cast<Cast*>(node))
       return generateCast(statement);
 
@@ -67,11 +65,7 @@ public:
   
   llvm::Value* generateIdentifier(Identifier* statement){
     const string name = statement->getName();
-
-    llvm::GlobalVariable* globalVariable = module->getGlobalVariable(name.c_str());
-    if (globalVariable) 
-      return builder.CreateLoad(globalVariable->getValueType(), globalVariable, name.c_str());
-
+    
     llvm::AllocaInst* localVariable = scope.find(name);
     if (localVariable)
       return builder.CreateLoad(localVariable->getAllocatedType(), localVariable, name.c_str());
