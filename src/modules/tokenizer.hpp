@@ -154,7 +154,7 @@ private:
     else 
       return false;
   }
-  
+
   bool isType(const string& token){
     if (token == "int8") {m_tokens.emplace_back(Token(TokenType::INT8, token, line)); return true;}
     else if (token == "int16") {m_tokens.emplace_back(Token(TokenType::INT16, token, line)); return true;}

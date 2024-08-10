@@ -17,6 +17,7 @@ public:
 };
 
 class Expression : public ASTNode {};
+
 class Literal : public Expression {};
 
 class Null: public Literal {
@@ -142,6 +143,14 @@ public:
 
 private:
   string m_value;
+};
+
+class Array : public Literal {
+public:
+  Array(const Token& type, const Token& size) {}
+
+private:
+
 };
 
 class Cast : public Expression {

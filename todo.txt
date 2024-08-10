@@ -1,3 +1,2 @@
-TODO: Implement checks for break and continue in semantic analisys  
 TODO: Add array
 TODO: Add checks for overflow for smaller integers / float

@@ -35,12 +35,6 @@ public:
     return nullptr;
   }
 
-  bool isGlobal(){
-    return m_scopes.size() > 1;
-  }
-
-  
-
 private:
   vector<unordered_map<string, IRVariable>> m_scopes;
 

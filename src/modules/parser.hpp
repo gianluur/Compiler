@@ -453,7 +453,7 @@ bool isType(const Token& token) const {
       return unique_ptr<ASTNode>();
     }
   }
-
+  
   unique_ptr<Variable> parseVariable() {
     Token& keyword = consumeToken();
     

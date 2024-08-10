@@ -7,16 +7,15 @@
 #include "ast.hpp"
 #include "error.hpp"
 
-#include "IRGeneration/llvm.hpp"
-#include "IRGeneration/functions.hpp"
-#include "IRGeneration/variables.hpp"
+#include "./IRGeneration/llvm.hpp"
+#include "./IRGeneration/scope.hpp"
 
 using std::vector, std::unique_ptr, std::make_unique;
 
 class Codegen {
 public:
   Codegen(const vector<unique_ptr<ASTNode>>& ast): 
-    m_ast(ast), llvm(LLVM::getInstance()) { generateIR(); }
+    m_ast(ast), scopes(), llvm(LLVM::getInstance()) { generateIR(); }
 
   void generateIR() {
     for (const unique_ptr<ASTNode>& node : m_ast) {
@@ -28,18 +27,67 @@ public:
 
 private:
   const vector<unique_ptr<ASTNode>>& m_ast;
+  IRScope scopes;
   LLVM& llvm;
   
   void generateIRStatement(ASTNode* current){
     if (Function* statement = dynamic_cast<Function*>(current)) {
-      FuncGen function(statement);
+      generateFunction(statement);
     }
     else if (Variable* statement = dynamic_cast<Variable*>(current)){
-      VarGen variable(statement, false);
+      generateVariable(statement);
+    }
+    else if (Return* statement = dynamic_cast<Return*>(current)){
+      generateReturn(statement);
     }
 
     else 
       error("Current node isn't handled yet");
+  }
+
+  void generateFunction(Function* statement){
+    const string name = statement->getIdentifier()->getName();
+    llvm::Type* returnType = llvm.getLLVMType(statement->getType());
+    vector<llvm::Type*> paramTypes = getParametersTypes(statement->getParameters());
+
+    llvm::FunctionType* type = llvm::FunctionType::get(returnType, paramTypes, false);
+    llvm::Function* function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, name, llvm.module.get());
+    llvm::BasicBlock* BB = llvm::BasicBlock::Create(llvm.context, "entry", function);
+    llvm.builder.SetInsertPoint(BB);
+
+    for(ASTNode* current: statement->getBody()->getStatements()){
+      generateIRStatement(current);
+    }
+
+  }
+
+  vector<llvm::Type*> getParametersTypes(const vector<Parameter*>& parameters) {
+    vector<llvm::Type*> types;
+
+    for (const Parameter* parameter : parameters) {
+      llvm::Type* llvmType = llvm.getLLVMType(parameter->getType());
+      types.emplace_back(llvmType);
+    }
+    return types;
+  }
+
+  void generateReturn(Return* node) {
+    llvm::Value* value = llvm.getLLVMValue(node->getValue());
+    llvm.builder.CreateRet(value);
+  }
+
+  void generateVariable(Variable* statement){
+    const string name = statement->getName();
+    llvm::Type* type = llvm.getLLVMType(statement->getType());
+
+    llvm::AllocaInst* variable = llvm.builder.CreateAlloca(type, nullptr, name);
+
+    if (!dynamic_cast<Null*>(statement->getValue())){
+      llvm::Value* value = llvm.getLLVMValue(statement->getValue());
+      llvm.builder.CreateStore(value, variable);
+    }
+
+    scopes.declare(name, variable);
   }
 
   void printIR() const {

@@ -11,3 +11,8 @@ var uint64 h = 5;
 var float32 i = 5.0;
 var float64 l = 5.0;
 
+func int test(){
+  return 5;
+}
+
+var int x = 5 + test();
