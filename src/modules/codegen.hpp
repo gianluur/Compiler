@@ -42,6 +42,10 @@ private:
     else if (Return* statement = dynamic_cast<Return*>(current)){
       generateReturn(statement);
     }
+    // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
+    //   generateFunctionCall(statement);
+    // }
+
     else 
       error("Current node isn't handled yet");
   }
@@ -62,6 +66,10 @@ private:
     }
     llvm.scope.exitScope();
 
+    if (name != "main")
+      llvm.scope.declareFunction(name, function);
+    
+    llvm::verifyFunction(*function);
   }
 
   vector<llvm::Type*> getParametersTypes(const vector<Parameter*>& parameters) {
@@ -94,14 +102,15 @@ private:
       llvm.builder.CreateStore(value, variable);
     }
 
-    llvm.scope.declare(name, variable);
+    llvm.scope.declareVariable(name, variable);
   }
 
   void generateGlobalVariable(Variable* statement){
     bool isConstant = (statement->getKeyword() == "const");
     llvm::Constant* value = llvm::cast<llvm::Constant>(llvm.getLLVMValue(statement->getValue()));
     llvm::Type* type = llvm.getLLVMType(statement->getType());
-    new llvm::GlobalVariable(*llvm.module, type, isConstant, llvm::GlobalValue::ExternalLinkage, value, statement->getName());
+    unique_ptr<llvm::GlobalVariable> globalVariable = std::make_unique<llvm::GlobalVariable>(*llvm.module, type, isConstant, llvm::GlobalValue::ExternalLinkage, value, statement->getName());
+    llvm.scope.declareGlobalVariable(statement->getName(), globalVariable.get());
   }
 
   void printIR() const {

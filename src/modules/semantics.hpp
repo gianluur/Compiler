@@ -231,6 +231,13 @@ private:
     return m_scopes->find(name).type;
   }
 
+  string getFunctionCallType(FunctionCall* functionCall){
+    const string name = functionCall->getIdentifier()->getName();
+    if (!m_scopes->isDeclared(name))
+      error("The function call to " + name + " couldn't be executed because the function definition wasn't found", m_line);
+    return m_scopes->find(name).type;
+  }
+
   string analyzeUnaryOperator(UnaryOperator* unaryOperator){
     string type = analyzeOperand(unaryOperator->getOperand());
     return type;
@@ -284,7 +291,10 @@ private:
     
     else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(operand))
       return analyzeUnaryOperator(unaryOperator); 
-
+    
+    else if (FunctionCall* functionCall = dynamic_cast<FunctionCall*>(operand)){
+      return getFunctionCallType(functionCall);
+    }
     else if (Cast* cast = dynamic_cast<Cast*>(operand))
       return cast->getTargetType();
   

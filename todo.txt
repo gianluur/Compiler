@@ -1,2 +1,8 @@
+TODO: Can't add function call because they are bugged in the parser, they aren't recognized as an expression
+TODO: Can't add cast in expression
+
+TODO: Add function call 
+TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast !!!PERFORMANCE BOOST!!!!
+
 TODO: Add array
 TODO: Add checks for overflow for smaller integers / float

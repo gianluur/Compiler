@@ -1,6 +1,9 @@
-var int test2 = 10;
+func int test(int p1, string p2){
+  return 5;
+}
 
 func int main(){
-  var int test = 5;
+  test(6, "te");
+  var int x = 5 + test(3, "t");
   return 0;
 }

@@ -687,7 +687,7 @@ private:
 
 };
 
-class FunctionCall: public ASTNode {
+class FunctionCall: public Expression {
 public:
   FunctionCall(unique_ptr<Identifier> name,  vector<unique_ptr<Expression>> arguments):
     m_name(std::move(name)), m_arguments(std::move(arguments)) {} 
