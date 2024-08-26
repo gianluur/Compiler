@@ -130,8 +130,7 @@ bool isType(const Token& token) const {
   unique_ptr<ASTNode> parseASTNode(const bool isScoped = false){
     Token& token = nextToken();
 
-    switch (token.type)
-    {
+    switch (token.type){
     case TokenType::VAR:
     case TokenType::CONST:
       return parseVariable();
@@ -315,14 +314,13 @@ bool isType(const Token& token) const {
     if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected a condition after while keyword in do-while statement", m_line);
     unique_ptr<Expression> condition = parseExpression();
+    m_semantics->analyzeCondition(condition.get());
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
       error("Expected semicolon at the end of do-while statement", m_line);
     consumeToken();
 
-    auto doStatement = make_unique<Do>(std::move(body), std::move(condition));
-    m_semantics->analyzeBasicLoop(doStatement.get());
-    return doStatement;
+    return make_unique<Do>(std::move(body), std::move(condition));
   }
 
   unique_ptr<While> parseWhileStatement(){
@@ -331,12 +329,11 @@ bool isType(const Token& token) const {
     if(!isValidExpressionToken() && !isType(nextToken()))
       error("Expected condition after while keyword", m_line);
     unique_ptr<Expression> condition = parseExpression();
+    m_semantics->analyzeCondition(condition.get());
 
     unique_ptr<BlockStatement> block = parseBlockStatement(true);
 
-    auto whileStatement = make_unique<While>(std::move(condition), std::move(block));
-    m_semantics->analyzeBasicLoop(whileStatement.get());
-    return whileStatement;
+    return make_unique<While>(std::move(condition), std::move(block));
   }
 
   unique_ptr<AssigmentOperator> parseAssigmentOperator(std::optional<Token> optIdentifier = {}){    
@@ -370,6 +367,8 @@ bool isType(const Token& token) const {
   unique_ptr<For> parseForStatement(){
     consumeToken();
 
+    m_semantics->m_scopes->enterScope();
+    
     if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
       error("Expected variable initialization after for keyword", m_line);
     unique_ptr<Variable> initialization = parseVariable();
@@ -388,6 +387,8 @@ bool isType(const Token& token) const {
 
     unique_ptr<BlockStatement> block = parseBlockStatement(true);  
 
+    m_semantics->m_scopes->exitScope();
+
     auto forStatement = make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
     m_semantics->analyzeFor(forStatement.get());
     return forStatement;
@@ -399,6 +400,7 @@ bool isType(const Token& token) const {
     if(!isValidExpressionToken() && !isType(nextToken()))
       error("Expected condition after if keyword", m_line);
     unique_ptr<Expression> condition = parseExpression();
+    m_semantics->analyzeCondition(condition.get());
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
 
@@ -407,17 +409,15 @@ bool isType(const Token& token) const {
 
       unique_ptr<BlockStatement> elseBody = parseBlockStatement();
 
-      auto ifStatement = make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
-      m_semantics->analyzeIfStatement(ifStatement.get());
-      return ifStatement;
+      return make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
     }
 
-    auto ifStatement = make_unique<IfStatement>(std::move(condition), std::move(body));
-    m_semantics->analyzeIfStatement(ifStatement.get());
-    return ifStatement;
+    return make_unique<IfStatement>(std::move(condition), std::move(body));
   }
 
   unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false){
+    m_semantics->m_scopes->enterScope();
+
     if (!isNextTokenType(TokenType::LCURLY)) 
       error("Expected open bracket for block statement", m_line);
     consumeToken();
@@ -433,6 +433,7 @@ bool isType(const Token& token) const {
       error("Expected closing bracket after if statement", m_line);
     consumeToken();
 
+    m_semantics->m_scopes->exitScope();
     return make_unique<BlockStatement>(std::move(statements));
   }
 

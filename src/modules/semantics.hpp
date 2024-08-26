@@ -18,6 +18,8 @@ class Semantics {
 public:
   Semantics(size_t& line): m_scopes(make_unique<Scope>()), m_line(line) {}
 
+   unique_ptr<Scope> m_scopes;
+
   void analyzeVariable(Variable* variable){
     string keyword = variable->getKeyword();
     string type = variable->getType();
@@ -53,12 +55,14 @@ public:
     Identifier* identifier = function->getIdentifier();
     const string type = function->getType();
     vector<Parameter*> parameters = function->getParameters();
-
+    BlockStatement* body = function->getBody();
     m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
 
-    m_scopes->enterScope();
-    analyzeBody(function, type);
-    m_scopes->exitScope();
+    for (ASTNode* current: body->getStatements()){
+      if (Return* statement = dynamic_cast<Return*>(current)){
+        analyzeReturn(statement, type);
+      }
+    }
   }
 
   void analyzeFunctionCall(FunctionCall* call){
@@ -85,29 +89,11 @@ public:
     }
   }
 
-  void analyzeIfStatement(IfStatement* statement){
-    analyzeBasicLoop(statement); //checks condition and body :P
-    ElseStatement* elseStatement = statement->getElseStatement();
-    if (elseStatement != nullptr)
-      analyzeBody(elseStatement);
-  }
-
-  template <typename T>
-  void analyzeBasicLoop(T* statement){
-    analyzeCondition(statement);
-
-    m_scopes->enterScope();
-    analyzeBody(statement);
-    m_scopes->exitScope();
-  }
-
   void analyzeFor(For* statement){  
     m_scopes->enterScope();
     analyzeVariable(statement->getInitialization());
-    analyzeCondition(statement);      
+    analyzeCondition(statement->getCondition());      
     analyzeAssignmentOperator(statement->getUpdate());
-
-    analyzeBody(statement);
     m_scopes->exitScope();
   }
 
@@ -135,71 +121,16 @@ public:
       error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
   }
 
-private:
-   unique_ptr<Scope> m_scopes;
-   size_t& m_line;
-
-  void analyzeNode(ASTNode* current) {
-    if (current == nullptr) return; 
-
-    if (Variable* variable = dynamic_cast<Variable*>(current)){
-      analyzeVariable(variable);
-    }
-    else if (AssigmentOperator* assignmentOperator = dynamic_cast<AssigmentOperator*>(current)){
-      analyzeAssignmentOperator(assignmentOperator);
-    }
-
-    else if (Function* function = dynamic_cast<Function*>(current)){
-      analyzeFunction(function);
-    }
-    
-    else if (FunctionCall* call = dynamic_cast<FunctionCall*>(current)){
-      analyzeFunctionCall(call);
-    }
-
-    else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
-      analyzeIfStatement(statement);
-    }
-
-    else if (While* statement = dynamic_cast<While*>(current)){
-      analyzeBasicLoop(statement);
-    }
-
-    else if (Do* statement = dynamic_cast<Do*>(current)){
-      analyzeBasicLoop(statement);
-    }
-
-    else if (For* statement = dynamic_cast<For*>(current)){
-      analyzeFor(statement);
-    }
-
-    // else if (Struct* statement = dynamic_cast<Struct*>(current)){
-    //   cout << "struct "; //TODO
-    // }
-
-  }
-
-  template <typename T>
-  void analyzeBody(T* statement, const string functionType = "error") {
-    BlockStatement* body = statement->getBody();
-    for(ASTNode* current : body->getStatements()){
-      analyzeNode(current);
-
-      if (Return* statement = dynamic_cast<Return*>(current)){
-        analyzeReturn(statement, functionType);
-      }
-    }
-  }
-
-  template <typename T>
-  void analyzeCondition(T* statement) {
-    auto* condition = statement->getCondition();
+  void analyzeCondition(Expression* condition) {
     const string expectedType = "bool";
     const string valueType = getExpressionType(expectedType, condition);
 
     if (valueType != expectedType)
       error("Conditions must always evaluate to boolean", m_line);
   }
+
+private:
+   size_t& m_line;
 
   bool isSmallerType(const string& expectedType, const string& valueType){
     if ((expectedType == "int" || expectedType == "int8" || expectedType == "int16" || 
