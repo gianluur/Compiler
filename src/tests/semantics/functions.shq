@@ -1,7 +1,3 @@
 func int main(){
-  var int update = 0;
-
-  for var int i = 0; true; update += 1; {
-    var int x = i + 2;
-  }
+  var int update = 3 + "test";
 }

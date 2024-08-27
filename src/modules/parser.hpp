@@ -248,7 +248,8 @@ bool isType(const Token& token) const {
   }
 
   unique_ptr<Return> parseReturn(const bool isScoped){
-    consumeToken();
+    const string keyword = (consumeToken()).lexemes;
+
     if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected an expresion/identifier/literal after return keyword", m_line);
     unique_ptr<Expression> value = parseExpression();
@@ -256,9 +257,8 @@ bool isType(const Token& token) const {
       error("Expected a semicolon after expression in return statement", m_line);
     consumeToken();
 
-    auto statement = make_unique<Return>(std::move(value));
-    m_semantics->isNodeScoped(statement.get(), isScoped);
-    return statement;
+    m_semantics->isNodeScoped(keyword, isScoped);
+    return make_unique<Return>(std::move(value));
   }
 
   unique_ptr<Function> parseFunction() {
@@ -287,7 +287,6 @@ bool isType(const Token& token) const {
     auto function = make_unique<Function>(returnType, make_unique<Identifier>(name), std::move(parameters), std::move(body));
     m_semantics->analyzeFunction(function.get());
     return function;
-
   }
 
   unique_ptr<LoopJumps> parseJumps(const bool isScoped) {
@@ -297,9 +296,8 @@ bool isType(const Token& token) const {
       error("Missing semicolon after " + keyword);
     consumeToken();
     
-    auto loopJump = make_unique<LoopJumps>(keyword);
-    m_semantics->isNodeScoped(loopJump.get(), isScoped);
-    return loopJump;
+    m_semantics->isNodeScoped(keyword, isScoped);
+    return make_unique<LoopJumps>(keyword);
   }
 
   unique_ptr<Do> parseDoStatement(){
@@ -348,7 +346,8 @@ bool isType(const Token& token) const {
         identifier = consumeToken();
     }
     
-    //add a check here
+    if (!isAssigmentOperator(nextToken()))
+      error("Expected a assigment operator after identifier", m_line);
     Token& op = consumeToken();
 
     if (!isValidExpressionToken() && !isType(nextToken()))
@@ -359,15 +358,13 @@ bool isType(const Token& token) const {
       error("In this variable decleration: '" + identifier.lexemes  + "' was expected a semicolon", m_line);
     consumeToken();
 
-    auto assigmentOperator = make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
-    m_semantics->analyzeAssignmentOperator(assigmentOperator.get());
-    return assigmentOperator;
+    m_semantics->analyzeAssignmentOperator(identifier.lexemes, value.get());
+    return make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
   }
 
   unique_ptr<For> parseForStatement(){
-    consumeToken();
-
     m_semantics->m_scopes->enterScope();
+    consumeToken();
     
     if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
       error("Expected variable initialization after for keyword", m_line);
@@ -376,6 +373,7 @@ bool isType(const Token& token) const {
     if (!isValidExpressionToken() && !isType(nextToken()))
       error("Expected a condition after variable initialization in for statement", m_line);
     unique_ptr<Expression> condition = parseExpression();
+    m_semantics->analyzeCondition(condition.get());
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
       error("Expected semicolon after condition in for loop", m_line);
@@ -388,10 +386,7 @@ bool isType(const Token& token) const {
     unique_ptr<BlockStatement> block = parseBlockStatement(true);  
 
     m_semantics->m_scopes->exitScope();
-
-    auto forStatement = make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
-    m_semantics->analyzeFor(forStatement.get());
-    return forStatement;
+    return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
   }
 
   unique_ptr<IfStatement> parseIfStatement(){
@@ -408,11 +403,10 @@ bool isType(const Token& token) const {
       consumeToken();
 
       unique_ptr<BlockStatement> elseBody = parseBlockStatement();
-
       return make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
     }
-
-    return make_unique<IfStatement>(std::move(condition), std::move(body));
+    else 
+      return make_unique<IfStatement>(std::move(condition), std::move(body));
   }
 
   unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false){

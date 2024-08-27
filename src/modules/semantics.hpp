@@ -35,17 +35,14 @@ public:
     }        
   }
 
-  void analyzeAssignmentOperator(AssigmentOperator* statement){
-    Identifier* identifier = statement->getIdentifier();
-    Expression* value = statement->getValue();
-
-    if (!m_scopes->isDeclared(identifier->getName()))
-      error("Identifier: " + identifier->getName() + " is not declared", m_line);
+  void analyzeAssignmentOperator(const string& name, Expression* value){
+    if (!m_scopes->isDeclared(name))
+      error("Identifier: " + name + " is not declared", m_line);
     
-    if (m_scopes->find(identifier->getName()).keyword == "const")
+    if (m_scopes->find(name).keyword == "const")
       error("Can't reassign to a constant", m_line);
 
-    const string type = m_scopes->find(identifier->getName()).type;
+    const string type = m_scopes->find(name).type;
     const string valueType = getExpressionType(type, value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
@@ -89,28 +86,12 @@ public:
     }
   }
 
-  void analyzeFor(For* statement){  
-    m_scopes->enterScope();
-    analyzeVariable(statement->getInitialization());
-    analyzeCondition(statement->getCondition());      
-    analyzeAssignmentOperator(statement->getUpdate());
-    m_scopes->exitScope();
-  }
-
-  template <typename T>
-  void isNodeScoped(T* statement, const bool isScoped){
-    string keyword, scope;
+  void isNodeScoped(const string keyword, const bool isScoped){
     if (!isScoped){
-      keyword = statement->getKeyword();
-      scope = (keyword == "return") ? "function body" : "loop";
+      const string scope = (keyword == "return") ? "function body" : "loop";
       error("You can't use " + keyword + " outside a " + scope, m_line);
     }
   }
-
-  void analyzeLoopJumps(LoopJumps* statement, const bool isLoopScoped){
-    if (!isLoopScoped)
-      error("You can't use " + statement->getKeyword() + " outside of a loop", m_line);
-  } 
 
   void analyzeReturn(Return* statement, const string& type){
     if (type == "null")

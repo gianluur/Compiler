@@ -1,4 +1,3 @@
-TODO: Can't add function call because they are bugged in the parser, they aren't recognized as an expression
 TODO: Can't add cast in expression
 
 TODO: Add function call 
