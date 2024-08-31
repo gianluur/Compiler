@@ -45,42 +45,99 @@ private:
     else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
       generateIfStatement(statement);
     }
+    else if (AssigmentOperator* statement = dynamic_cast<AssigmentOperator*>(current)){
+      generateAssignmentOperator(statement);
+    }
     // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
     //   generateFunctionCall(statement);
     // }
-
     else 
       error("Current node isn't handled yet");
   }
 
-  void generateIfStatement(IfStatement* statement){
-    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+  void generateAssignmentOperator(AssigmentOperator* statement){
+    string op = statement->getOperator();
 
-    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
-    llvm::BasicBlock* ifBody = llvm::BasicBlock::Create(llvm.context, "body", currentFunction);
-    llvm::BasicBlock* elseBody = nullptr;
-    if (statement->getElseStatement() != nullptr)
-      elseBody = llvm::BasicBlock::Create(llvm.context, "else");
-    llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(llvm.context, "ifcont"); //basically everything after the if-else part
+    llvm::AllocaInst* variable = llvm.scope.findVariable(statement->getIdentifier()->getName());
+    llvm::Type* variableType = variable->getAllocatedType();
 
-    llvm.builder.CreateCondBr(condition, ifBody, elseBody);
-
-    llvm.builder.SetInsertPoint(ifBody);
-    for(ASTNode* current: statement->getBody()->getStatements()){
-      generateIRStatement(current);
-    }
-    llvm.builder.CreateBr(mergeBlock);
+    llvm::Value* assignmentValue = llvm.getLLVMValue(statement->getValue());
+    llvm::Value* currentValue = llvm.builder.CreateLoad(variableType, variable, "currentValue");
+    llvm::Value* result;
 
 
-    currentFunction->insert(currentFunction->end(), elseBody);
-    llvm.builder.SetInsertPoint(elseBody);
-    if (elseBody){
-      for(ASTNode* current: statement->getElseStatement()->getBody()->getStatements()){
-        generateIRStatement(current);
+    if (op == "=") {
+      result = assignmentValue;
+    } 
+    else {
+      bool isFloat = variableType->isFloatTy();
+
+      if (op == "+=") {
+        result = isFloat ? llvm.builder.CreateFAdd(currentValue, assignmentValue, "addtmp") 
+                         : llvm.builder.CreateAdd(currentValue, assignmentValue, "addtmp");
+      } else if (op == "-=") {
+        result = isFloat ? llvm.builder.CreateFSub(currentValue, assignmentValue, "subtmp") 
+                         : llvm.builder.CreateSub(currentValue, assignmentValue, "subtmp");
+      } else if (op == "*=") {
+        result = isFloat ? llvm.builder.CreateFMul(currentValue, assignmentValue, "multmp") 
+                         : llvm.builder.CreateMul(currentValue, assignmentValue, "multmp");
+      } else if (op == "/=") {
+        result = isFloat ? llvm.builder.CreateFDiv(currentValue, assignmentValue, "divtmp") 
+                         : llvm.builder.CreateSDiv(currentValue, assignmentValue, "divtmp");
+      } else if (op == "%=") {
+        result = isFloat ? llvm.builder.CreateFRem(currentValue, assignmentValue, "modtmp") 
+                         : llvm.builder.CreateSRem(currentValue, assignmentValue, "modtmp");
+      } else {
+        error("Unsupported assignment operator: " + op);
+        return;
       }
     }
+    llvm.builder.CreateStore(result, variable);
+ 
+  }
+
+  void generateIfStatement(IfStatement* statement){
+    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+    if (!condition) {
+      error("Failed to generate condition for if statement");
+      return;
+    }
+
+    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
+    if (!currentFunction) {
+      error("If statement must be inside a function");
+      return;
+    }
+
+    llvm::BasicBlock* thenBlock = llvm::BasicBlock::Create(llvm.context, "then", currentFunction);
+    llvm::BasicBlock* elseBlock = llvm::BasicBlock::Create(llvm.context, "else");
+    llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(llvm.context, "ifcont");
+
+    llvm.builder.CreateCondBr(condition, thenBlock, elseBlock);
+
+    llvm.builder.SetInsertPoint(thenBlock);
+    llvm.scope.enterScope();
+    for (ASTNode* current : statement->getBody()->getStatements()) {
+      generateIRStatement(current);
+    }
+    llvm.scope.exitScope();
     llvm.builder.CreateBr(mergeBlock);
-    elseBody = llvm.builder.GetInsertBlock();
+    
+    thenBlock = llvm.builder.GetInsertBlock();
+
+    currentFunction->insert(currentFunction->end(), elseBlock);
+    llvm.builder.SetInsertPoint(elseBlock);
+    
+    if (statement->getElseStatement()) {
+      llvm.scope.enterScope();
+      for (ASTNode* current : statement->getElseStatement()->getBody()->getStatements()) {
+        generateIRStatement(current);
+      }
+      llvm.scope.exitScope();
+    }
+    llvm.builder.CreateBr(mergeBlock);
+    
+    elseBlock = llvm.builder.GetInsertBlock();
 
     currentFunction->insert(currentFunction->end(), mergeBlock);
     llvm.builder.SetInsertPoint(mergeBlock);

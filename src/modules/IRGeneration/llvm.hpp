@@ -183,7 +183,43 @@ public:
         return builder.CreateFRem(leftValue, rightValue, "faddtmp");
       else 
         return builder.CreateSRem(leftValue, rightValue, "addtmp");
-        
+
+    else if (op == "==") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpUEQ(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpEQ(leftValue, rightValue, "cmptmp");
+
+    else if (op == "!=") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpUNE(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpNE(leftValue, rightValue, "cmptmp");
+    
+    else if (op == "<") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpULT(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpSLT(leftValue, rightValue, "cmptmp");
+    
+    else if (op == "<=") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpULE(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpSLE(leftValue, rightValue, "cmptmp");
+    
+    else if (op == ">") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpUGT(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpSGT(leftValue, rightValue, "cmptmp");
+    
+    else if (op == ">=") 
+      if (leftValue->getType()->isFloatTy() && rightValue->getType()->isFloatTy()) 
+        return builder.CreateFCmpUGE(leftValue, rightValue, "cmptmp");
+      else 
+        return builder.CreateICmpSGE(leftValue, rightValue, "cmptmp");
+    
     else {
       error("Unknown binary operator"); 
       return nullptr;
