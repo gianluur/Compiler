@@ -52,14 +52,7 @@ public:
     Identifier* identifier = function->getIdentifier();
     const string type = function->getType();
     vector<Parameter*> parameters = function->getParameters();
-    BlockStatement* body = function->getBody();
     m_scopes->declare(identifier->getName(), Symbol("func", type, parameters));
-
-    for (ASTNode* current: body->getStatements()){
-      if (Return* statement = dynamic_cast<Return*>(current)){
-        analyzeReturn(statement, type);
-      }
-    }
   }
 
   void analyzeFunctionCall(FunctionCall* call){
@@ -93,11 +86,11 @@ public:
     }
   }
 
-  void analyzeReturn(Return* statement, const string& type){
+  void analyzeReturn(Expression* value, const string& type){
     if (type == "null")
       error("Return statement found in a function returning null", m_line);
-
-    const string valueType = getExpressionType(type, statement->getValue());
+    cout << type << '\n';
+    const string valueType = getExpressionType(type, value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
   }
@@ -151,9 +144,7 @@ private:
   }
 
   string analyzeUnaryOperator(UnaryOperator* unaryOperator){
-    string type = analyzeOperand(unaryOperator->getOperand());
-    return type;
-
+    return analyzeOperand(unaryOperator->getOperand());
   }
 
   string analyzeBinaryOperator(BinaryOperator* binaryOperator) {
@@ -168,7 +159,6 @@ private:
     else {
       leftType = "bool"; rightType = "bool";
     }
-
 
     if (leftType != rightType)
       error("Type Mismatch in binary operator: " + leftType + " and " + rightType + " do not match", m_line);

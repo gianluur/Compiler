@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <string>
 
+#include "error.hpp"
+
 using std::cout, std::vector, std::string, std::unordered_map;
 
 struct Symbol {
@@ -27,16 +29,19 @@ public:
 
   void enterScope() {
     scopes.emplace_back();
+    cout << "Entered new scope\n";
   }
 
   void exitScope(){
     scopes.pop_back();
+    cout << "Exited new scope\n";
   }
 
   void declare(const string& name, const Symbol& symbol) {
     if (isRedeclared(name))
       error("Identifier: " + name + " is already declared");
     scopes.back().emplace(name, symbol);
+    cout << "declared: " << name << " at scope #" << scopes.size() <<  "\n";
   }
 
   bool isRedeclared(const string& name) const {
@@ -61,10 +66,4 @@ public:
 
 private:
   vector<unordered_map<string, Symbol>> scopes;
-
-  void error(const string& message) const {
-    cout << message << endl;
-    exit(1);
-  }
-
 };

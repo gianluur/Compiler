@@ -127,7 +127,7 @@ bool isType(const Token& token) const {
            token.type == TokenType::LITERAL_BOOLEAN;
   }
 
-  unique_ptr<ASTNode> parseASTNode(const bool isScoped = false){
+  unique_ptr<ASTNode> parseASTNode(const bool isScoped = false, const string functionType = ""){
     Token& token = nextToken();
 
     switch (token.type){
@@ -157,7 +157,7 @@ bool isType(const Token& token) const {
       return parseStruct();
 
     case TokenType::RETURN:
-      return parseReturn(isScoped);
+      return parseReturn(isScoped, functionType);
 
     case TokenType::BREAK:
     case TokenType::CONTINUE:
@@ -254,7 +254,7 @@ bool isType(const Token& token) const {
     return parameters;
   }
 
-  unique_ptr<Return> parseReturn(const bool isScoped){
+  unique_ptr<Return> parseReturn(const bool isScoped, const string functionType){
     const string keyword = (consumeToken()).lexemes;
 
     if (!isValidExpressionToken() && !isType(nextToken()))
@@ -265,6 +265,7 @@ bool isType(const Token& token) const {
     consumeToken();
 
     m_semantics->isNodeScoped(keyword, isScoped);
+    m_semantics->analyzeReturn(value.get(), functionType);
     return make_unique<Return>(std::move(value));
   }
 
@@ -289,7 +290,7 @@ bool isType(const Token& token) const {
       error("Expected open parenethesis for parameters after func", m_line);
     consumeToken();
 
-    unique_ptr<BlockStatement> body = parseBlockStatement(true);
+    unique_ptr<BlockStatement> body = parseBlockStatement(true, returnType.lexemes);
 
     auto function = make_unique<Function>(returnType, make_unique<Identifier>(name), std::move(parameters), std::move(body));
     m_semantics->analyzeFunction(function.get());
@@ -416,7 +417,7 @@ bool isType(const Token& token) const {
       return make_unique<IfStatement>(std::move(condition), std::move(body));
   }
 
-  unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false){
+  unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false, const string functionType = ""){
     m_semantics->m_scopes->enterScope();
 
     if (!isNextTokenType(TokenType::LCURLY)) 
@@ -427,7 +428,7 @@ bool isType(const Token& token) const {
     while (!isNextTokenType(TokenType::RCURLY)){
       if (i + 1 >= m_tokens.size()) 
         error("No closing bracket in block statement", m_line);
-      statements.emplace_back(parseASTNode(isScoped));
+      statements.emplace_back(parseASTNode(isScoped, functionType));
     }
 
     if (!isNextTokenType(TokenType::RCURLY)) 
@@ -519,7 +520,6 @@ bool isType(const Token& token) const {
 
     while (isValidExpressionToken()) {
         Token& current = consumeToken();
-        cout << "OUT " << current.lexemes  << " " << isFunctionCall << '\n';
 
         if (isLiteral(current)) {
           operands.push(parseLiterals(current));
@@ -580,8 +580,6 @@ bool isType(const Token& token) const {
       operators.pop(); // Pop the left parenthesis
     } 
     else {
-      cout << "IN " << current.lexemes << " " << isFunctionCall << '\n';
-
       if (isFunctionCall){
         shouldFunctionCallEnd = true;
         i--;

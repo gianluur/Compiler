@@ -42,12 +42,48 @@ private:
     else if (Return* statement = dynamic_cast<Return*>(current)){
       generateReturn(statement);
     }
+    else if (IfStatement* statement = dynamic_cast<IfStatement*>(current)){
+      generateIfStatement(statement);
+    }
     // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
     //   generateFunctionCall(statement);
     // }
 
     else 
       error("Current node isn't handled yet");
+  }
+
+  void generateIfStatement(IfStatement* statement){
+    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+
+    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
+    llvm::BasicBlock* ifBody = llvm::BasicBlock::Create(llvm.context, "body", currentFunction);
+    llvm::BasicBlock* elseBody = nullptr;
+    if (statement->getElseStatement() != nullptr)
+      elseBody = llvm::BasicBlock::Create(llvm.context, "else");
+    llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(llvm.context, "ifcont"); //basically everything after the if-else part
+
+    llvm.builder.CreateCondBr(condition, ifBody, elseBody);
+
+    llvm.builder.SetInsertPoint(ifBody);
+    for(ASTNode* current: statement->getBody()->getStatements()){
+      generateIRStatement(current);
+    }
+    llvm.builder.CreateBr(mergeBlock);
+
+
+    currentFunction->insert(currentFunction->end(), elseBody);
+    llvm.builder.SetInsertPoint(elseBody);
+    if (elseBody){
+      for(ASTNode* current: statement->getElseStatement()->getBody()->getStatements()){
+        generateIRStatement(current);
+      }
+    }
+    llvm.builder.CreateBr(mergeBlock);
+    elseBody = llvm.builder.GetInsertBlock();
+
+    currentFunction->insert(currentFunction->end(), mergeBlock);
+    llvm.builder.SetInsertPoint(mergeBlock);
   }
 
   void generateFunction(Function* statement){
