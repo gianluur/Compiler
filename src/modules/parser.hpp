@@ -186,15 +186,21 @@ bool isType(const Token& token) const {
     return make_unique<Struct>(make_unique<Identifier>(name), std::move(body));
   }
 
-  unique_ptr<FunctionCall>parseFunctionCall(const Token& name){
-    consumeToken();
-
-    vector<unique_ptr<Expression>> arguments = parseArguments();
+  unique_ptr<FunctionCall> parseFunctionCall(const Token& name){
+    consumeToken(); // consumes LPAREN
     
-    if (!isNextTokenType(TokenType::RPAREN))
-      error("Expected closing parenthesis after arguments in funtion call", m_line);
-    consumeToken();
-
+    vector<unique_ptr<Expression>> arguments;
+    if (isNextTokenType(TokenType::RPAREN)){
+      consumeToken();
+    }
+    else {
+      arguments = parseArguments();
+      
+      if (!isNextTokenType(TokenType::RPAREN))
+        error("Expected closing parenthesis after arguments in funtion call " + name.lexemes + " " + m_tokens.at(i).lexemes, m_line);
+      consumeToken();
+    }
+  
     auto functionCall = make_unique<FunctionCall>(make_unique<Identifier>(name), std::move(arguments));
     m_semantics->analyzeFunctionCall(functionCall.get());
     return functionCall;
@@ -202,24 +208,25 @@ bool isType(const Token& token) const {
 
   vector<unique_ptr<Expression>> parseArguments(){
     vector<unique_ptr<Expression>> arguments;
-    if (isNextTokenType(TokenType::RPAREN)) {
-      return arguments;
-    }
 
     while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
       if (!isValidExpressionToken() && !isType(nextToken()))
-        error("Expected argument in function call", m_line);
-      unique_ptr<Expression> argument = parseExpression();
+        error("Expected a valid argument in function call", m_line);
 
-      arguments.emplace_back(std::move(argument));
+      arguments.emplace_back(parseExpression(true));
 
       if (isNextTokenType(TokenType::COMMA)) {
         consumeToken();
         if (isNextTokenType(TokenType::RPAREN)) 
           error("Expected another argument after comma in function call", m_line);
       }
+      else if (isNextTokenType(TokenType::RPAREN))
+        break;
+      else{
+        cout << nextToken().lexemes << '\n';
+        error("Unexpected error in function call", m_line);
+      }
     }
-    i--;
     return arguments;
   }
 
@@ -498,7 +505,92 @@ bool isType(const Token& token) const {
     }
   } 
 
-  // vvv CREATING NEW EXPRESSION FUNCTION DOWN HERE vvv
+  unique_ptr<Expression> parseExpression(const bool isFunctionCall = false){
+    static unordered_map<string, int> precedence = { 
+      {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
+      {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
+      {"!", 3}, {"&&", 2}, {"||", 1}
+    };
+
+    const string castType = checkInitialCast();
+
+    stack<Token> operators;
+    stack<unique_ptr<Expression>> operands;
+
+    while (isValidExpressionToken()) {
+        Token& current = consumeToken();
+        cout << "OUT " << current.lexemes  << " " << isFunctionCall << '\n';
+
+        if (isLiteral(current)) {
+          operands.push(parseLiterals(current));
+        } 
+        else if (current.type == TokenType::IDENTIFIER) {
+          if (isNextTokenType(TokenType::LPAREN)) {
+            operands.push(parseFunctionCall(current));
+          } 
+          else {
+            operands.push(make_unique<Identifier>(current));
+          }
+        } 
+        else if (isMathOperator(current) || isBooleanOperator(current) || isComparisonOperator(current)) {
+          handleOperator(current, operators, operands, precedence);
+        } 
+        else if (current.type == TokenType::LPAREN) {
+          operators.push(current);
+        } 
+        else if (current.type == TokenType::RPAREN) {
+          bool shouldFunctionCallEnd = false;
+          handleClosingParenthesis(operators, operands, isFunctionCall, shouldFunctionCallEnd, current);
+          if (isFunctionCall && shouldFunctionCallEnd){
+            break;
+          }
+        }
+        else {
+          error("Unexpected token: " + current.lexemes, m_line);
+        }
+    }
+
+    while (!operators.empty()) {
+      if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) 
+        error("Mismatched parentheses", m_line);
+      applyOperator(operators, operands);
+    }
+
+    if (operands.size() == 0)
+      error("Invalid expression", m_line);
+    auto expression = std::move(operands.top());
+
+    if (!castType.empty()) {
+      if (!isNextTokenType(TokenType::RPAREN)){
+        error("Expected closing parenthesis after the expression in cast expression");
+      }
+      consumeToken();
+      return make_unique<Cast>(std::move(expression), castType);
+    }
+
+    return expression;
+  }
+
+  void handleClosingParenthesis(stack<Token>& operators, stack<unique_ptr<Expression>>& operands, const bool isFunctionCall, bool& shouldFunctionCallEnd, const Token& current) {
+    while (!operators.empty() && operators.top().type != TokenType::LPAREN) {
+      applyOperator(operators, operands);
+    }
+    
+    if (!operators.empty() && operators.top().type == TokenType::LPAREN) {      
+      operators.pop(); // Pop the left parenthesis
+    } 
+    else {
+      cout << "IN " << current.lexemes << " " << isFunctionCall << '\n';
+
+      if (isFunctionCall){
+        shouldFunctionCallEnd = true;
+        i--;
+        return;
+      }
+      if (!isValidExpressionToken()) return;
+      error("Mismatched parentheses " + nextToken().lexemes, m_line);
+    }
+  }
 
   unique_ptr<Literal> parseLiterals(const Token& current){
     switch(current.type) {
@@ -561,82 +653,5 @@ bool isType(const Token& token) const {
     }
     operators.push(current);
   }
-
-  void handleClosingParenthesis(stack<Token>& operators, stack<unique_ptr<Expression>>& operands) {
-    while (!operators.empty() && operators.top().type != TokenType::LPAREN) {
-      applyOperator(operators, operands);
-    }
-    
-    if (!operators.empty() && operators.top().type == TokenType::LPAREN) {
-      operators.pop(); // Pop the left parenthesis
-    } 
-    else {
-      if (!isValidExpressionToken()) return;
-      error("Mismatched parentheses", m_line);
-    }
-  }
-
-  //!!! NEW !!!
-  unique_ptr<Expression> parseExpression(){
-    static unordered_map<string, int> precedence = { 
-        {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
-        {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
-        {"!", 3}, {"&&", 2}, {"||", 1}
-    };
-
-    const string castType = checkInitialCast();
-
-    stack<Token> operators;
-    stack<unique_ptr<Expression>> operands;
-
-    while (isValidExpressionToken()) {
-        Token& current = consumeToken();
-
-        if (isLiteral(current)) {
-            operands.push(parseLiterals(current));
-        } 
-        else if (current.type == TokenType::IDENTIFIER) {
-            if (isNextTokenType(TokenType::LPAREN)) {
-                operands.push(parseFunctionCall(current));
-            } 
-            else {
-                operands.push(make_unique<Identifier>(current));
-            }
-        } 
-        else if (isMathOperator(current) || isBooleanOperator(current) || isComparisonOperator(current)) {
-            handleOperator(current, operators, operands, precedence);
-        } 
-        else if (current.type == TokenType::LPAREN) {
-            operators.push(current);
-        } 
-        else if (current.type == TokenType::RPAREN) {
-            handleClosingParenthesis(operators, operands);
-        }
-        else {
-            error("Unexpected token: " + current.lexemes, m_line);
-        }
-    }
-
-    while (!operators.empty()) {
-        if (operators.top().type == TokenType::LPAREN || operators.top().type == TokenType::RPAREN) 
-            error("Mismatched parentheses", m_line);
-        
-        applyOperator(operators, operands);
-    }
-
-    if (operands.size() != 1)
-        error("Invalid expression", m_line);
-
-    auto expression = std::move(operands.top());
-
-    if (!castType.empty()) {
-        if (!isNextTokenType(TokenType::RPAREN)){
-            error("Expected closing parenthesis after the expression in cast expression");
-        }
-        consumeToken();
-        return make_unique<Cast>(std::move(expression), castType);
-    }
-
-    return expression;
-  }
 };
+ 

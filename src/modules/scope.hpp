@@ -26,20 +26,17 @@ public:
   ~Scope() {exitScope(); }
 
   void enterScope() {
-    cout << "Entered scope #" << scopes.size() << "\n";
     scopes.emplace_back();
   }
 
   void exitScope(){
     scopes.pop_back();
-    cout << "Exited scope #" << scopes.size() << "\n";
   }
 
   void declare(const string& name, const Symbol& symbol) {
     if (isRedeclared(name))
       error("Identifier: " + name + " is already declared");
     scopes.back().emplace(name, symbol);
-    cout << "Declared " << name << " at scope #" << scopes.size() << "\n";
   }
 
   bool isRedeclared(const string& name) const {
@@ -55,17 +52,11 @@ public:
 
   Symbol find(const string& name) const {
     for (int i = scopes.size() - 1; i >= 0; i--){
-      if (scopes[i].count(name) > 0) {
-        cout << "Found " << name << " at scope #" << i << '\n';
+      if (scopes[i].count(name) > 0)
         return scopes[i].at(name);
-      }
     }
     error("Identifier: " + name + " is not declared");
     return Symbol();
-  }
-
-  void currentScope(){
-    cout << "Current Scope: " << scopes.size() << '\n'; 
   }
 
 private:

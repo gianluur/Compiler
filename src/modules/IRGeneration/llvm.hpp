@@ -54,9 +54,9 @@ public:
     else if (Cast* statement = dynamic_cast<Cast*>(node))
       return generateCast(statement);
 
-    // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(node)){
-    //   return generateFunctionCall(statement);
-    // }
+    else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(node)){
+      return generateFunctionCall(statement);
+    }
 
     else if (dynamic_cast<Null*>(node)) 
       return llvm::Constant::getNullValue(getLLVMType("null"));
@@ -67,26 +67,26 @@ public:
     }
   }
 
-  // llvm::Value* generateFunctionCall(FunctionCall* statement){
-  //   const string name = statement->getIdentifier()->getName();
-  //   llvm::Function* calledFunction = scope.findFunction(name);
-  //   vector<llvm::Value*> argumentsValues = getArgumentsValue(statement->getArguments());
-  //   llvm::Value* call = builder.CreateCall(calledFunction, argumentsValues, name + "_call");
+  llvm::Value* generateFunctionCall(FunctionCall* statement){
+    const string name = statement->getIdentifier()->getName();
+    llvm::Function* calledFunction = scope.findFunction(name);
+    vector<llvm::Value*> argumentsValues = getArgumentsValue(statement->getArguments());
+    llvm::Value* call = builder.CreateCall(calledFunction, argumentsValues, name + "_call");
 
-  //   if (calledFunction->getReturnType()->isVoidTy())
-  //     return nullptr;
-  //   else
-  //     return call;
-  // }
+    if (calledFunction->getReturnType()->isVoidTy())
+      return nullptr;
+    else
+      return call;
+  }
 
-  // vector<llvm::Value*> getArgumentsValue(const vector<Expression*>& arguments){
-  //   vector<llvm::Value*> argumentsValues;
-  //   for (Expression* argNode : arguments) {
-  //     llvm::Value* value = getLLVMValue(argNode);
-  //     argumentsValues.push_back(value);
-  //   }
-  //   return argumentsValues;
-  // }
+  vector<llvm::Value*> getArgumentsValue(const vector<Expression*>& arguments){
+    vector<llvm::Value*> argumentsValues;
+    for (Expression* argNode : arguments) {
+      llvm::Value* value = getLLVMValue(argNode);
+      argumentsValues.push_back(value);
+    }
+    return argumentsValues;
+  }
   
   llvm::Value* generateIdentifier(Identifier* statement){
     const string name = statement->getName();
