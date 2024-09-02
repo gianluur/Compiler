@@ -1,5 +1,5 @@
+TODO: Add else-if statements
 TODO: Can't add cast in expression
-TODO: Fix scopes (again)
 
 TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast !!!PERFORMANCE BOOST!!!!
 

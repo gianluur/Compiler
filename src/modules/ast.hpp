@@ -431,13 +431,38 @@ private:
   unique_ptr<BlockStatement> m_body;
 };
 
-class IfStatement: public ControlFlow {
+class ElseIfStatement: public ControlFlow {
 public:
-  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body):
+  ElseIfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body):
     m_condition(std::move(condition)), m_body(std::move(body)) {}
 
-  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body, unique_ptr<ElseStatement> elseBody):
-    m_condition(std::move(condition)), m_body(std::move(body)), m_else(std::move(elseBody)) {}
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Else If Statement { " << '\n';
+    cout << setw(indentation_level + 2) << " " << "condition: ";
+    m_condition->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    m_body->print(indentation_level + 4);
+    cout << setw(indentation_level) << " " << "} ";
+  }
+
+  Expression* getCondition() const {
+    return m_condition.get();
+  }
+
+  BlockStatement* getBody() const {
+    return m_body.get();
+  }
+
+private:
+  unique_ptr<Expression> m_condition;
+  unique_ptr<BlockStatement> m_body;
+};
+
+class IfStatement: public ControlFlow {
+public:
+  IfStatement(unique_ptr<Expression> condition, unique_ptr<BlockStatement> body, 
+              vector<unique_ptr<ElseIfStatement>> elseIfStatements, unique_ptr<ElseStatement> elseStatement):
+    m_condition(std::move(condition)), m_body(std::move(body)), m_elseifs(std::move(elseIfStatements)), m_else(std::move(elseStatement)) {}
 
   void print(int indentation_level) const override {
     cout << '\n' << setw(indentation_level) << " " << "If Statement { " << '\n';
@@ -469,6 +494,14 @@ public:
     return m_else.get();
   }
 
+  vector<ElseIfStatement*> getElseIfStatements() const {
+    vector<ElseIfStatement*> statements = {};
+    for(const auto& statement: m_elseifs){
+      statements.emplace_back(statement.get());
+    }
+    return statements;
+  }
+
   void setCondition(unique_ptr<Expression> condition){
     m_condition = std::move(condition);
   }
@@ -476,7 +509,9 @@ public:
 private:
   unique_ptr<Expression> m_condition;
   unique_ptr<BlockStatement> m_body;
+  vector<unique_ptr<ElseIfStatement>> m_elseifs;
   unique_ptr<ElseStatement> m_else;
+
 };
 
 class Loops: public ASTNode {};

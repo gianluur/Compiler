@@ -97,50 +97,85 @@ private:
   }
 
   void generateIfStatement(IfStatement* statement){
-    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
-    if (!condition) {
-      error("Failed to generate condition for if statement");
-      return;
-    }
-
     llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
-    if (!currentFunction) {
-      error("If statement must be inside a function");
-      return;
-    }
+      if (!currentFunction) {
+        error("If statement must be inside a function");
+        return;
+      }
 
-    llvm::BasicBlock* thenBlock = llvm::BasicBlock::Create(llvm.context, "then", currentFunction);
-    llvm::BasicBlock* elseBlock = llvm::BasicBlock::Create(llvm.context, "else");
-    llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(llvm.context, "ifcont");
+      llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(llvm.context, "ifcont");
+      
+      // Generate initial 'if' condition and block
+      llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+      if (!condition) {
+        error("Failed to generate condition for if statement");
+        return;
+      }
 
-    llvm.builder.CreateCondBr(condition, thenBlock, elseBlock);
+      llvm::BasicBlock* thenBlock = llvm::BasicBlock::Create(llvm.context, "then", currentFunction);
+      llvm::BasicBlock* nextBlock = llvm::BasicBlock::Create(llvm.context, "elseif");
 
-    llvm.builder.SetInsertPoint(thenBlock);
-    llvm.scope.enterScope();
-    for (ASTNode* current : statement->getBody()->getStatements()) {
-      generateIRStatement(current);
-    }
-    llvm.scope.exitScope();
-    llvm.builder.CreateBr(mergeBlock);
-    
-    thenBlock = llvm.builder.GetInsertBlock();
+      llvm.builder.CreateCondBr(condition, thenBlock, nextBlock);
 
-    currentFunction->insert(currentFunction->end(), elseBlock);
-    llvm.builder.SetInsertPoint(elseBlock);
-    
-    if (statement->getElseStatement()) {
+      // Generate 'then' block
+      llvm.builder.SetInsertPoint(thenBlock);
       llvm.scope.enterScope();
-      for (ASTNode* current : statement->getElseStatement()->getBody()->getStatements()) {
+      for (ASTNode* current : statement->getBody()->getStatements()) {
         generateIRStatement(current);
       }
       llvm.scope.exitScope();
-    }
-    llvm.builder.CreateBr(mergeBlock);
-    
-    elseBlock = llvm.builder.GetInsertBlock();
+      llvm.builder.CreateBr(mergeBlock);
 
-    currentFunction->insert(currentFunction->end(), mergeBlock);
-    llvm.builder.SetInsertPoint(mergeBlock);
+      // Handle 'else if' statements
+      llvm::BasicBlock* currentBlock = nextBlock;
+      vector<ElseIfStatement*> elseIfStatements = statement->getElseIfStatements();
+      
+      for (size_t i = 0; i < elseIfStatements.size(); ++i) {
+        currentFunction->insert(currentFunction->end(), currentBlock);
+        llvm.builder.SetInsertPoint(currentBlock);
+
+        ElseIfStatement* elseIf = elseIfStatements[i];
+        condition = llvm.getLLVMValue(elseIf->getCondition());
+        if (!condition) {
+          error("Failed to generate condition for else-if statement");
+          return;
+        }
+
+        thenBlock = llvm::BasicBlock::Create(llvm.context, "elseif_then", currentFunction);
+        nextBlock = (i == elseIfStatements.size() - 1) ? 
+                    llvm::BasicBlock::Create(llvm.context, "else") :
+                    llvm::BasicBlock::Create(llvm.context, "elseif_next");
+
+        llvm.builder.CreateCondBr(condition, thenBlock, nextBlock);
+
+        // Generate 'else if' block
+        llvm.builder.SetInsertPoint(thenBlock);
+        llvm.scope.enterScope();
+        for (ASTNode* current : elseIf->getBody()->getStatements()) {
+          generateIRStatement(current);
+        }
+        llvm.scope.exitScope();
+        llvm.builder.CreateBr(mergeBlock);
+
+        currentBlock = nextBlock;
+      }
+
+      // Handle final 'else' block
+      currentFunction->insert(currentFunction->end(), currentBlock);
+      llvm.builder.SetInsertPoint(currentBlock);
+
+      if (statement->getElseStatement()) {
+        llvm.scope.enterScope();
+        for (ASTNode* current : statement->getElseStatement()->getBody()->getStatements()) {
+          generateIRStatement(current);
+        }
+        llvm.scope.exitScope();
+      }
+      llvm.builder.CreateBr(mergeBlock);
+
+      // Set insert point to merge block
+      currentFunction->insert(currentFunction->end(), mergeBlock);
+      llvm.builder.SetInsertPoint(mergeBlock);
   }
 
   void generateFunction(Function* statement){

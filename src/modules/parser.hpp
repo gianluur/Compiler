@@ -397,6 +397,23 @@ bool isType(const Token& token) const {
     return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(block));
   }
 
+  unique_ptr<ElseStatement> parseElseStatement(){
+    unique_ptr<BlockStatement>body = parseBlockStatement();
+    return make_unique<ElseStatement>(std::move(body));
+  }
+
+  unique_ptr<ElseIfStatement> parseElseIfStatement(){
+    consumeToken(); // consumes if token
+
+    if(!isValidExpressionToken() && !isType(nextToken()))
+      error("Expected condition after if keyword", m_line);
+    unique_ptr<Expression> condition = parseExpression();
+    m_semantics->analyzeCondition(condition.get());
+
+    unique_ptr<BlockStatement> body = parseBlockStatement();
+    return make_unique<ElseIfStatement>(std::move(condition), std::move(body));
+  }
+
   unique_ptr<IfStatement> parseIfStatement(){
     consumeToken();
     
@@ -406,15 +423,21 @@ bool isType(const Token& token) const {
     m_semantics->analyzeCondition(condition.get());
 
     unique_ptr<BlockStatement> body = parseBlockStatement();
-
-    if (i < m_tokens.size() && isNextTokenType(TokenType::ELSE)) {
+    vector<unique_ptr<ElseIfStatement>> elseIfStatements = {};
+    unique_ptr<ElseStatement> elseStatement = nullptr;
+    
+    while (isNextTokenType(TokenType::ELSE)) {
       consumeToken();
-
-      unique_ptr<BlockStatement> elseBody = parseBlockStatement();
-      return make_unique<IfStatement>(std::move(condition), std::move(body), make_unique<ElseStatement>(std::move(elseBody)));
+      
+      if (isNextTokenType(TokenType::IF)){
+        elseIfStatements.push_back(parseElseIfStatement());
+      }
+      else {
+        elseStatement = parseElseStatement();
+        break; // can only be one 1 else statement
+      }
     }
-    else 
-      return make_unique<IfStatement>(std::move(condition), std::move(body));
+    return make_unique<IfStatement>(std::move(condition), std::move(body), std::move(elseIfStatements), std::move(elseStatement));
   }
 
   unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false, const string functionType = ""){
