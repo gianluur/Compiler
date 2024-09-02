@@ -48,6 +48,9 @@ private:
     else if (AssigmentOperator* statement = dynamic_cast<AssigmentOperator*>(current)){
       generateAssignmentOperator(statement);
     }
+    else if (While* statement = dynamic_cast<While*>(current)){
+      generateWhileStatement(statement);
+    }
     // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
     //   generateFunctionCall(statement);
     // }
@@ -96,6 +99,39 @@ private:
  
   }
 
+  void generateWhileStatement(While* statement){
+    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
+    if (!currentFunction) {
+        error("While statement must be inside a function");
+        return;
+    }
+
+    llvm::BasicBlock* conditionBlock = llvm::BasicBlock::Create(llvm.context, "while.cond", currentFunction);
+    llvm::BasicBlock* loopBlock = llvm::BasicBlock::Create(llvm.context, "while.body");
+    llvm::BasicBlock* afterLoopBlock = llvm::BasicBlock::Create(llvm.context, "while.end");
+
+    llvm.builder.CreateBr(conditionBlock);
+
+    llvm.builder.SetInsertPoint(conditionBlock);
+
+    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+    llvm.builder.CreateCondBr(condition, loopBlock, afterLoopBlock);
+
+    currentFunction->insert(currentFunction->end(), loopBlock);
+    llvm.builder.SetInsertPoint(loopBlock);
+
+    llvm.scope.enterScope();
+    for (ASTNode* current : statement->getBody()->getStatements()) {
+        generateIRStatement(current);
+    }
+    llvm.scope.exitScope();
+
+    llvm.builder.CreateBr(conditionBlock);
+
+    currentFunction->insert(currentFunction->end(), afterLoopBlock);
+    llvm.builder.SetInsertPoint(afterLoopBlock);
+  }
+
   void generateIfStatement(IfStatement* statement){
     llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
       if (!currentFunction) {
@@ -107,10 +143,6 @@ private:
       
       // Generate initial 'if' condition and block
       llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
-      if (!condition) {
-        error("Failed to generate condition for if statement");
-        return;
-      }
 
       llvm::BasicBlock* thenBlock = llvm::BasicBlock::Create(llvm.context, "then", currentFunction);
       llvm::BasicBlock* nextBlock = llvm::BasicBlock::Create(llvm.context, "elseif");
@@ -193,7 +225,7 @@ private:
       generateIRStatement(current, true);
     }
     llvm.scope.exitScope();
-
+  
     if (name != "main")
       llvm.scope.declareFunction(name, function);
     
