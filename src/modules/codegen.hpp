@@ -51,6 +51,9 @@ private:
     else if (While* statement = dynamic_cast<While*>(current)){
       generateWhileStatement(statement);
     }
+    else if (Do* statement = dynamic_cast<Do*>(current)){
+      generateDoWhileStatement(statement);
+    }
     // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
     //   generateFunctionCall(statement);
     // }
@@ -97,6 +100,43 @@ private:
     }
     llvm.builder.CreateStore(result, variable);
  
+  }
+
+  void generateDoWhileStatement(Do* statement){
+    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
+    if (!currentFunction) {
+      error("Do-while statement must be inside a function");
+      return;
+    }
+
+    // Create basic blocks for the loop
+    llvm::BasicBlock* loopBlock = llvm::BasicBlock::Create(llvm.context, "dowhile.body", currentFunction);
+    llvm::BasicBlock* conditionBlock = llvm::BasicBlock::Create(llvm.context, "dowhile.cond");
+    llvm::BasicBlock* afterLoopBlock = llvm::BasicBlock::Create(llvm.context, "dowhile.end");
+
+    // Branch to the loop body
+    llvm.builder.CreateBr(loopBlock);
+
+    // Generate loop body
+    llvm.builder.SetInsertPoint(loopBlock);
+    llvm.scope.enterScope();
+    for (ASTNode* current : statement->getBody()->getStatements()) {
+      generateIRStatement(current);
+    }
+    llvm.scope.exitScope();
+
+    // Branch to the condition block
+    llvm.builder.CreateBr(conditionBlock);
+
+    // Generate condition code
+    currentFunction->insert(currentFunction->end(), conditionBlock);
+    llvm.builder.SetInsertPoint(conditionBlock);
+    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+    llvm.builder.CreateCondBr(condition, loopBlock, afterLoopBlock);
+
+    // Set insert point to the block after the loop
+    currentFunction->insert(currentFunction->end(), afterLoopBlock);
+    llvm.builder.SetInsertPoint(afterLoopBlock);
   }
 
   void generateWhileStatement(While* statement){

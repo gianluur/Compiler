@@ -1,7 +1,7 @@
 func int main() {
-  var int x = 5;
-  while x < 10 {
+  var int x = 11;
+  do {
     x += 1;
-  }
+  }while x < 10;
   return x;
 }
