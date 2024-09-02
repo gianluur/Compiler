@@ -54,6 +54,9 @@ private:
     else if (Do* statement = dynamic_cast<Do*>(current)){
       generateDoWhileStatement(statement);
     }
+    else if (For* statement = dynamic_cast<For*>(current)){
+      generateForStatement(statement);
+    }
     // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
     //   generateFunctionCall(statement);
     // }
@@ -100,6 +103,60 @@ private:
     }
     llvm.builder.CreateStore(result, variable);
  
+  }
+
+  void generateForStatement(For* statement){
+    llvm::Function* currentFunction = llvm.builder.GetInsertBlock()->getParent();
+    if (!currentFunction) {
+        error("For loop must be inside a function");
+        return;
+    }
+
+    // Create basic blocks for the loop
+    llvm::BasicBlock* initBlock = llvm::BasicBlock::Create(llvm.context, "for.init", currentFunction);
+    llvm::BasicBlock* conditionBlock = llvm::BasicBlock::Create(llvm.context, "for.cond");
+    llvm::BasicBlock* loopBlock = llvm::BasicBlock::Create(llvm.context, "for.body");
+    llvm::BasicBlock* updateBlock = llvm::BasicBlock::Create(llvm.context, "for.update");
+    llvm::BasicBlock* afterLoopBlock = llvm::BasicBlock::Create(llvm.context, "for.end");
+
+    // Branch to the initialization block
+    llvm.builder.CreateBr(initBlock);
+
+    // Generate initialization code
+    llvm.builder.SetInsertPoint(initBlock);
+    llvm.scope.enterScope(); // New scope for loop variable
+    if (statement->getInitialization()) {
+      generateIRStatement(statement->getInitialization(), true);
+    }
+    llvm.builder.CreateBr(conditionBlock);
+
+    // Generate condition code
+    currentFunction->insert(currentFunction->end(), conditionBlock);
+    llvm.builder.SetInsertPoint(conditionBlock);
+    llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
+    llvm.builder.CreateCondBr(condition, loopBlock, afterLoopBlock);
+    cout << "this one2\n";
+
+    // Generate loop body
+    currentFunction->insert(currentFunction->end(), loopBlock);
+    llvm.builder.SetInsertPoint(loopBlock);
+    for (ASTNode* current : statement->getBody()->getStatements()) {
+        generateIRStatement(current);
+    }
+    llvm.builder.CreateBr(updateBlock);
+
+    // Generate update code
+    currentFunction->insert(currentFunction->end(), updateBlock);
+    llvm.builder.SetInsertPoint(updateBlock);
+    if (statement->getUpdate()) {
+        generateIRStatement(statement->getUpdate());
+    }
+    llvm.builder.CreateBr(conditionBlock);
+
+    // Set insert point to the block after the loop
+    currentFunction->insert(currentFunction->end(), afterLoopBlock);
+    llvm.builder.SetInsertPoint(afterLoopBlock);
+    llvm.scope.exitScope(); // Exit the loop variable scope
   }
 
   void generateDoWhileStatement(Do* statement){

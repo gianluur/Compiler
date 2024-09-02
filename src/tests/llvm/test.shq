@@ -1,7 +1,8 @@
 func int main() {
-  var int x = 11;
-  do {
-    x += 1;
-  }while x < 10;
+  var int y = 0;
+  for var int i = 0; i < 10; i += 1; {
+    y = i * 2;
+  }
+  var int x = y;
   return x;
 }
