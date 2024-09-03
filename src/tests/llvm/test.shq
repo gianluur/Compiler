@@ -1,8 +1,8 @@
+func int test(){
+  return 5;
+}
+
 func int main() {
-  var int y = 0;
-  for var int i = 0; i < 10; i += 1; {
-    y = i * 2;
-  }
-  var int x = y;
-  return x;
+  test();
+  return 0;
 }

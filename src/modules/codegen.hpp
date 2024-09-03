@@ -57,9 +57,9 @@ private:
     else if (For* statement = dynamic_cast<For*>(current)){
       generateForStatement(statement);
     }
-    // else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(statement)){
-    //   generateFunctionCall(statement);
-    // }
+    else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(current)){
+      llvm.generateFunctionCall(statement); 
+    }
     else 
       error("Current node isn't handled yet");
   }
