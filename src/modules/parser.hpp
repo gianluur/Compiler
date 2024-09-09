@@ -538,7 +538,9 @@ bool isType(const Token& token) const {
       error("Expected closing parenthesis after the expression to cast", m_line);
     consumeToken();
 
-    return make_unique<Cast>(std::move(expression), type.lexemes);
+    auto cast =  make_unique<Cast>(std::move(expression), type.lexemes);
+    m_semantics->analyzeCast(cast.get());
+    return cast;
   }
 
   unique_ptr<Expression> parseExpression(const bool isWrappedInParenthesis = false){
