@@ -1,5 +1,6 @@
-TODO: Add else-if statements
 TODO: Can't add cast in expression
+  make sure you can don't cast a type to the same type
+  add parameters to functions
 
 TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast !!!PERFORMANCE BOOST!!!!
 

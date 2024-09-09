@@ -99,9 +99,7 @@ bool isValidExpressionToken() {
 
   Token token = nextToken();
   return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
-         token.type == TokenType::LITERAL_INTEGER || token.type == TokenType::LITERAL_FLOAT || 
-         token.type == TokenType::LITERAL_BOOLEAN || token.type == TokenType::LITERAL_CHARACTER || 
-         token.type == TokenType::LITERAL_STRING  || token.type == TokenType::IDENTIFIER || 
+         isLiteral(token) || isType(token) || token.type == TokenType::IDENTIFIER || 
          token.type == TokenType::LPAREN || token.type == TokenType::RPAREN;
 }
 
@@ -529,22 +527,41 @@ bool isType(const Token& token) const {
     }
   } 
 
-  unique_ptr<Expression> parseExpression(const bool isFunctionCall = false){
+  unique_ptr<Cast> parseCastExpression(const Token& type){
+    if (!isNextTokenType(TokenType::LPAREN))
+      error("Expected opening parenthesis after type in a cast expression", m_line);
+    consumeToken();
+
+    unique_ptr<Expression> expression = parseExpression(true);
+
+    if (!isNextTokenType(TokenType::RPAREN))
+      error("Expected closing parenthesis after the expression to cast", m_line);
+    consumeToken();
+
+    return make_unique<Cast>(std::move(expression), type.lexemes);
+  }
+
+  unique_ptr<Expression> parseExpression(const bool isWrappedInParenthesis = false){
     static unordered_map<string, int> precedence = { 
       {"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"%", 2}, 
       {"==", 3}, {">", 3}, {"<", 3}, {">=", 3}, {"<=", 3},
       {"!", 3}, {"&&", 2}, {"||", 1}
     };
 
-    const string castType = checkInitialCast();
+    //const string castType = checkInitialCast();
 
     stack<Token> operators;
     stack<unique_ptr<Expression>> operands;
 
     while (isValidExpressionToken()) {
         Token& current = consumeToken();
+        cout << current.lexemes << '\n';
 
-        if (isLiteral(current)) {
+        if (isType(current)){
+          cout << "here\n";
+          operands.push(parseCastExpression(current));
+        }
+        else if (isLiteral(current)) {
           operands.push(parseLiterals(current));
         } 
         else if (current.type == TokenType::IDENTIFIER) {
@@ -562,9 +579,9 @@ bool isType(const Token& token) const {
           operators.push(current);
         } 
         else if (current.type == TokenType::RPAREN) {
-          bool shouldFunctionCallEnd = false;
-          handleClosingParenthesis(operators, operands, isFunctionCall, shouldFunctionCallEnd, current);
-          if (isFunctionCall && shouldFunctionCallEnd){
+          bool shouldExpressionEnd = false;
+          handleClosingParenthesis(operators, operands, isWrappedInParenthesis, shouldExpressionEnd);
+          if (isWrappedInParenthesis && shouldExpressionEnd){
             break;
           }
         }
@@ -583,18 +600,18 @@ bool isType(const Token& token) const {
       error("Invalid expression", m_line);
     auto expression = std::move(operands.top());
 
-    if (!castType.empty()) {
-      if (!isNextTokenType(TokenType::RPAREN)){
-        error("Expected closing parenthesis after the expression in cast expression");
-      }
-      consumeToken();
-      return make_unique<Cast>(std::move(expression), castType);
-    }
+    // if (!castType.empty()) {
+    //   if (!isNextTokenType(TokenType::RPAREN)){
+    //     error("Expected closing parenthesis after the expression in cast expression");
+    //   }
+    //   consumeToken();
+    //   return make_unique<Cast>(std::move(expression), castType);
+    // }
 
     return expression;
   }
 
-  void handleClosingParenthesis(stack<Token>& operators, stack<unique_ptr<Expression>>& operands, const bool isFunctionCall, bool& shouldFunctionCallEnd, const Token& current) {
+  void handleClosingParenthesis(stack<Token>& operators, stack<unique_ptr<Expression>>& operands, const bool isWrappedInParenthesis, bool& shouldExpressionEnd) {
     while (!operators.empty() && operators.top().type != TokenType::LPAREN) {
       applyOperator(operators, operands);
     }
@@ -603,11 +620,12 @@ bool isType(const Token& token) const {
       operators.pop(); // Pop the left parenthesis
     } 
     else {
-      if (isFunctionCall){
-        shouldFunctionCallEnd = true;
+      if (isWrappedInParenthesis){
+        shouldExpressionEnd = true;
         i--;
         return;
       }
+
       if (!isValidExpressionToken()) return;
       error("Mismatched parentheses " + nextToken().lexemes, m_line);
     }

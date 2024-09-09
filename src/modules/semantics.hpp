@@ -29,7 +29,7 @@ public:
     m_scopes->declare(name, Symbol(keyword, type));
 
     if (!dynamic_cast<Null*>(value)){
-      const string valueType = getExpressionType(type, value);
+      const string valueType = getExpressionType(value);
       if (valueType != type && !isSmallerType(type, valueType))
         error("Expected " + type + " in variable declaration but got " + valueType + " instead", m_line);
     }        
@@ -43,7 +43,7 @@ public:
       error("Can't reassign to a constant", m_line);
 
     const string type = m_scopes->find(name).type;
-    const string valueType = getExpressionType(type, value);
+    const string valueType = getExpressionType(value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
   }
@@ -73,7 +73,7 @@ public:
     
     for(int i = 0; i < n_parameters; i++){
       string expectedType = parameters[i]->getType();
-      string valueType = getExpressionType(expectedType, arguments[i]); 
+      string valueType = getExpressionType(arguments[i]); 
       if (expectedType != valueType) 
         error("In function call the " + std::to_string(i + 1) + "* parameter was expecting a " + expectedType + "but instead got a " + valueType, m_line);
     }
@@ -90,17 +90,25 @@ public:
     if (type == "null")
       error("Return statement found in a function returning null", m_line);
     cout << type << '\n';
-    const string valueType = getExpressionType(type, value);
+    const string valueType = getExpressionType(value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
   }
 
   void analyzeCondition(Expression* condition) {
     const string expectedType = "bool";
-    const string valueType = getExpressionType(expectedType, condition);
+    const string valueType = getExpressionType(condition);
 
     if (valueType != expectedType)
       error("Conditions must always evaluate to boolean", m_line);
+  }
+
+  void analyzeCast(Cast* expression){
+    const string type = getExpressionType(expression->getExpression());
+    const string targetType = expression->getTargetType();
+
+    if (type == targetType)
+      error("Can't cast a type to the same type", m_line);
   }
 
 private:
@@ -124,9 +132,9 @@ private:
     return false;
   }
 
-  string getExpressionType(const string& expectedType, Expression* value) {
-    const string valueType = analyzeOperand(value);
-    return valueType;
+  string getExpressionType(Expression* value) {
+    const string type = analyzeOperand(value);
+    return type;
   }
 
   string getIdentifierType(Identifier* identifier){

@@ -3,6 +3,6 @@ func int test(){
 }
 
 func int main() {
-  test();
-  return 0;
+  var int x = int(1);
+  return x;
 }
