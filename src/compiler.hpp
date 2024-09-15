@@ -27,6 +27,6 @@ public:
     Parser parser(tokens);
     const vector<unique_ptr<ASTNode>>& ast = parser.getAST();
     
-    //Codegen codegen(ast);
+    Codegen codegen(ast);
   }
 };

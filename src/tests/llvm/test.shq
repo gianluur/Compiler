@@ -5,7 +5,10 @@ func int main() {
   }; 
 
   var Test test;
+  test.a = 5;
+  test.b = 3.5;
+  var int x = test.a + int(test.b);
 
-  return 3 + test.a;
+  return x;
 }
 

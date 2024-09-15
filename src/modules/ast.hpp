@@ -836,6 +836,10 @@ public:
     return m_member->getName();
   }
 
+  AssigmentOperator* getAssigment() const {
+    return m_assigment.get();
+  }
+
 private:
   unique_ptr<Identifier> m_identifier;
   unique_ptr<Identifier> m_member;
@@ -873,6 +877,17 @@ public:
         return member.get();
     }
     return nullptr;
+  }
+
+  size_t getMemberIndex(const string& name) const{
+    size_t index = 0;
+    
+    for(const unique_ptr<Variable>& member : m_members){
+      if (member->getName() == name)
+        return index;
+      index++;
+    }
+    return -1;
   }
 
   vector<Variable*> getMembers() const {

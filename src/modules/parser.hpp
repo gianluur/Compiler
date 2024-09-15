@@ -496,7 +496,7 @@ private:
     return make_unique<BlockStatement>(std::move(statements));
   }
 
-  unique_ptr<DotOperator> parseMember(const Token& identifier, const bool isInsideExpression = false) {
+  unique_ptr<DotOperator> parseDotOperator(const Token& identifier, const bool isInsideExpression = false) {
     consumeToken(); //consumes the dot
 
     if (!isNextTokenType(TokenType::IDENTIFIER))
@@ -536,7 +536,7 @@ private:
 
     }
     else if (isNextTokenType(TokenType::DOT)){
-      return parseMember(identifier);
+      return parseDotOperator(identifier);
     }
     else {
       error("Expected assigment or function call after identifier" + identifier.lexemes, m_line);
@@ -633,7 +633,7 @@ private:
             operands.push(parseFunctionCall(current));
           }
           else if (isNextTokenType(TokenType::DOT)){
-            operands.push(parseMember(current, true));
+            operands.push(parseDotOperator(current, true));
           }
           else {
             operands.push(make_unique<Identifier>(current));

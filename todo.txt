@@ -1,4 +1,6 @@
 TODO: Add structs
+  TODO: Add better error for structs stuff like (In this variable decleration: 'b' was expected a semicolon) when a dot operator hasn't a semicolon;
+
 TODO: Add pointers
 TODO: Add array
 TODO: Add print function
@@ -13,6 +15,7 @@ TODO: Add check for main function return value to avoid LLVM weird error
 
 TODO: Change all symbol to a enum class 
 TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast
+TODO: Make a hash function to return the index of struct member
 
 !!! STYLE !!!
 

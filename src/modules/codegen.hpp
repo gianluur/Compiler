@@ -61,12 +61,35 @@ private:
       llvm.generateFunctionCall(statement); 
     }
     else if (Struct* statement = dynamic_cast<Struct*>(current)){
-      llvm.generateStruct(statement);
+      generateStruct(statement);
+    }
+    else if (DotOperator* statement = dynamic_cast<DotOperator*>(current)){
+      llvm.generateDotOperator(statement);
     }
   
     else 
       error("Current node isn't handled yet");
   } 
+
+  void generateStruct(Struct* statement){
+    const string name = statement->getName();
+    std::pair<IRStruct, unordered_map<string, unsigned int>> structInfos = {};
+
+    unsigned int index = 0;
+    vector<llvm::Type*> memberTypes = {};
+    for(const Variable* member: statement->getMembers()){
+      memberTypes.push_back(llvm.getLLVMType(member->getType()));
+
+      structInfos.second.emplace(member->getName(), index);
+      index++;
+    }
+    
+    llvm::StructType* structure = llvm::StructType::create(llvm.context, memberTypes, name);
+    structure->setBody(memberTypes); // <-- remeber to look into this setBody stuff because like forward declaration, recursive struct etc... 
+
+    structInfos.first = structure;
+    llvm.scope.declareStruct(name, structInfos);  
+  }
 
   void generateAssignmentOperator(AssigmentOperator* statement){
     string op = statement->getOperator();
@@ -106,7 +129,6 @@ private:
       }
     }
     llvm.builder.CreateStore(result, variable);
- 
   }
 
   void generateForStatement(For* statement){

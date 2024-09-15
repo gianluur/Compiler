@@ -73,6 +73,10 @@ public:
     else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(node)){
       return generateFunctionCall(statement);
     }
+    else if (DotOperator* statement = dynamic_cast<DotOperator*>(node)){
+      return generateDotOperator(statement);
+    }
+
     else if (dynamic_cast<Null*>(node)) 
       return llvm::Constant::getNullValue(getLLVMType("null"));
 
@@ -82,18 +86,23 @@ public:
     }
   }
 
-  void generateStruct(Struct* statement){
-    const string name = statement->getName();
+  llvm::Value* generateDotOperator(DotOperator* statement){
+    llvm::AllocaInst* variable = scope.findVariable(statement->getIdentifierName());
+    llvm::StructType* structType = llvm::cast<llvm::StructType>(variable->getAllocatedType());
 
-    vector<llvm::Type*> memberTypes = {};
-    for(const Variable* member: statement->getMembers()){
-      memberTypes.push_back(getLLVMType(member->getType()));
+    unsigned int memberIndex = scope.findStructMemberIndex(structType, statement->getMemberName());
+    if (memberIndex == static_cast<unsigned int>(-1)){
+      error("Invalid member name or index for struct.");
+      return nullptr;
     }
-    
-    llvm::StructType* structure = llvm::StructType::create(context, memberTypes, name);
-    structure->setBody(memberTypes); // <-- remeber to look into this setBody stuff because like forward declaration, recursive struct etc... 
 
-    scope.declareStruct(name, structure);  
+    llvm::Value* memberPtr = builder.CreateStructGEP(structType, variable, memberIndex, "memberPtr");
+    if (statement->getAssigment()) {
+      llvm::Value* assignmentValue = getLLVMValue(statement->getAssigment()->getValue());
+      builder.CreateStore(assignmentValue, memberPtr);
+      return assignmentValue;
+    }
+   return builder.CreateLoad(structType->getElementType(memberIndex), memberPtr, "memberValue");
   }
 
   llvm::Value* generateStructInstance(const string& name){
@@ -105,6 +114,7 @@ public:
     return builder.CreateAlloca(structure, nullptr, name + "_struct");
   }
 
+  //I belive this can be turned into a function that i can use just in codegen and create a version for the llvm class
   llvm::Value* generateFunctionCall(FunctionCall* statement){
     const string name = statement->getIdentifier()->getName();
     llvm::Function* calledFunction = scope.findFunction(name);
