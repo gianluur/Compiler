@@ -670,6 +670,10 @@ public:
     return m_type;
   }
 
+  string getName() const {
+    return m_name->getName();
+  }
+
 private:
   string m_type;
   unique_ptr<Identifier> m_name;
@@ -793,25 +797,97 @@ private:
   unique_ptr<Expression> m_value;
 };
 
+class Member: public Expression {
+public:
+  Member(unique_ptr<Identifier> identifier, unique_ptr<Identifier> member) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Member {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "identifier: ";
+    m_identifier->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "Member: " << m_member->getName();
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+private:
+  unique_ptr<Identifier> m_identifier;
+  unique_ptr<Identifier> m_member;
+};
+
+class DotOperator: public Expression {
+public:
+  DotOperator(unique_ptr<Identifier> identifier, unique_ptr<Identifier> member, unique_ptr<AssigmentOperator> assigment):
+    m_identifier(std::move(identifier)), m_member(std::move(member)), m_assigment(std::move(assigment)) { }
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "DotOperator {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "identifier: ";
+    m_identifier->print(indentation_level + 4);
+    if (m_assigment)
+      m_assigment->print(indentation_level + 2);
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+  string getIdentifierName() const {
+    return m_identifier->getName();
+  }
+
+  string getMemberName() const {
+    return m_member->getName();
+  }
+
+private:
+  unique_ptr<Identifier> m_identifier;
+  unique_ptr<Identifier> m_member;
+  unique_ptr<AssigmentOperator> m_assigment;
+
+};
+
 class Struct : public ASTNode {
 public:
-  Struct(unique_ptr<Identifier> name, unique_ptr<BlockStatement> body):
-    m_name(std::move(name)), m_body(std::move(body)) {}
+  Struct(unique_ptr<Identifier> name, vector<unique_ptr<Variable>> members):
+    m_name(std::move(name)), m_members(std::move(members)) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Struct {" << '\n';
     cout << setw(indentation_level + 2) << " " << "name: ";
     m_name->print(indentation_level + 4);
     cout << setw(indentation_level + 2) << " " << "body: ";
-    m_body->print(indentation_level + 4);
+    for(const unique_ptr<Variable>& member: m_members){
+      member->print(indentation_level + 4);
+    }
     cout << setw(indentation_level) << " " << "} " << endl;
   }
 
-  BlockStatement* getBody() const {
-    return m_body.get();
+  Identifier* getIdentifier() const {
+    return m_name.get();
+  }
+
+  string getName() const {
+    return m_name->getName();
+  }
+
+  Variable* getMember(const string& name) const{
+    for(const unique_ptr<Variable>& member : m_members){
+      if (member->getName() == name)
+        return member.get();
+    }
+    return nullptr;
+  }
+
+  vector<Variable*> getMembers() const {
+    vector<Variable*> members;
+    for(const unique_ptr<Variable>& member : m_members) {
+      members.emplace_back(member.get());
+    }
+    return members;
+  }
+
+  size_t getMembersCount() const {
+    return m_members.size();
   }
 
 private:
   unique_ptr<Identifier> m_name;
-  unique_ptr<BlockStatement> m_body;
+  vector<unique_ptr<Variable>> m_members;
 };

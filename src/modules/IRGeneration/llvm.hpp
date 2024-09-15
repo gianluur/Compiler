@@ -22,11 +22,27 @@ public:
   IRScope scope;
 
   llvm::Type* getLLVMType(const string& type) {
-    if (type == "int") return llvm::Type::getInt32Ty(context);
-    else if (type == "float") return llvm::Type::getFloatTy(context);
-    else if (type == "char") return llvm::Type::getInt8Ty(context);
-    else if (type == "bool") return llvm::Type::getInt1Ty(context);
-    else return llvm::Type::getVoidTy(context);
+    if (type == "int") 
+      return llvm::Type::getInt32Ty(context);
+
+    else if (type == "float") 
+      return llvm::Type::getFloatTy(context);
+
+    else if (type == "char") 
+      return llvm::Type::getInt8Ty(context);
+
+    else if (type == "bool") 
+      return llvm::Type::getInt1Ty(context);
+
+    else if (type == "null")
+      return llvm::Type::getVoidTy(context);
+    else{
+      llvm::StructType* structType = llvm::StructType::getTypeByName(context, type);
+      if (structType)
+        return structType;
+      else
+        return llvm::Type::getVoidTy(context);
+    }
   }
 
   llvm::Value* getLLVMValue(Expression* node){
@@ -57,7 +73,6 @@ public:
     else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(node)){
       return generateFunctionCall(statement);
     }
-
     else if (dynamic_cast<Null*>(node)) 
       return llvm::Constant::getNullValue(getLLVMType("null"));
 
@@ -65,6 +80,29 @@ public:
       error("Can't convert expression to an valid LLVM value");
       return nullptr;
     }
+  }
+
+  void generateStruct(Struct* statement){
+    const string name = statement->getName();
+
+    vector<llvm::Type*> memberTypes = {};
+    for(const Variable* member: statement->getMembers()){
+      memberTypes.push_back(getLLVMType(member->getType()));
+    }
+    
+    llvm::StructType* structure = llvm::StructType::create(context, memberTypes, name);
+    structure->setBody(memberTypes); // <-- remeber to look into this setBody stuff because like forward declaration, recursive struct etc... 
+
+    scope.declareStruct(name, structure);  
+  }
+
+  llvm::Value* generateStructInstance(const string& name){
+    llvm::StructType* structure = scope.findStruct(name);
+    if (!structure){
+      error("Unexpected error during code generation, couldn't find the structure in the scope");
+      return nullptr;
+    }
+    return builder.CreateAlloca(structure, nullptr, name + "_struct");
   }
 
   llvm::Value* generateFunctionCall(FunctionCall* statement){

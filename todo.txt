@@ -1,8 +1,19 @@
-TODO: Can't add cast in expression
-  make sure you can don't cast a type to the same type
-  add parameters to functions
-
-TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast !!!PERFORMANCE BOOST!!!!
-
+TODO: Add structs
+TODO: Add pointers
 TODO: Add array
+TODO: Add print function
+
 TODO: Add checks for overflow for smaller integers / float
+TODO: Add check for main function return value to avoid LLVM weird error
+
+
+
+
+!!!PERFORMANCE BOOST!!!!
+
+TODO: Change all symbol to a enum class 
+TODO: Make a enum of all ast nodes to improve performance to avoid dynamic cast
+
+!!! STYLE !!!
+
+TODO: Where possible instantly create the unique_ptrs;

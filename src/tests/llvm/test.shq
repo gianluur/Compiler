@@ -1,8 +1,11 @@
-func int test(){
-  return 5;
+func int main() {
+  struct Test {
+    var int a;
+    var float b;
+  }; 
+
+  var Test test;
+
+  return 3 + test.a;
 }
 
-func int main() {
-  var int x = int(1);
-  return x;
-}

@@ -11,9 +11,9 @@
 using std::cout, std::vector, std::string, std::unordered_map;
 
 using IRVariable = llvm::AllocaInst*;
-using IRFunction = llvm::Function*;
 using IRGlobalVariable = llvm::GlobalVariable*;
-
+using IRFunction = llvm::Function*;
+using IRStruct = llvm::StructType*;
 
 //There's no need to check for declaration/redeclaration since the semantic analysis was already done
 class IRScope {
@@ -24,6 +24,7 @@ public:
   void enterScope() {
     m_varScopes.emplace_back();
     m_funcScopes.emplace_back();
+    m_structScopes.emplace_back();
   }
 
   void exitScope() {
@@ -61,9 +62,21 @@ public:
     return nullptr;
   }
 
+  void declareStruct(const string& name, IRStruct structure){
+    m_structScopes.back().emplace(name, structure);
+  }
+
+  IRStruct findStruct(const string& name){
+    for (int i = m_structScopes.size() - 1; i >= 0; i--){
+      if (m_structScopes[i].count(name) > 0) return m_structScopes[i].at(name);
+    }
+    return nullptr;
+  }
+
 private:
   vector<unordered_map<string, IRVariable>> m_varScopes;
   vector<unordered_map<string, IRFunction>> m_funcScopes;
+  vector<unordered_map<string, IRStruct>> m_structScopes;
   unordered_map<string, IRGlobalVariable> m_globalVariables;
   
 };

@@ -60,9 +60,13 @@ private:
     else if (FunctionCall* statement = dynamic_cast<FunctionCall*>(current)){
       llvm.generateFunctionCall(statement); 
     }
+    else if (Struct* statement = dynamic_cast<Struct*>(current)){
+      llvm.generateStruct(statement);
+    }
+  
     else 
       error("Current node isn't handled yet");
-  }
+  } 
 
   void generateAssignmentOperator(AssigmentOperator* statement){
     string op = statement->getOperator();
@@ -135,7 +139,6 @@ private:
     llvm.builder.SetInsertPoint(conditionBlock);
     llvm::Value* condition = llvm.getLLVMValue(statement->getCondition());
     llvm.builder.CreateCondBr(condition, loopBlock, afterLoopBlock);
-    cout << "this one2\n";
 
     // Generate loop body
     currentFunction->insert(currentFunction->end(), loopBlock);
@@ -318,6 +321,19 @@ private:
     llvm.builder.SetInsertPoint(BB);
 
     llvm.scope.enterScope();
+
+    size_t index = 0;
+    for (auto& argument : function->args()) {
+        const Parameter* parameter = statement->getParameters()[index];
+        argument.setName(parameter->getName());
+        
+        llvm::AllocaInst* variable = llvm.builder.CreateAlloca(argument.getType(), nullptr, parameter->getName() + "_addr");
+        llvm.builder.CreateStore(&argument, variable);
+        llvm.scope.declareVariable(parameter->getName(), variable);
+        
+        index++;
+    }
+
     for(ASTNode* current: statement->getBody()->getStatements()){
       generateIRStatement(current, true);
     }
@@ -356,7 +372,15 @@ private:
 
     if (!dynamic_cast<Null*>(statement->getValue())){
       llvm::Value* value = llvm.getLLVMValue(statement->getValue());
-      llvm.builder.CreateStore(value, variable);
+      if (llvm::StructType* structure = llvm::dyn_cast<llvm::StructType>(type)){
+        for (size_t i = 0; i < structure->getNumElements(); ++i){
+          llvm::Value* elementPtr = llvm.builder.CreateStructGEP(type, variable, i);
+          llvm::Value* elementValue = llvm.builder.CreateExtractValue(value, i);
+          llvm.builder.CreateStore(elementValue, elementPtr);
+        }
+      }
+      else
+        llvm.builder.CreateStore(value, variable);
     }
 
     llvm.scope.declareVariable(name, variable);

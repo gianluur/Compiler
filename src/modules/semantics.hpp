@@ -20,13 +20,14 @@ public:
 
    unique_ptr<Scope> m_scopes;
 
-  void analyzeVariable(Variable* variable){
+  void analyzeVariable(Variable* variable, const bool isMember = false){
     string keyword = variable->getKeyword();
     string type = variable->getType();
     string name = variable->getName();
     Expression* value = variable->getValue();
 
-    m_scopes->declare(name, Symbol(keyword, type));
+    if (!isMember)
+      m_scopes->declare(name, Symbol(keyword, type));
 
     if (!dynamic_cast<Null*>(value)){
       const string valueType = getExpressionType(value);
@@ -44,6 +45,7 @@ public:
 
     const string type = m_scopes->find(name).type;
     const string valueType = getExpressionType(value);
+
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in assignment but got " + valueType + "instead", m_line);
   }
@@ -61,6 +63,9 @@ public:
 
     if (!m_scopes->isDeclared(name))
       error("Identifier: " + name + " is not declared", m_line);
+
+    if (m_scopes->find(name).keyword != "func")
+      error("Calls are valid only if calling a function", m_line);
 
     vector<Expression*> arguments = call->getArguments();
     const int n_arguments = arguments.size();
@@ -89,7 +94,7 @@ public:
   void analyzeReturn(Expression* value, const string& type){
     if (type == "null")
       error("Return statement found in a function returning null", m_line);
-    cout << type << '\n';
+
     const string valueType = getExpressionType(value);
     if (valueType != type && !isSmallerType(type, valueType))
       error("Expected " + type + " in return value but got " + valueType + " instead", m_line);
@@ -109,6 +114,19 @@ public:
 
     if (type == targetType)
       error("Can't cast a type to the same type", m_line);
+  }
+
+  void analyzeDotOperator(const string& identifierName, const string& memberName, const AssigmentOperator* assigment) {
+    const Struct* structure = getStructure(identifierName);
+    const Variable* member = getStructMember(structure, memberName);
+    
+    if (assigment){
+      const string type = member->getType();
+      const string valueType = getExpressionType(assigment->getValue());
+
+      if (type != getExpressionType(assigment->getValue()))
+        error("Expected " + type + " for member " + memberName + " but got " + valueType + " instead", m_line);
+    }
   }
 
 private:
@@ -132,9 +150,30 @@ private:
     return false;
   }
 
+  Struct* getStructure(const string& identifierName) const {
+    const string structName = m_scopes->find(identifierName).type;
+    const Symbol& structSymbol = m_scopes->find(structName);
+
+    if (!(std::holds_alternative<Struct*>(structSymbol.node))){
+      error("Unexpected error coudln't retrive struct", m_line);
+      return nullptr;
+    }
+    return std::get<Struct*>(structSymbol.node);
+  }
+
+  const Variable* getStructMember(const Struct* structure, const string& name) const {
+    const Variable* member = structure->getMember(name);
+
+    if (!member){
+      error("Identifier: " + name + " isn't part a member of '" + structure->getName() + "' struct", m_line);
+      return nullptr;
+    }
+
+    return member;
+  }
+
   string getExpressionType(Expression* value) {
-    const string type = analyzeOperand(value);
-    return type;
+    return analyzeOperand(value);
   }
 
   string getIdentifierType(Identifier* identifier){
@@ -149,6 +188,11 @@ private:
     if (!m_scopes->isDeclared(name))
       error("The function call to " + name + " couldn't be executed because the function definition wasn't found", m_line);
     return m_scopes->find(name).type;
+  }
+
+  string getMemberType(DotOperator* dotOperator){
+    const Struct* structure = getStructure(dotOperator->getIdentifierName());
+    return getStructMember(structure, dotOperator->getMemberName())->getType();
   }
 
   string analyzeUnaryOperator(UnaryOperator* unaryOperator){
@@ -202,12 +246,15 @@ private:
     else if (UnaryOperator* unaryOperator = dynamic_cast<UnaryOperator*>(operand))
       return analyzeUnaryOperator(unaryOperator); 
     
-    else if (FunctionCall* functionCall = dynamic_cast<FunctionCall*>(operand)){
+    else if (FunctionCall* functionCall = dynamic_cast<FunctionCall*>(operand))
       return getFunctionCallType(functionCall);
-    }
+    
     else if (Cast* cast = dynamic_cast<Cast*>(operand))
       return cast->getTargetType();
-  
+
+    else if (DotOperator* dotOperator = dynamic_cast<DotOperator*>(operand)){
+      return getMemberType(dotOperator);
+    }
     else { 
       error("Unknown operand type", m_line);
       return "";

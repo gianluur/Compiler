@@ -41,7 +41,10 @@ public:
 private:
   vector<Token> m_tokens;
   size_t i;
+
   size_t m_line;
+  
+
   unique_ptr<Semantics> m_semantics;
   vector<unique_ptr<ASTNode>> m_ast;
 
@@ -94,16 +97,7 @@ private:
            token.lexemes == "*" || token.lexemes == "/" || token.lexemes == "%";
   }
 
-bool isValidExpressionToken() {
-  if (i >= m_tokens.size()) return false;
-
-  Token token = nextToken();
-  return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
-         isLiteral(token) || isType(token) || token.type == TokenType::IDENTIFIER || 
-         token.type == TokenType::LPAREN || token.type == TokenType::RPAREN;
-}
-
-bool isType(const Token& token) const {
+  bool isType(const Token& token) const {
     return token.type == TokenType::INT  || 
            token.type == TokenType::INT8 || token.type == TokenType::INT16 || 
            token.type == TokenType::INT32 || token.type == TokenType::INT64 || 
@@ -112,10 +106,17 @@ bool isType(const Token& token) const {
 
            token.type == TokenType::FLOAT || 
            token.type == TokenType::FLOAT32 || token.type == TokenType::FLOAT64 ||
-           
+          
            token.type == TokenType::CHAR || token.type == TokenType::STRING ||
            token.type == TokenType::BOOL || token.type == TokenType::NULL;
-}
+  }
+
+  bool isUserDefinedType(const Token& token) const {
+    const Symbol userType = m_semantics->m_scopes->find(token.lexemes);
+    if (!(userType.type == "struct"))
+      return false;
+    return true; 
+  }
 
   bool isLiteral(const Token& token) const {
     return token.type == TokenType::LITERAL_INTEGER || 
@@ -123,6 +124,15 @@ bool isType(const Token& token) const {
            token.type == TokenType::LITERAL_CHARACTER ||
            token.type == TokenType::LITERAL_STRING ||
            token.type == TokenType::LITERAL_BOOLEAN;
+  }
+
+  bool isValidExpressionToken() {
+    if (i >= m_tokens.size()) return false;
+
+    Token token = nextToken();
+    return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
+          isLiteral(token) || isType(token) || token.type == TokenType::IDENTIFIER || 
+          token.type == TokenType::LPAREN || token.type == TokenType::RPAREN;
   }
 
   unique_ptr<ASTNode> parseASTNode(const bool isScoped = false, const string functionType = ""){
@@ -174,14 +184,34 @@ bool isType(const Token& token) const {
       error("Expected identifier after struct", m_line);
     const Token& name = consumeToken();
 
-    unique_ptr<BlockStatement> body = parseBlockStatement();
+    if (!isNextTokenType(TokenType::LCURLY))
+      error("Expected left parenthesis after name in struct declaration", m_line);
+    consumeToken();
+
+    vector<unique_ptr<Variable>> members = {};
+    if (isNextTokenType(TokenType::RCURLY))
+      error("Struct must contain atleast 1 member", m_line);
+      
+    else {
+      while (i < m_tokens.size() && !isNextTokenType(TokenType::RCURLY)){
+        members.emplace_back(parseVariable(true));
+
+        if (i >= m_tokens.size() && !isNextTokenType(TokenType::RCURLY))
+          error("Expected closing parenthesis after struct declaration");
+      }
+
+      if (!isNextTokenType(TokenType::RCURLY))
+        error("Expected closing parenthesis after struct declaration", m_line);
+      consumeToken();
+    }
 
     if (!isNextTokenType(TokenType::SEMICOLON)) 
       error("Expected semicolon after struct", m_line);
     consumeToken();
     
-    // TODO add semantic check for structs;
-    return make_unique<Struct>(make_unique<Identifier>(name), std::move(body));
+    auto structure = make_unique<Struct>(make_unique<Identifier>(name), std::move(members));
+    m_semantics->m_scopes->declare(name.lexemes, Symbol("struct", name.lexemes, structure.get()));
+    return structure;
   }
 
   unique_ptr<FunctionCall> parseFunctionCall(const Token& name){
@@ -221,7 +251,6 @@ bool isType(const Token& token) const {
       else if (isNextTokenType(TokenType::RPAREN))
         break;
       else{
-        cout << nextToken().lexemes << '\n';
         error("Unexpected error in function call", m_line);
       }
     }
@@ -270,7 +299,7 @@ bool isType(const Token& token) const {
   unique_ptr<Function> parseFunction() {
     consumeToken();
 
-    if (!isType(nextToken())) 
+    if (!isType(nextToken()) && isUserDefinedType(nextToken())) 
       error("Expected type after function statement", m_line);
     const Token& returnType = consumeToken();
 
@@ -288,7 +317,7 @@ bool isType(const Token& token) const {
       error("Expected open parenethesis for parameters after func", m_line);
     consumeToken();
 
-    unique_ptr<BlockStatement> body = parseBlockStatement(true, returnType.lexemes);
+    unique_ptr<BlockStatement> body = parseBlockStatement(true, returnType.lexemes, parameters);
 
     auto function = make_unique<Function>(returnType, make_unique<Identifier>(name), std::move(parameters), std::move(body));
     m_semantics->analyzeFunction(function.get());
@@ -340,8 +369,7 @@ bool isType(const Token& token) const {
     return make_unique<While>(std::move(condition), std::move(block));
   }
 
-  unique_ptr<AssigmentOperator> parseAssigmentOperator(std::optional<Token> optIdentifier = {}){    
-
+  unique_ptr<AssigmentOperator> parseAssigmentOperator(std::optional<Token> optIdentifier = {}, const bool isIdentifierMember = false){    
     //Getting the identifier if present
     Token identifier;
     if (optIdentifier) {
@@ -351,7 +379,7 @@ bool isType(const Token& token) const {
       if (isNextTokenType(TokenType::IDENTIFIER))
         identifier = consumeToken();
     }
-    
+
     if (!isAssigmentOperator(nextToken()))
       error("Expected a assigment operator after identifier", m_line);
     Token& op = consumeToken();
@@ -363,8 +391,9 @@ bool isType(const Token& token) const {
     if (!isNextTokenType(TokenType::SEMICOLON)) 
       error("In this variable decleration: '" + identifier.lexemes  + "' was expected a semicolon", m_line);
     consumeToken();
-
-    m_semantics->analyzeAssignmentOperator(identifier.lexemes, value.get());
+    
+    if (!isIdentifierMember)
+      m_semantics->analyzeAssignmentOperator(identifier.lexemes, value.get());
     return make_unique<AssigmentOperator>(make_unique<Identifier>(identifier), op, std::move(value));
   }
 
@@ -438,12 +467,19 @@ bool isType(const Token& token) const {
     return make_unique<IfStatement>(std::move(condition), std::move(body), std::move(elseIfStatements), std::move(elseStatement));
   }
 
-  unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false, const string functionType = ""){
+  unique_ptr<BlockStatement> parseBlockStatement(const bool isScoped = false, const string functionType = "", const vector<unique_ptr<Parameter>>& parameters = {}){
     m_semantics->m_scopes->enterScope();
 
     if (!isNextTokenType(TokenType::LCURLY)) 
       error("Expected open bracket for block statement", m_line);
     consumeToken();
+
+    if (parameters.size() != 0){
+      for (const unique_ptr<Parameter>& parameter: parameters){
+        Parameter* current = parameter.get();
+        m_semantics->m_scopes->declare(current->getName(), Symbol("var", current->getType())); //add const
+      }
+    }
 
     vector<unique_ptr<ASTNode>> statements;
     while (!isNextTokenType(TokenType::RCURLY)){
@@ -460,8 +496,31 @@ bool isType(const Token& token) const {
     return make_unique<BlockStatement>(std::move(statements));
   }
 
-  unique_ptr<ASTNode> parseIdentifier(){
-    Token& identifier = consumeToken();
+  unique_ptr<DotOperator> parseMember(const Token& identifier, const bool isInsideExpression = false) {
+    consumeToken(); //consumes the dot
+
+    if (!isNextTokenType(TokenType::IDENTIFIER))
+      error("Expected a identifier after the dot operator", m_line);
+    const Token& member = consumeToken();
+
+    if (isAssigmentOperator(nextToken())){
+
+      if (isInsideExpression)
+        error("Assignment operations aren't possible within an expression", m_line);
+      unique_ptr<AssigmentOperator> assignment = parseAssigmentOperator(member, true);
+      
+      m_semantics->analyzeDotOperator(identifier.lexemes, member.lexemes, assignment.get());
+      return make_unique<DotOperator>(make_unique<Identifier>(identifier), make_unique<Identifier>(member), std::move(assignment));
+    }
+    else {
+      m_semantics->analyzeDotOperator(identifier.lexemes, member.lexemes, nullptr);
+      return make_unique<DotOperator>(make_unique<Identifier>(identifier), make_unique<Identifier>(member), nullptr);
+    } 
+  };
+
+  //THIS FUNCTION HAS A WHOLE CAN BE IMPROVED A LOT
+  unique_ptr<ASTNode> parseIdentifier(){ 
+    const Token& identifier = consumeToken();
     if (isAssigmentOperator(nextToken())){
       return parseAssigmentOperator(identifier);
     }
@@ -476,16 +535,19 @@ bool isType(const Token& token) const {
       return std::move(functionCall);
 
     }
+    else if (isNextTokenType(TokenType::DOT)){
+      return parseMember(identifier);
+    }
     else {
       error("Expected assigment or function call after identifier" + identifier.lexemes, m_line);
       return unique_ptr<ASTNode>();
     }
   }
   
-  unique_ptr<Variable> parseVariable() {
+  unique_ptr<Variable> parseVariable(const bool isMember = false) {
     Token& keyword = consumeToken();
     
-    if (i >= m_tokens.size() || !isType(nextToken())) 
+    if (i >= m_tokens.size() || (!isType(nextToken()) && isUserDefinedType(nextToken()))) 
       error("Expected type after " + keyword.lexemes + " keyword.", m_line); 
     
     else if (isNextTokenType(TokenType::NULL))
@@ -501,7 +563,7 @@ bool isType(const Token& token) const {
       consumeToken();
 
       auto variable = make_unique<Variable>(keyword, type, make_unique<Identifier>(name));
-      m_semantics->analyzeVariable(variable.get());
+      m_semantics->analyzeVariable(variable.get(), isMember);
       return variable;
     }
 
@@ -517,7 +579,7 @@ bool isType(const Token& token) const {
       consumeToken();
 
       auto variable = make_unique<Variable>(keyword, type, make_unique<Identifier>(name), std::move(value));
-      m_semantics->analyzeVariable(variable.get());
+      m_semantics->analyzeVariable(variable.get(), isMember);
       return variable;
     }
 
@@ -557,19 +619,22 @@ bool isType(const Token& token) const {
 
     while (isValidExpressionToken()) {
         Token& current = consumeToken();
-        cout << current.lexemes << '\n';
 
         if (isType(current)){
-          cout << "here\n";
+          if (current.type == TokenType::NULL)
+            error("Null is not a valid type to cast into", m_line);
           operands.push(parseCastExpression(current));
         }
         else if (isLiteral(current)) {
           operands.push(parseLiterals(current));
-        } 
+        } // THIS CODE SNIPPET I BELIVE CAN BE MADE INTO JUST THE PARSE IDENTIFIER CALL
         else if (current.type == TokenType::IDENTIFIER) {
-          if (isNextTokenType(TokenType::LPAREN)) {
+          if (isNextTokenType(TokenType::LPAREN)){
             operands.push(parseFunctionCall(current));
-          } 
+          }
+          else if (isNextTokenType(TokenType::DOT)){
+            operands.push(parseMember(current, true));
+          }
           else {
             operands.push(make_unique<Identifier>(current));
           }
@@ -601,14 +666,6 @@ bool isType(const Token& token) const {
     if (operands.size() == 0)
       error("Invalid expression", m_line);
     auto expression = std::move(operands.top());
-
-    // if (!castType.empty()) {
-    //   if (!isNextTokenType(TokenType::RPAREN)){
-    //     error("Expected closing parenthesis after the expression in cast expression");
-    //   }
-    //   consumeToken();
-    //   return make_unique<Cast>(std::move(expression), castType);
-    // }
 
     return expression;
   }
