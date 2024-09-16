@@ -86,12 +86,37 @@ public:
     }
   }
 
+  llvm::Value* generateStructInitialization(const string& structName, const vector<Expression*>& initValues) {
+      llvm::StructType* structType = scope.findStruct(structName);
+      if (!structType) {
+          error("Struct type '" + structName + "' not found");
+          return nullptr;
+      }
+
+      // Create an allocation for the struct
+      llvm::AllocaInst* structAlloca = builder.CreateAlloca(structType, nullptr, structName + "_instance");
+
+      // Initialize each member of the struct
+      for (size_t i = 0; i < initValues.size(); ++i) {
+          llvm::Value* memberPtr = builder.CreateStructGEP(structType, structAlloca, i, "member_ptr");
+          llvm::Value* initValue = getLLVMValue(initValues[i]);
+          
+          if (!initValue) {
+              error("Failed to generate initialization value for struct member");
+              return nullptr;
+          }
+          builder.CreateStore(initValue, memberPtr);
+      }
+
+      return structAlloca;
+  }
+
   llvm::Value* generateDotOperator(DotOperator* statement){
     llvm::AllocaInst* variable = scope.findVariable(statement->getIdentifierName());
     llvm::StructType* structType = llvm::cast<llvm::StructType>(variable->getAllocatedType());
 
     unsigned int memberIndex = scope.findStructMemberIndex(structType, statement->getMemberName());
-    if (memberIndex == static_cast<unsigned int>(-1)){
+    if (memberIndex == -1){
       error("Invalid member name or index for struct.");
       return nullptr;
     }

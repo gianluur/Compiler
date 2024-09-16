@@ -321,24 +321,58 @@ private:
 
 };
 
-class Variable : public ASTNode {
+class StructInitialization: public ASTNode {
 public:
-
-  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)) {}
-  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(make_unique<Null>()) {}
+  StructInitialization(vector<unique_ptr<Expression>> members):
+    m_members(std::move(members)) {}
 
   void print(int indentation_level = 0) const override {
-    if (m_value) {
+    cout << '\n' << setw(indentation_level + 2) << " " << "Struct Initialization: " << '\n';
+    cout << setw(indentation_level + 4) << " " << "Members: ";
+    for (const unique_ptr<Expression>& member: m_members){
+      member->print(indentation_level + 4);
+    }
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+  vector<Expression*> getMemberInitializer() const {
+    vector<Expression*> members = {};
+    for(const unique_ptr<Expression>& member: m_members){
+      members.emplace_back(member.get());
+    }
+    return members;
+  }
+
+private:
+  vector<unique_ptr<Expression>> m_members;
+};
+
+class Variable : public ASTNode {
+public:
+  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(make_unique<Null>()), m_initialization() {}
+
+  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)), m_initialization() {}
+
+  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<StructInitialization> initialization):
+    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(nullptr), m_initialization(std::move(initialization)) {}
+
+  void print(int indentation_level = 0) const override {
+    if (m_value || m_initialization) {
       cout << '\n' << setw(indentation_level) << " " << "Variable-Initialization { " << '\n';
       cout << setw(indentation_level + 2) << " " << "kind: " << m_keyword << '\n';
       cout << setw(indentation_level + 2) << " " << "name: ";
       m_name->print(indentation_level + 4);
       cout << setw(indentation_level + 2) << " " << "type: " << m_type << '\n';
       cout << setw(indentation_level + 2) << " " << "value: ";
-      m_value->print(indentation_level + 4);
-      cout << setw(indentation_level) << " " << "} " << endl;
+
+      if (m_value){
+        m_value->print(indentation_level + 4);
+        cout << setw(indentation_level) << " " << "} " << endl;
+      }
+      else if (m_initialization)
+        m_initialization->print(indentation_level + 4);
     }
     else {
       cout << '\n' << setw(indentation_level) << " " << "Variable-Declaration { " << '\n';
@@ -375,13 +409,82 @@ public:
     return m_value.release();
   }
 
+  StructInitialization* getInitializer() const {
+    return m_initialization.get();
+  }
+
+  bool isStructType() const {
+    return m_initialization != nullptr;
+  }
+
 private:
   string m_keyword;
   string m_type;
   unique_ptr<Identifier> m_name;
   string m_assignment;
   unique_ptr<Expression> m_value;
+  unique_ptr<StructInitialization> m_initialization;
+};
 
+
+class Struct : public ASTNode {
+public:
+  Struct(unique_ptr<Identifier> name, vector<unique_ptr<Variable>> members):
+    m_name(std::move(name)), m_members(std::move(members)) {}
+
+  void print(int indentation_level = 0) const override {
+    cout << '\n' << setw(indentation_level) << " " << "Struct {" << '\n';
+    cout << setw(indentation_level + 2) << " " << "name: ";
+    m_name->print(indentation_level + 4);
+    cout << setw(indentation_level + 2) << " " << "body: ";
+    for(const unique_ptr<Variable>& member: m_members){
+      member->print(indentation_level + 4);
+    }
+    cout << setw(indentation_level) << " " << "} " << endl;
+  }
+
+  Identifier* getIdentifier() const {
+    return m_name.get();
+  }
+
+  string getName() const {
+    return m_name->getName();
+  }
+
+  Variable* getMember(const string& name) const{
+    for(const unique_ptr<Variable>& member : m_members){
+      if (member->getName() == name)
+        return member.get();
+    }
+    return nullptr;
+  }
+
+  size_t getMemberIndex(const string& name) const{
+    size_t index = 0;
+    
+    for(const unique_ptr<Variable>& member : m_members){
+      if (member->getName() == name)
+        return index;
+      index++;
+    }
+    return -1;
+  }
+
+  vector<Variable*> getMembers() const {
+    vector<Variable*> members;
+    for(const unique_ptr<Variable>& member : m_members) {
+      members.emplace_back(member.get());
+    }
+    return members;
+  }
+
+  size_t getMembersCount() const {
+    return m_members.size();
+  }
+
+private:
+  unique_ptr<Identifier> m_name;
+  vector<unique_ptr<Variable>> m_members;
 };
 
 class BlockStatement : public ASTNode {
@@ -845,64 +948,4 @@ private:
   unique_ptr<Identifier> m_member;
   unique_ptr<AssigmentOperator> m_assigment;
 
-};
-
-class Struct : public ASTNode {
-public:
-  Struct(unique_ptr<Identifier> name, vector<unique_ptr<Variable>> members):
-    m_name(std::move(name)), m_members(std::move(members)) {}
-
-  void print(int indentation_level = 0) const override {
-    cout << '\n' << setw(indentation_level) << " " << "Struct {" << '\n';
-    cout << setw(indentation_level + 2) << " " << "name: ";
-    m_name->print(indentation_level + 4);
-    cout << setw(indentation_level + 2) << " " << "body: ";
-    for(const unique_ptr<Variable>& member: m_members){
-      member->print(indentation_level + 4);
-    }
-    cout << setw(indentation_level) << " " << "} " << endl;
-  }
-
-  Identifier* getIdentifier() const {
-    return m_name.get();
-  }
-
-  string getName() const {
-    return m_name->getName();
-  }
-
-  Variable* getMember(const string& name) const{
-    for(const unique_ptr<Variable>& member : m_members){
-      if (member->getName() == name)
-        return member.get();
-    }
-    return nullptr;
-  }
-
-  size_t getMemberIndex(const string& name) const{
-    size_t index = 0;
-    
-    for(const unique_ptr<Variable>& member : m_members){
-      if (member->getName() == name)
-        return index;
-      index++;
-    }
-    return -1;
-  }
-
-  vector<Variable*> getMembers() const {
-    vector<Variable*> members;
-    for(const unique_ptr<Variable>& member : m_members) {
-      members.emplace_back(member.get());
-    }
-    return members;
-  }
-
-  size_t getMembersCount() const {
-    return m_members.size();
-  }
-
-private:
-  unique_ptr<Identifier> m_name;
-  vector<unique_ptr<Variable>> m_members;
 };

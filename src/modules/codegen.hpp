@@ -390,9 +390,16 @@ private:
     const string name = statement->getName();
     llvm::Type* type = llvm.getLLVMType(statement->getType());
 
-    llvm::AllocaInst* variable = llvm.builder.CreateAlloca(type, nullptr, name);
+    llvm::AllocaInst* variable = llvm.builder.CreateAlloca(type, nullptr, name);;
+    if (statement->isStructType()){
+      StructInitialization* initializer = statement->getInitializer();
+      if (initializer != nullptr)
+        variable = llvm::cast<llvm::AllocaInst>(llvm.generateStructInitialization(statement->getType(), initializer->getMemberInitializer()));
+      else 
+        variable = llvm.builder.CreateAlloca(type, nullptr, name);
+    }
 
-    if (!dynamic_cast<Null*>(statement->getValue())){
+    else if (!dynamic_cast<Null*>(statement->getValue())){
       llvm::Value* value = llvm.getLLVMValue(statement->getValue());
       if (llvm::StructType* structure = llvm::dyn_cast<llvm::StructType>(type)){
         for (size_t i = 0; i < structure->getNumElements(); ++i){

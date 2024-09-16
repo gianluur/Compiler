@@ -21,19 +21,40 @@ public:
    unique_ptr<Scope> m_scopes;
 
   void analyzeVariable(Variable* variable, const bool isMember = false){
-    string keyword = variable->getKeyword();
     string type = variable->getType();
     string name = variable->getName();
     Expression* value = variable->getValue();
+    const bool isStruct = variable->isStructType();
+
 
     if (!isMember)
-      m_scopes->declare(name, Symbol(keyword, type));
+      m_scopes->declare(name, Symbol(variable->getKeyword(), type));
 
-    if (!dynamic_cast<Null*>(value)){
+    if (isStruct){
+      const Struct* structure = getStructure(type);
+      const vector<Variable*> members = structure->getMembers();
+      vector<Expression*> membersInitializer = variable->getInitializer()->getMemberInitializer();
+
+      const size_t membersSize = members.size();
+      const size_t initializerSize = membersInitializer.size();
+
+      if (membersSize != initializerSize)
+        error("Struct " + type + " was expecting + " + std::to_string(membersSize) + "but recived only " + std::to_string(initializerSize), m_line);
+      
+      for(size_t i = 0; i < membersSize; i++) {
+        const string expectedType = members[i]->getType();
+        const string actualType = getExpressionType(membersInitializer[i]);
+        
+        if (expectedType != actualType)
+          error("In struct initialization the " + std::to_string(i + 1) + "* field was expecting a " + expectedType + "but instead got a " + actualType, m_line);
+      }
+    }
+    else if (!dynamic_cast<Null*>(value)){
       const string valueType = getExpressionType(value);
       if (valueType != type && !isSmallerType(type, valueType))
         error("Expected " + type + " in variable declaration but got " + valueType + " instead", m_line);
-    }        
+    }
+           
   }
 
   void analyzeAssignmentOperator(const string& name, Expression* value){
