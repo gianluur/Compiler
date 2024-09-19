@@ -1,4 +1,0 @@
-struct Sigma {
-  var int x;
-  var string y;
-};

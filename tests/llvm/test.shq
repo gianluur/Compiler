@@ -1,0 +1,14 @@
+func int main() {
+  struct Test {
+    var int a;
+    var float b;
+  }; 
+
+  var Test test = {2, 3.5};
+  #test.a = 5;
+  #test.b = 3.5;
+  #var int x = test.a + int(test.b);
+  
+  return test.a + int(4.5);
+}
+

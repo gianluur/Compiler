@@ -1,0 +1,5 @@
+func null test(string p1, string p2) {
+  var int x = 5;
+}
+
+test(p1, p2);

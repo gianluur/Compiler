@@ -1,5 +1,0 @@
-let int number = 123;
-const float pi = 3.14159;
-string name = "Alice";
-char initial = 'A';
-bool isReady = true;

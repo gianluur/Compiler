@@ -1,3 +1,0 @@
-let int result = (4 + 5) * 3 - 2 / 1 % 2;
-result += 10;
-result *= 2;

@@ -1,0 +1,51 @@
+var int suca;
+var float suca;
+var bool suca;
+var char suca;
+var string suca;
+
+var int suca = 5;
+var float suca = 5.1;
+var bool suca = true;
+var char suca = 'c';
+var string suca = "asd";
+var string id = x;
+
+x = 5;
+x += 5;
+x -= 5;
+x *= 5;
+x /= 5;
+x %= 5;
+
+if tobia != chloe {
+  var int x = 5;
+}
+else {
+  var int y = 7;
+}
+
+while tobia != chloe {
+  sessoxtobia += 1;
+}
+
+do {
+  var string x = "sigma";
+} while tobia != chloe;
+
+for var int i = 0; i < n; i += 1; {
+  x += 1;
+}
+
+func null test(string p1, string p2) {
+  var int x = 5;
+}
+
+test();
+test(p1);
+test(p1, p2);
+
+struct Sigma {
+  var int x;
+  var string y;
+};

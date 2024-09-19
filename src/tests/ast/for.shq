@@ -1,3 +1,0 @@
-for var int i = 0; i < n; i += 1; {
-  x += 1;
-}

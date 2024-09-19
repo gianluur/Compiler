@@ -1,0 +1,6 @@
+if tobia != chloe {
+  var int x = 5;
+}
+else {
+  var int y = 7;
+}
