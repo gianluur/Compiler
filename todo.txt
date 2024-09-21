@@ -1,15 +1,9 @@
-TODO: Add structs
-  TODO: Add better error for structs stuff like (In this variable decleration: 'b' was expected a semicolon) when a dot operator hasn't a semicolon;
-
 TODO: Add pointers
 TODO: Add array
 TODO: Add print function
 
 TODO: Add checks for overflow for smaller integers / float
 TODO: Add check for main function return value to avoid LLVM weird error
-
-
-
 
 !!!PERFORMANCE BOOST!!!!
 

@@ -539,7 +539,58 @@ private:
     }
   }
 
+  unique_ptr<Variable> parseVariableInitialization(const string& keyword, const Token& type, const string& name, const bool& isMember) {
+    consumeToken();
+
+    if (isType(type)){ 
+      if (!isValidExpressionToken() && !isType(nextToken()))
+        error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
+      unique_ptr<Expression> value = parseExpression();
+
+      auto variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name), std::move(value));
+      return variable;
+    }
+
+    else { //the type is struct so it must have an initializer
+      if (!isNextTokenType(TokenType::LCURLY)){
+        error("Expected initializer in struct variable '" + name + "'", m_line);
+        return nullptr;
+      }
+      consumeToken();
+
+      vector<unique_ptr<Expression>> members;
+      while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
+        if (!isValidExpressionToken() && !isType(nextToken())){
+          error("Expected a valid struct member to initialize it", m_line);
+          return nullptr;
+        }
+        members.emplace_back(parseExpression());
+
+        if (isNextTokenType(TokenType::COMMA)) {
+          consumeToken();
+          if (isNextTokenType(TokenType::RCURLY)){
+            error("Expected another argument after comma in struct initializer", m_line);
+            return nullptr;
+          }
+        }
+        else if (isNextTokenType(TokenType::RCURLY)){
+          consumeToken();
+          break;
+        }
+        else {
+          error("Unexpected error in variable declaration", m_line);
+          return nullptr;
+        }
+      }
+
+      auto variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name), make_unique<StructInitialization>(std::move(members)));
+      return variable;
+    }
+  }
+
   unique_ptr<Variable> parseVariable(const bool isMember = false) {
+    unique_ptr<Variable> variable;
+
     const string& keyword = consumeToken().lexemes;
     
     if (i >= m_tokens.size() || (!isType(nextToken()) && isUserDefinedType(nextToken()))) 
@@ -553,79 +604,17 @@ private:
       error("Expected identifier after type in variable declaration", m_line);
     const string& name = consumeToken().lexemes;
 
-    if (isNextTokenType(TokenType::SEMICOLON)){
-      consumeToken();
+    if (isNextTokenType(TokenType::ASSIGNMENT))
+      variable = parseVariableInitialization(keyword, type, name, isMember);
+    else
+      variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name));
 
-      auto variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name));
-      m_semantics->analyzeVariable(variable.get(), isMember);
-      return variable;
-    }
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("Expected semicolon at the end of this variable declaration '" + name + "'", m_line);
+    consumeToken();
 
-    else if (isNextTokenType(TokenType::ASSIGNMENT)){
-      consumeToken();
-
-      if (isType(type)){ 
-        if (!isValidExpressionToken() && !isType(nextToken()))
-          error("Error: Expected a literal/expression/identifier after assigment operator in variable initialization", m_line);
-        unique_ptr<Expression> value = parseExpression();
-
-        if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
-          error("In this variable decleration: '" + keyword + " " + name  + "'; was expected a semicolon.", m_line);
-        consumeToken();
-
-        auto variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name), std::move(value));
-        m_semantics->analyzeVariable(variable.get(), isMember);
-        return variable;
-      }
-      //the type is struct so it must have an initializer
-      else {
-        if (!isNextTokenType(TokenType::LCURLY)){
-          error("Expected initializer in struct variable '" + name + "'", m_line);
-          return nullptr;
-        }
-        consumeToken();
-
-        vector<unique_ptr<Expression>> members;
-        while (isValidExpressionToken() || isNextTokenType(TokenType::COMMA)) {
-          if (!isValidExpressionToken() && !isType(nextToken())){
-            error("Expected a valid struct member to initialize it", m_line);
-            return nullptr;
-          }
-          members.emplace_back(parseExpression());
-
-
-          if (isNextTokenType(TokenType::COMMA)) {
-            cout << "Test\n";
-            consumeToken();
-            if (isNextTokenType(TokenType::RCURLY)){
-              error("Expected another argument after comma in struct initializer", m_line);
-              return nullptr;
-            }
-          }
-          else if (isNextTokenType(TokenType::RCURLY)){
-            consumeToken();
-            break;
-          }
-          else {
-            error("Unexpected error in variable declaration", m_line);
-            return nullptr;
-          }
-        }
-        
-        if (i >= m_tokens.size() || !isNextTokenType(TokenType::SEMICOLON))
-          error("In this variable decleration: '" + keyword + " " + name  + "'; was expected a semicolon.", m_line);
-        consumeToken();
-
-        auto variable = make_unique<Variable>(keyword, type.lexemes, make_unique<Identifier>(name), make_unique<StructInitialization>(std::move(members)));
-        m_semantics->analyzeVariable(variable.get(), isMember);
-        return variable;
-      }
-    }
-
-    else {
-      error("Expected semicolon after identifier in variable declaration", m_line);
-      return nullptr;
-    }
+    m_semantics->analyzeVariable(variable.get(), isMember);
+    return variable;
   } 
 
   unique_ptr<Cast> parseCastExpression(const Token& type){
