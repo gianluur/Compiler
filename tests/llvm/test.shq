@@ -4,11 +4,14 @@ func int main() {
     var float b;
   }; 
 
+  var int x = 0;
   var Test test = {2, 3.5};
-  #test.a = 5;
-  #test.b = 3.5;
-  #var int x = test.a + int(test.b);
+
+  for var int i = 0; test.a < 10; i += 1; {
+    test.a = test.a + 1;
+  }
+
   
-  return test.a + int(4.5);
+  return test.a + int(4.5) + x;
 }
 

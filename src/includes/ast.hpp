@@ -181,7 +181,7 @@ private:
 
 class Identifier : public Expression {
 public:
-  Identifier(const Token& name) : m_name(name.lexemes) {}
+  Identifier(const string& name) : m_name(std::move(name)) {}
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Identifier { " << '\n';
     cout << setw(indentation_level + 2) << " " << "name: " << m_name << "\n";
@@ -232,8 +232,8 @@ private:
 
 class AssigmentOperator : public Expression {
 public:
-  AssigmentOperator(unique_ptr<Identifier> identifier, const Token& op, unique_ptr<Expression> value):
-    m_identifier(std::move(identifier)), m_op(op.lexemes), m_value(std::move(value)) {}
+  AssigmentOperator(unique_ptr<Identifier> identifier, const string& op, unique_ptr<Expression> value, const bool isIdentifierMember):
+    m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)), m_isIdentifierMember(isIdentifierMember) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "AssigmentOperator { " << '\n';
@@ -247,6 +247,10 @@ public:
 
   Identifier* getIdentifier() const {
     return m_identifier.get();
+  }
+
+  string getName() const {
+    return getIdentifier()->getName();
   }
 
   Expression* getValue() const {
@@ -265,10 +269,15 @@ public:
     return m_op;
   }
 
+  bool isDotOperator() const {
+    return m_isIdentifierMember;
+  }
+
 private:
   unique_ptr<Identifier> m_identifier;
   string m_op;
   unique_ptr<Expression> m_value;
+  bool m_isIdentifierMember;
 };
 
 class BinaryOperator : public Expression {
@@ -349,14 +358,14 @@ private:
 
 class Variable : public ASTNode {
 public:
-  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(make_unique<Null>()), m_initialization() {}
+  Variable(const string& keyword, const string& type, unique_ptr<Identifier> name):
+    m_keyword(std::move(keyword)), m_type(std::move(type)), m_name(std::move(name)), m_value(make_unique<Null>()), m_initialization() {}
 
-  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(std::move(value)), m_initialization() {}
+  Variable(const string& keyword, const string& type, unique_ptr<Identifier> name, unique_ptr<Expression> value):
+    m_keyword(std::move(keyword)), m_type(std::move(type)), m_name(std::move(name)), m_value(std::move(value)), m_initialization() {}
 
-  Variable(const Token& keyword, const Token& type, unique_ptr<Identifier> name, unique_ptr<StructInitialization> initialization):
-    m_keyword(keyword.lexemes), m_type(type.lexemes), m_name(std::move(name)), m_value(nullptr), m_initialization(std::move(initialization)) {}
+  Variable(const string& keyword, const string& type, unique_ptr<Identifier> name, unique_ptr<StructInitialization> initialization):
+    m_keyword(std::move(keyword)), m_type(std::move(type)), m_name(std::move(name)), m_value(nullptr), m_initialization(std::move(initialization)) {}
 
   void print(int indentation_level = 0) const override {
     if (m_value || m_initialization) {
@@ -457,17 +466,6 @@ public:
         return member.get();
     }
     return nullptr;
-  }
-
-  size_t getMemberIndex(const string& name) const{
-    size_t index = 0;
-    
-    for(const unique_ptr<Variable>& member : m_members){
-      if (member->getName() == name)
-        return index;
-      index++;
-    }
-    return -1;
   }
 
   vector<Variable*> getMembers() const {
@@ -758,8 +756,8 @@ private:
 
 class Parameter: public ASTNode {
 public:
-  Parameter(const Token& type, unique_ptr<Identifier> name):
-    m_type(type.lexemes), m_name(std::move(name)) {}
+  Parameter(const string& type, unique_ptr<Identifier> name):
+    m_type(std::move(type)), m_name(std::move(name)) {}
 
   void print(int indentation_level = 0) const override {
     cout << '\n' << setw(indentation_level) << " " << "Parameter {" << '\n';
@@ -784,8 +782,8 @@ private:
 
 class Function: public ASTNode {
 public:
-  Function(const Token& returnType, unique_ptr<Identifier> name, vector<unique_ptr<Parameter>> parameters, unique_ptr<BlockStatement> body):
-    m_returnType(returnType.lexemes), m_name(std::move(name)), m_parameters(std::move(parameters)), m_body(std::move(body)) {}
+  Function(const string& returnType, unique_ptr<Identifier> name, vector<unique_ptr<Parameter>> parameters, unique_ptr<BlockStatement> body):
+    m_returnType(std::move(returnType)), m_name(std::move(name)), m_parameters(std::move(parameters)), m_body(std::move(body)) {}
 
   void print(int indentation_level) const override {
     cout << '\n' << setw(indentation_level) << " " << "Function {" << '\n';

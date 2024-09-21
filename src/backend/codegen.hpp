@@ -91,22 +91,35 @@ private:
     llvm.scope.declareStruct(name, structInfos);  
   }
 
-  void generateAssignmentOperator(AssigmentOperator* statement){
-    string op = statement->getOperator();
+  void generateAssignmentOperator(AssigmentOperator* statement, const string& identifierName = ""){
+    const string op = statement->getOperator();
+    const bool isDotOperator = statement->isDotOperator();
+    llvm::AllocaInst* variable; llvm::Value* memberPtr; llvm::Type* type;
+    llvm::Value* result; llvm::Value* currentValue; llvm::Value* assignmentValue;
 
-    llvm::AllocaInst* variable = llvm.scope.findVariable(statement->getIdentifier()->getName());
-    llvm::Type* variableType = variable->getAllocatedType();
+    if (isDotOperator){
+      llvm::AllocaInst* variable = llvm.scope.findVariable(identifierName);
+      llvm::StructType* structType = llvm::cast<llvm::StructType>(variable->getAllocatedType());
+      unsigned int memberIndex = llvm.scope.findStructMemberIndex(structType, statement->getName());
+      memberPtr = llvm.builder.CreateStructGEP(structType, variable, memberIndex, "memberPtr");
 
-    llvm::Value* assignmentValue = llvm.getLLVMValue(statement->getValue());
-    llvm::Value* currentValue = llvm.builder.CreateLoad(variableType, variable, "currentValue");
-    llvm::Value* result;
+      currentValue = memberPtr;
+      type = structType->getElementType(memberIndex);
+    }
 
+    else {
+      variable = llvm.scope.findVariable(statement->getName());
+      type = variable->getAllocatedType();
+      currentValue = llvm.builder.CreateLoad(type, variable, "currentValue");
+    }
 
+    assignmentValue = llvm.getLLVMValue(statement->getValue());
+  
     if (op == "=") {
       result = assignmentValue;
     } 
     else {
-      bool isFloat = variableType->isFloatTy();
+      const bool isFloat = type->isFloatTy();
 
       if (op == "+=") {
         result = isFloat ? llvm.builder.CreateFAdd(currentValue, assignmentValue, "addtmp") 
@@ -128,7 +141,11 @@ private:
         return;
       }
     }
-    llvm.builder.CreateStore(result, variable);
+
+    if (isDotOperator)
+      llvm.builder.CreateStore(result, memberPtr);
+    else
+      llvm.builder.CreateStore(result, variable);
   }
 
   void generateForStatement(For* statement){

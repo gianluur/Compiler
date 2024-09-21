@@ -76,7 +76,6 @@ public:
     else if (DotOperator* statement = dynamic_cast<DotOperator*>(node)){
       return generateDotOperator(statement);
     }
-
     else if (dynamic_cast<Null*>(node)) 
       return llvm::Constant::getNullValue(getLLVMType("null"));
 
@@ -110,16 +109,13 @@ public:
 
       return structAlloca;
   }
+  
+
 
   llvm::Value* generateDotOperator(DotOperator* statement){
     llvm::AllocaInst* variable = scope.findVariable(statement->getIdentifierName());
     llvm::StructType* structType = llvm::cast<llvm::StructType>(variable->getAllocatedType());
-
     unsigned int memberIndex = scope.findStructMemberIndex(structType, statement->getMemberName());
-    if (memberIndex == -1){
-      error("Invalid member name or index for struct.");
-      return nullptr;
-    }
 
     llvm::Value* memberPtr = builder.CreateStructGEP(structType, variable, memberIndex, "memberPtr");
     if (statement->getAssigment()) {

@@ -112,7 +112,9 @@ public:
     }
   }
 
-  void analyzeReturn(Expression* value, const string& type){
+  void analyzeReturn(Expression* value, const string& type, const bool isScoped){
+    isNodeScoped("return", isScoped);
+
     if (type == "null")
       error("Return statement found in a function returning null", m_line);
 
