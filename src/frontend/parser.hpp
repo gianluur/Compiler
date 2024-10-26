@@ -41,9 +41,7 @@ public:
 private:
   vector<Token> m_tokens;
   size_t i;
-
   size_t m_line;
-  
 
   unique_ptr<Semantics> m_semantics;
   vector<unique_ptr<ASTNode>> m_ast;

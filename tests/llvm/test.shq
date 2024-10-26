@@ -11,7 +11,6 @@ func int main() {
     test.a = test.a + 1;
   }
 
-
   
   return test.a + int(4.5) + x;
 }

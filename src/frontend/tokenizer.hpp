@@ -467,6 +467,7 @@ private:
 
   void tokenText(const char& currentChar){
     const string& token = getText(currentChar);
-    if (!isKeyword(token)) tokenIdentifier(token);
+    if (!isKeyword(token)) 
+      tokenIdentifier(token);
   }
 };
