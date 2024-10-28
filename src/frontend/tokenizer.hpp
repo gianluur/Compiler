@@ -118,44 +118,50 @@ private:
   void tokenize(){
     for(index = 0; index < m_src.size(); index++){
       const char current = m_src[index];
-      if (std::isspace(current))
-        continue;
-      
-      if (current == '\n'){
-        line++;
+      if (std::isspace(current)){
+        if (current == '\n')
+          line++;
         continue;
       }
-      
-      if (isNumber(current))
-        m_tokens.push_back(tokenNumber(current));
-
-      else if (isText(current))
-        m_tokens.push_back(tokenText(current));
-      
-      else if (isOperator(current))
-        m_tokens.push_back(tokenOperator(current));
-        
-      else if (isMiscellaneous(current))
-        m_tokens.push_back(tokenMiscellaneous(current));
-      
-      else if (isSingleQuote(current))
-        m_tokens.push_back(tokenChar(current));
-      
-      else if (isDoubleQuote(current))
-        m_tokens.push_back(tokenString(current));
+      m_tokens.push_back(getToken(current));
     }
     print();
   }
 
+  const Token getToken(const char& current) {
+    if (isNumber(current))
+      return tokenNumber(current);
+
+    else if (isText(current))
+      return tokenText(current);
+    
+    else if (isOperator(current))
+      return tokenOperator(current);
+      
+    else if (isMiscellaneous(current))
+      return tokenMiscellaneous(current);
+    
+    else if (isSingleQuote(current))
+      return tokenChar(current);
+    
+    else if (isDoubleQuote(current))
+      return tokenString(current);
+
+    else{
+      error("Compiler Error: getToken(), couldn't recognize the token starting with: " + std::string(1, current), line);
+      return Token();
+    }
+  }
+
   char nextChar(){
     if (++index >= m_src.size()) 
-      return '\0';
+      error("Compiler Error: nextChar(), in tokenizer.hpp, has gone out of bounds", line);
     return m_src.at(index);
   }
 
   char peekNextChar() const {
     if (index + 1 >= m_src.size())
-      error("out of bounds!", line);
+      error("Compiler Error: peekNextChar(), in tokenizer.hpp, has gone out of bounds", line);
     return m_src.at(index + 1);
   }
 
@@ -190,9 +196,10 @@ private:
     if (singleCharOperatorMap.find(current) != singleCharOperatorMap.end()){
       if (peekNextChar() == '=')
         return doubleCharOperatorMap.find(string(1, current) + '=') != doubleCharOperatorMap.end();
-      if ((current == '&' || current == '|') && peekNextChar() == current)
-        return doubleCharOperatorMap.find(string(2, current)) != doubleCharOperatorMap.end();
       return true;
+    }
+    if ((current == '&' || current == '|') && peekNextChar() == current){
+      return doubleCharOperatorMap.find(string(1, current) + current) != doubleCharOperatorMap.end();
     }
     return false;
   } 

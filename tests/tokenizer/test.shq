@@ -11,5 +11,7 @@ func int main(){
     test.a = test.a + 1;
   }
 
+  bool x = 5 && 0
+
   return 0;
 }
