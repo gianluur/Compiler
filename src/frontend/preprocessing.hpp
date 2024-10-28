@@ -5,9 +5,10 @@
 #include <sstream>
 #include <fstream>   
 #include <algorithm>
+#include <string_view>
 
 using std::cout, std::cerr, std::endl;
-using std::string, std::stringstream, std::ifstream;
+using std::string, std::string_view, std::stringstream, std::ifstream;
 using std::remove_if, std::size_t;
 
 class Preprocessor {
@@ -20,7 +21,7 @@ public:
     cout << "-------------------------\n\n";
   }
 
-  string getSrc() const { 
+  string_view getSrc() const { 
     return m_src;
   }
 

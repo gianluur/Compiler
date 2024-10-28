@@ -17,7 +17,7 @@ using std::pair;
 
 class Tokenizer{
 public:
-  Tokenizer(const string source_code):
+  Tokenizer(const string_view source_code):
     m_src(source_code), index(0), line(1) {
       cout << "----- Tokenizer -----\n\n";
       tokenize(); 
@@ -49,7 +49,7 @@ private:
     { '.', TokenType::DOT }
   };
 
-  const unordered_map<string, TokenType> keywordMap = {
+  const unordered_map<string_view, TokenType> keywordMap = {
     { "var", TokenType::VAR },
     { "const", TokenType::CONST },
     { "int8", TokenType::INT8 },
@@ -95,7 +95,7 @@ private:
     { '=', TokenType::ASSIGNMENT}
   };
 
-  const unordered_map<string, TokenType> doubleCharOperatorMap = {
+  const unordered_map<string_view, TokenType> doubleCharOperatorMap = {
     { "&&", TokenType::AND },
     { "||", TokenType::OR },
     { "==", TokenType::EQUALS },
@@ -147,10 +147,8 @@ private:
     else if (isDoubleQuote(current))
       return tokenString(current);
 
-    else{
+    else
       error("Compiler Error: getToken(), couldn't recognize the token starting with: " + std::string(1, current), line);
-      return Token();
-    }
   }
 
   char nextChar(){

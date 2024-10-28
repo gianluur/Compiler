@@ -6,7 +6,7 @@
 
 using std::cerr, std::string;
 
-void error(const string& message, const int line = -1) {
+[[noreturn]] void error(const string& message, const int line = -1) {
   cerr << CLIStyle::red << "Line: " << line << " | Error: " << CLIStyle::reset << message << "\n";
   exit(EXIT_FAILURE);
 }

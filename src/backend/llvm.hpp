@@ -289,6 +289,37 @@ public:
       else 
         return builder.CreateICmpSGE(leftValue, rightValue, "cmptmp");
     
+    else if (op == "&&") {
+      // Convert operands to boolean (i1) if they aren't already
+      llvm::Value* leftBool = builder.CreateICmpNE(
+          leftValue, 
+          llvm::ConstantInt::get(leftValue->getType(), 0),
+          "tobool"
+      );
+      llvm::Value* rightBool = builder.CreateICmpNE(
+          rightValue,
+          llvm::ConstantInt::get(rightValue->getType(), 0),
+          "tobool"
+      );
+      return builder.CreateAnd(leftBool, rightBool, "andtmp");
+    }
+    
+    else if (op == "||") {
+        // Convert operands to boolean (i1) if they aren't already
+        llvm::Value* leftBool = builder.CreateICmpNE(
+            leftValue,
+            llvm::ConstantInt::get(leftValue->getType(), 0),
+            "tobool"
+        );
+        llvm::Value* rightBool = builder.CreateICmpNE(
+            rightValue,
+            llvm::ConstantInt::get(rightValue->getType(), 0),
+            "tobool"
+        );
+        return builder.CreateOr(leftBool, rightBool, "ortmp");
+    }
+
+
     else {
       error("Unknown binary operator"); 
       return nullptr;
