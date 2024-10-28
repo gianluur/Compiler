@@ -5,8 +5,8 @@ source_filename = "MyModule"
 
 define i32 @main() {
 entry:
-  %x = alloca i32, align 4
-  store i32 0, ptr %x, align 4
+  %x = alloca float, align 4
+  store float 0xC0515AE140000000, ptr %x, align 4
   %test = alloca %Test, align 8
   %Test_instance = alloca %Test, align 8
   %member_ptr = getelementptr inbounds %Test, ptr %Test_instance, i32 0, i32 0
@@ -41,10 +41,5 @@ for.update:                                       ; preds = %for.body
   br label %for.cond
 
 for.end:                                          ; preds = %for.cond
-  %memberPtr6 = getelementptr inbounds %Test, ptr %Test_instance, i32 0, i32 0
-  %memberValue7 = load i32, ptr %memberPtr6, align 4
-  %addtmp8 = add i32 %memberValue7, 4
-  %x9 = load i32, ptr %x, align 4
-  %addtmp10 = add i32 %addtmp8, %x9
-  ret i32 %addtmp10
+  ret i32 0
 }

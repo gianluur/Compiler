@@ -1,66 +1,113 @@
+#pragma once
+
 #include <iostream>
 #include <cstdint>
 #include <vector>
 #include <stdexcept>
+#include <string_view>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "../includes/token.hpp"
 #include "../includes/error.hpp"
 
-#undef NULL
-
 using std::cout, std::cerr;
-using std::string, std::vector;
+using std::string, std::string_view, std::vector, std::unordered_map, std::unordered_set;
+using std::pair;
 
 class Tokenizer{
 public:
-  Tokenizer(const string& src): m_src(src), i(0), line(1) { 
-    cout << "----- Tokenizer -----\n\n";
-    
-    tokenize(); 
-
-    cout << "\n---------------------\n\n";
-  }
-
-  vector<Token> getTokens() const { return m_tokens; }
-
-  void tokenize(){
-    for(i = 0; i < m_src.size(); i++){  
-      char currentChar = m_src.at(i);
-
-      if (isSpace(currentChar)) continue;
-
-      else if (isEndLine(currentChar)) { line += 1;  continue; }
-
-      else if (isNumber(currentChar)) tokenNumber(currentChar);
-
-      else if (isChar(currentChar)) tokenChar(currentChar);
-
-      else if (isString(currentChar)) tokenString(currentChar);
-      
-      else if (isParenthesis(currentChar)) tokenParenthesis(currentChar);
-
-      else if (isMathOperator(currentChar)) tokenMathOperator(currentChar);
-
-      else if (isAssignmentOperator(currentChar)) tokenAssignmentOperator(currentChar);
-
-      else if (isComparisonOperator(currentChar)) tokenComparisonOperator(currentChar);
-
-      else if (isLogicalOperator(currentChar)) tokenLogicalOperator(currentChar);
-
-      else if (isSemicolon(currentChar)) tokenSemicolon(currentChar);
-
-      else if (isComma(currentChar)) tokenComma(currentChar);
-
-      else  if (isDot(currentChar)) tokenDot(currentChar);
-
-      else if (isText(currentChar)) tokenText(currentChar); 
-
-      else invalidToken(currentChar);
+  Tokenizer(const string source_code):
+    m_src(source_code), index(0), line(1) {
+      cout << "----- Tokenizer -----\n\n";
+      tokenize(); 
+      cout << "\n---------------------\n\n";
     }
-    m_tokens.emplace_back(Token(TokenType::EOF, "\0", line));
 
-    print();
+  ~Tokenizer(){}
+
+  vector<Token> getTokens() const {
+    return m_tokens;
   }
+
+private:
+  string m_src;
+  vector<Token> m_tokens;
+
+  size_t index;
+  size_t line;
+
+  const unordered_map<char, TokenType> miscellaneousMap = {
+    { '(', TokenType::LPAREN },
+    { ')', TokenType::RPAREN },
+    { '[', TokenType::LBRACKET },
+    { ']', TokenType::RBRACKET },
+    { '{', TokenType::LCURLY },
+    { '}', TokenType::RCURLY },
+    { ';', TokenType::SEMICOLON },
+    { ',', TokenType::COMMA },
+    { '.', TokenType::DOT }
+  };
+
+  const unordered_map<string, TokenType> keywordMap = {
+    { "var", TokenType::VAR },
+    { "const", TokenType::CONST },
+    { "int8", TokenType::INT8 },
+    { "int16", TokenType::INT16 },
+    { "int32", TokenType::INT32 },
+    { "int64", TokenType::INT64 },
+    { "int", TokenType::INT },
+    { "uint8", TokenType::UINT8 },
+    { "uint16", TokenType::UINT16 },
+    { "uint32", TokenType::UINT32 },
+    { "uint64", TokenType::UINT64 },
+    { "uint", TokenType::UINT},
+    { "float32", TokenType::FLOAT32 },
+    { "float64", TokenType::FLOAT64 },
+    { "float", TokenType::FLOAT },
+    { "char", TokenType::CHAR },
+    { "string", TokenType::STRING },
+    { "bool", TokenType::BOOL },
+    { "null", TokenType::NULL },
+    { "if", TokenType::IF },
+    { "else", TokenType::ELSE },
+    { "do", TokenType::DO },
+    { "while", TokenType::WHILE },
+    { "for", TokenType::FOR },
+    { "break", TokenType::BREAK },
+    { "continue", TokenType::CONTINUE },
+    { "func", TokenType::FUNC },
+    { "return", TokenType::RETURN },
+    { "struct", TokenType::STRUCT },
+    { "true", TokenType::LITERAL_BOOLEAN },
+    { "false", TokenType::LITERAL_BOOLEAN }
+  };
+
+  const unordered_map<char, TokenType> singleCharOperatorMap = {
+    { '+', TokenType::ADDITION },
+    { '-', TokenType::SUBTRACTION },
+    { '*', TokenType::MULTIPLICATION },
+    { '/', TokenType::DIVISION },
+    { '%', TokenType::MODULUS },
+    { '!' , TokenType::NOT},
+    { '<' , TokenType::LESS},
+    { '>' , TokenType::GREATER},
+    { '=', TokenType::ASSIGNMENT}
+  };
+
+  const unordered_map<string, TokenType> doubleCharOperatorMap = {
+    { "&&", TokenType::AND },
+    { "||", TokenType::OR },
+    { "==", TokenType::EQUALS },
+    { "!=", TokenType::NOT_EQUAL },
+    { ">=", TokenType::GREATER_EQUAL },
+    { "<=", TokenType::LESS_EQUAL },
+    { "+=", TokenType::ADDITION_ASSIGNMENT },
+    { "-=", TokenType::SUBTRACTION_ASSIGNMENT },
+    { "*=", TokenType::MULTIPLICATION_ASSIGNMENT },
+    { "/=", TokenType::DIVISION_ASSIGNMENT },
+    { "%=", TokenType::MODULUS_ASSIGNMENT }
+  };
 
   void print() const {
     for(const Token& token : m_tokens){
@@ -68,406 +115,163 @@ public:
     }
   }
 
-private:
-  vector<Token> m_tokens;
-  string m_src;
-  size_t i;
-  size_t line;
+  void tokenize(){
+    for(index = 0; index < m_src.size(); index++){
+      const char current = m_src[index];
+      if (std::isspace(current))
+        continue;
+      
+      if (current == '\n'){
+        line++;
+        continue;
+      }
+      
+      if (isNumber(current))
+        m_tokens.push_back(tokenNumber(current));
 
-  bool contains(const string& charset, const char& currentChar){
-    return charset.find(currentChar) != string::npos;
+      else if (isText(current))
+        m_tokens.push_back(tokenText(current));
+      
+      else if (isOperator(current))
+        m_tokens.push_back(tokenOperator(current));
+        
+      else if (isMiscellaneous(current))
+        m_tokens.push_back(tokenMiscellaneous(current));
+      
+      else if (isSingleQuote(current))
+        m_tokens.push_back(tokenChar(current));
+      
+      else if (isDoubleQuote(current))
+        m_tokens.push_back(tokenString(current));
+    }
+    print();
   }
 
   char nextChar(){
-    if (i + 1 >= m_src.size()) return '\0';
-    return m_src.at(i + 1);
-  }
-  
-  bool isNextChar(const char& charToCheck){
-    if (i + 1 >= m_src.size()) return false;
-    return m_src.at(i + 1) == charToCheck;
+    if (++index >= m_src.size()) 
+      return '\0';
+    return m_src.at(index);
   }
 
-  bool isEndLine(const char& currentChar){
-    return currentChar == '\n';
+  char peekNextChar() const {
+    if (index + 1 >= m_src.size())
+      error("out of bounds!", line);
+    return m_src.at(index + 1);
   }
 
-  bool isSpace(const char& currentChar){
-    return currentChar == ' ';
-  }
-
-  bool isParenthesis(const char& currentChar){
-    return contains("()[]{}", currentChar);
-  }
-
-  bool isDigit(const char& currentChar){
-    return contains("0123456789", currentChar);
-  }
-
-  bool isNumber(const char& currentChar){
-    return isDigit(currentChar) || (currentChar == '-' && isDigit(nextChar()));
-  }
-
-  bool isMathOperator(const char& currentChar){
-    return contains("+-*/%", currentChar) && !(nextChar() == '=');
-  }
-
-  bool isAssignmentOperator(const char& currentChar){
-    return (currentChar == '=' && !isNextChar('=')) || (contains("+-*/%", currentChar) && isNextChar('='));
-  }
-
-  bool isComparisonOperator(const char& currentChar){
-    return contains("<>", currentChar) || (contains("!=", currentChar) && isNextChar('=')); 
-  }
-
-  bool isLogicalOperator(const char& currentChar){
-    return contains("!&|", currentChar) || ((currentChar == '!') && !isNextChar('='));
-  }
-
-  bool isText(const char& currentChar){
-    return contains("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_", currentChar) || isDigit(currentChar);
-  }
-
-  bool isSemicolon(const char& currentChar){
-    return currentChar == ';';
-  }
-
-  bool isComma(const char& currentChar){
-    return currentChar == ',';
-  }
-
-  bool isDot(const char currentChar){
-    return currentChar == '.';
-  }
-
-  bool isChar(const char& currentChar){
-    return currentChar == '\'';
-  }
-
-  bool isString(const char& currentChar){
-    return currentChar == '\"';
-  }
-  
-  bool isVariable(const string& token){
-    if (token == "var" ) {m_tokens.emplace_back(Token(TokenType::VAR, token, line)); return true;}
-    else if (token == "const") {m_tokens.emplace_back(Token(TokenType::CONST, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  bool isType(const string& token){
-    if (token == "int8") {m_tokens.emplace_back(Token(TokenType::INT8, token, line)); return true;}
-    else if (token == "int16") {m_tokens.emplace_back(Token(TokenType::INT16, token, line)); return true;}
-    else if (token == "int32") {m_tokens.emplace_back(Token(TokenType::INT32, token, line)); return true;}
-    else if (token == "int64") {m_tokens.emplace_back(Token(TokenType::INT64, token, line)); return true;}
-
-    else if (token == "int") {m_tokens.emplace_back(Token(TokenType::INT, token, line)); return true;}
-
-    else if (token == "uint8") {m_tokens.emplace_back(Token(TokenType::UINT8, token, line)); return true;}
-    else if (token == "uint16") {m_tokens.emplace_back(Token(TokenType::UINT16, token, line)); return true;}
-    else if (token == "uint32") {m_tokens.emplace_back(Token(TokenType::UINT32, token, line)); return true;}
-    else if (token == "uint64") {m_tokens.emplace_back(Token(TokenType::UINT64, token, line)); return true;}
-
-    else if (token == "float32") {m_tokens.emplace_back(Token(TokenType::FLOAT32, token, line)); return true;}
-    else if (token == "float64") {m_tokens.emplace_back(Token(TokenType::FLOAT64, token, line)); return true;}
-    else if (token == "float") {m_tokens.emplace_back(Token(TokenType::FLOAT, token, line)); return true;}
-    
-    else if (token == "char") {m_tokens.emplace_back(Token(TokenType::CHAR, token, line)); return true;}
-    else if (token == "string") {m_tokens.emplace_back(Token(TokenType::STRING, token, line)); return true;}
-    else if (token == "bool") {m_tokens.emplace_back(Token(TokenType::BOOL, token, line)); return true;}
-    else if (token == "null") {m_tokens.emplace_back(Token(TokenType::NULL, token, line)); return true;}
-    
-    else 
-      return false;
-  }
-
-  bool isIfStatement(const string& token){
-    if (token == "if") {m_tokens.emplace_back(Token(TokenType::IF, token, line)); return true;}
-    else if (token == "else") {m_tokens.emplace_back(Token(TokenType::ELSE, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  bool isLoopStatement(const string& token){
-    if (token == "do") {m_tokens.emplace_back(Token(TokenType::DO, token, line)); return true;}
-    else if (token == "while") {m_tokens.emplace_back(Token(TokenType::WHILE, token, line)); return true;}
-    else if (token == "for") {m_tokens.emplace_back(Token(TokenType::FOR, token, line)); return true;}
-    else if (token == "break") {m_tokens.emplace_back(Token(TokenType::BREAK, token, line)); return true;}
-    else if (token == "continue") {m_tokens.emplace_back(Token(TokenType::CONTINUE, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  bool isFunction(const string& token){
-    if (token == "func") {m_tokens.emplace_back(Token(TokenType::FUNC, token, line)); return true;}
-    else if (token == "return") {m_tokens.emplace_back(Token(TokenType::RETURN, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  bool isStruct(const string& token){
-    if (token == "struct") {m_tokens.emplace_back(Token(TokenType::STRUCT, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  bool isBoolean(const string& token){
-    if (token == "true") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
-    else if (token == "false") {m_tokens.emplace_back(Token(TokenType::LITERAL_BOOLEAN, token, line)); return true;}
-    else 
-      return false;
-  }
-
-  void invalidToken(const char& currentChar, const string& message = ""){
+  void invalidToken(const char& character, const string& message = "") const {
     if (message == "")
-      error("Invalid token detected: '" + string(1, currentChar) + "'", line);
+      error("Invalid token detected: '" + string(1, character) + "'", line);
     else 
       error(message, line);
   }
-
-  void tokenNumber(const char& currentChar){
-    string number = "";
-    int8_t dotCount = 0;
-
-    if (currentChar == '-') {
-        number += currentChar;
-        i++;
-    }
-
-    for (; i < m_src.size() && (isDigit(m_src.at(i)) || (m_src.at(i) == '.')); i++) {
-        if (m_src.at(i) == '.') {
-            if (++dotCount > 1) {
-                invalidToken(currentChar, "Floats can only have one decimal point");
-                break; 
-            }
-        }
-        number += m_src.at(i);
-    }
-    i--; 
-
-    if (dotCount == 0) 
-      m_tokens.emplace_back(Token(TokenType::LITERAL_INTEGER, number, line));
-    else 
-      m_tokens.emplace_back(Token(TokenType::LITERAL_FLOAT, number, line));
-
+  
+  bool isText(const char& current) const {
+    return isalnum(current) || current == '_';
   }
 
-  void tokenChar(const char& currentChar){
-    string token = string(1, currentChar);
-    char character = nextChar();
-    i++;
-
-    char closing = nextChar();
-    if (closing != '\'') 
-      invalidToken(currentChar, "Missing char closing quote");
-    i++;
-
-    token += string(1, character) + string(1, closing);
-    m_tokens.emplace_back(Token(TokenType::LITERAL_CHARACTER, token, line));
+  bool isNumber(const char& current) const {
+    return std::isdigit(current) || (current == '-' && std::isdigit(peekNextChar()));
   }
 
-  void tokenString(const char& currentChar){
-    string token = string(1, currentChar);
-    while(nextChar() != '\"' && i < m_src.size()){
-      token += string(1, nextChar());
-      i++;
+  bool isMiscellaneous(const char& current) const {
+    return miscellaneousMap.find(current) != miscellaneousMap.end();
+  }
+
+  bool isSingleQuote(const char& current) const {
+    return current == '\'';
+  }
+
+  bool isDoubleQuote(const char& current) const {
+    return current == '\"';
+  }
+
+  bool isOperator(const char& current) {
+    if (singleCharOperatorMap.find(current) != singleCharOperatorMap.end()){
+      if (peekNextChar() == '=')
+        return doubleCharOperatorMap.find(string(1, current) + '=') != doubleCharOperatorMap.end();
+      if ((current == '&' || current == '|') && peekNextChar() == current)
+        return doubleCharOperatorMap.find(string(2, current)) != doubleCharOperatorMap.end();
+      return true;
+    }
+    return false;
+  } 
+
+  string getText(const char& character){
+    string text = string(1, character);
+
+    while (isText(peekNextChar())) {
+      text += nextChar();
     }
 
-    char closing = nextChar();
-    if (closing != '\"') 
-      invalidToken(currentChar, "Missing string closing quote");
-    i++;
-
-    token += string(1, closing);
-    m_tokens.emplace_back(Token(TokenType::LITERAL_STRING, token, line));
+    return text;
   }
 
-  void tokenParenthesis(const char& currentChar){
-    const string token = string(1, currentChar);
-
-    switch (currentChar){
-      case '(':
-        m_tokens.emplace_back(Token(TokenType::LPAREN, token, line));
-        break;
-
-      case ')':
-        m_tokens.emplace_back(Token(TokenType::RPAREN, token, line));
-        break;
-
-      case '[':
-        m_tokens.emplace_back(Token(TokenType::LBRACKET, token, line));
-        break;
-
-      case ']':
-        m_tokens.emplace_back(Token(TokenType::RBRACKET, token, line));
-        break;
-
-      case '{':
-        m_tokens.emplace_back(Token(TokenType::LCURLY, token, line));
-        break;
-
-      case '}':
-        m_tokens.emplace_back(Token(TokenType::RCURLY, token, line));
-        break;
-      
-      default:
-        invalidToken(currentChar, "Invalid parenthesis in tokenizer, this error should never pop up");
-        break;
-    }
+  Token tokenMiscellaneous(const char& character) const {
+    return Token(miscellaneousMap.at(character), string(1, character), line);
   }
 
-  void tokenMathOperator(const char& currentChar){
-    const string token = string(1, currentChar);
-    switch (currentChar)
-    {
-    case '+':
-      m_tokens.emplace_back(Token(TokenType::ADDITION, token, line));
-      break;
-
-    case '-':
-      m_tokens.emplace_back(Token(TokenType::SUBTRACTION, token, line));
-      break;
-
-    case '*':
-      m_tokens.emplace_back(Token(TokenType::MULTIPLICATION, token, line));
-      break;
-
-    case '/':
-      m_tokens.emplace_back(Token(TokenType::DIVISION, token, line));
-      break;
-
-    case '%':
-      m_tokens.emplace_back(Token(TokenType::MODULUS, token, line));
-      break;
-
-    default:
-      break;
-    }
-  }
-
-  void tokenAssignmentOperator(const char& currentChar){
+  Token tokenNumber(const char& character){
+    string token = character == '-' ? "-" : string(1, character);
     
-    if (currentChar == '=') {
-      const string token = string(1, currentChar);
-      m_tokens.emplace_back(Token(TokenType::ASSIGNMENT, token, line)); 
+    char current; uint8_t dots = 0;
+    while(std::isdigit(peekNextChar()) || peekNextChar() == '.'){
+      current = nextChar();
+
+      if (current == '.' && (dots += 1) > 1)
+        invalidToken(character, "Floats can only have one decimal point");
+
+      token += current;
     }
 
-    else {
-      const string token = string(1, currentChar) + "=";
-
-      switch (currentChar){
-        case '+':
-          m_tokens.emplace_back(Token(TokenType::ADDITION_ASSIGNMENT, token, line));
-          break;
-
-        case '-':
-          m_tokens.emplace_back(Token(TokenType::SUBTRACTION_ASSIGNMENT, token, line));
-          break;
-        
-        case '*':
-          m_tokens.emplace_back(Token(TokenType::MULTIPLICATION_ASSIGNMENT, token, line));
-          break;
-
-        case '/':
-          m_tokens.emplace_back(Token(TokenType::DIVISION_ASSIGNMENT, token, line));
-          break;
-
-        case '%':
-          m_tokens.emplace_back(Token(TokenType::MODULUS_ASSIGNMENT, token, line));
-          break;
-
-        default:
-          invalidToken(currentChar, "Invalid assignment operator in tokenizer, this error should never pop up");
-          break;
-      }
-      i++;
-    }
+    if (dots == 0)
+      return Token(TokenType::LITERAL_INTEGER, token, line);
+    else
+      return Token(TokenType::LITERAL_FLOAT, token , line);
   }
 
-  void tokenComparisonOperator(const char& currentChar){
+  Token tokenChar(const char& character){
+    string token = string(1, character) + nextChar();
 
-    if (currentChar == '>'){
-      if (isNextChar('=')){
-        const string token = string(1, currentChar) + "=";
-        m_tokens.emplace_back(Token(TokenType::GREATER_EQUAL, token, line));
-        i++;
-      }
-      else 
-        m_tokens.emplace_back(Token(TokenType::GREATER, string(1, currentChar), line));
-    }
+    if (!(peekNextChar() == '\''))
+      invalidToken(character, "Missing char closing quote");
+    token += nextChar();
 
-    else if (currentChar == '<'){
-      if (isNextChar('=')){
-        const string token = string(1, currentChar) + "=";
-        m_tokens.emplace_back(Token(TokenType::LESS_EQUAL, token, line));
-        i++;
-      }
-      else 
-        m_tokens.emplace_back(Token(TokenType::LESS, string(1, currentChar), line));
-    }
-
-    else if (currentChar == '=') {
-      const string token = string(1, currentChar) + "=";
-      m_tokens.emplace_back(Token(TokenType::EQUALS, token, line));
-      i++;
-    }
-
-    else if (currentChar == '!'){
-      const string token = string(1, currentChar) + "=";
-      m_tokens.emplace_back(Token(TokenType::NOT_EQUAL, token, line));
-      i++;
-    }
+    return Token(TokenType::LITERAL_CHARACTER, token, line);
   }
 
-  void tokenLogicalOperator(const char& currentChar){
-    string token = string(1, currentChar);
-    while(isLogicalOperator(nextChar())){
-      token += string(1, nextChar());
-      i++;
-    }
+  Token tokenString(const char& character){
+    string token = string(1, character);
+    char current;
+    do {
+      current = nextChar();
+      token += current;
+    } while(current != '\"' && index < m_src.size());
 
-    if (token == "&&") m_tokens.emplace_back(Token(TokenType::AND, token, line));
-    else if (token == "||") m_tokens.emplace_back(Token(TokenType::OR, token, line));
-    else if (token == "!") m_tokens.emplace_back(Token(TokenType::NOT, token, line));
-    else invalidToken(currentChar, "Invalid logical operator in tokenizer, this error should never pop up");
+    if (current != '\"')
+      invalidToken(character, "Missing string closing quote");
 
+    return Token(TokenType::LITERAL_STRING, token, line);
   }
 
-  string getText(const char& currentChar){
-    string token = string(1, currentChar);
-    while(isText(nextChar())){
-      token += string(1, nextChar());
-      i++;
-    }
-    return token;
+  Token tokenOperator(const char& character){
+    string text = string(1, character);
+    if (singleCharOperatorMap.find(character) != singleCharOperatorMap.end() && peekNextChar() == '=') 
+      text += nextChar();
+    else if ((character == '&' || character == '|') && peekNextChar() == character)
+      text += nextChar();
+
+    if (doubleCharOperatorMap.find(text) != doubleCharOperatorMap.end())
+      return Token(doubleCharOperatorMap.at(text), text, line);
+    else
+      return Token(singleCharOperatorMap.at(character), text, line);
   }
 
-  void tokenSemicolon(const char& currentChar){
-    const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::SEMICOLON, token, line));
-  }
-
-  void tokenComma(const char& currentChar){
-    const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::COMMA, token, line));
-  }
-
-  void tokenDot(const char& currentChar){
-    const string token = string(1, currentChar);
-    m_tokens.emplace_back(Token(TokenType::DOT, token, line));
-  }
-
-  void tokenIdentifier(const string& token){
-    m_tokens.emplace_back(Token(TokenType::IDENTIFIER, token, line));
-  }
-
-  bool isKeyword(const string& token){
-    return isVariable(token) || isType(token) || isIfStatement(token) || isLoopStatement(token) || isFunction(token) || isStruct(token) || isBoolean(token);
-  }
-
-  void tokenText(const char& currentChar){
-    const string& token = getText(currentChar);
-    if (!isKeyword(token)) 
-      tokenIdentifier(token);
+  Token tokenText(const char& character){
+    const string text = getText(character);
+    if (keywordMap.find(text) != keywordMap.end())
+      return Token(keywordMap.at(text), text, line);
+    else 
+      return Token(TokenType::IDENTIFIER, text, line);
   }
 };
