@@ -1,3 +1,5 @@
+TODO: Parser fix return value can be allowed if nested in scopes
+
 TODO: Add pointers
 TODO: Add array
 TODO: Add print function

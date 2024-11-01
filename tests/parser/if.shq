@@ -1,0 +1,28 @@
+f (true) {
+    var int x = 1;
+}
+
+// If-else
+if (false) {
+    var int x = 1;
+} else {
+    var int x = 2;
+}
+
+// Nested if
+if (true) {
+    if (false) {
+        var int x = 1;
+    } else {
+        var int x = 2;
+    }
+}
+
+// Complex conditions
+if (true && false || true) {
+    var int x = 1;
+}
+
+if (!(false) && (true || false)) {
+    var int x = 2;
+}

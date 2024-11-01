@@ -1,0 +1,37 @@
+func void empty() {
+}
+
+// Basic return types
+func int return_int() {
+    return 42;
+}
+
+func float64 return_float() {
+    return 3.14;
+}
+
+func string return_string() {
+    return "hello";
+}
+
+func bool return_bool() {
+    return true;
+}
+
+// Parameters
+func void single_param(var int x) {
+}
+
+func int multiple_params(var int x, var float32 y, var string z) {
+    return x;
+}
+
+func string default_param(var string msg = "default") {
+    return msg;
+}
+
+// Nested function calls
+func int nested() {
+    var int x = return_int();
+    return x + return_int();
+}

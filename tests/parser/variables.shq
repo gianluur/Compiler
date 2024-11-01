@@ -1,0 +1,32 @@
+var int x;
+var int32 y = 42;
+const int z = 100;
+
+// Integer types
+var int regular_int = 2147483647;
+var int8 tiny_int = 127;
+var int16 small_int = 32767;
+var int32 medium_int = 2147483647;
+var int64 big_int = 9223372036854775807;
+
+// Unsigned integer types
+var uint unsigned_int = 4294967295;
+var uint8 tiny_unsigned = 255;
+var uint16 small_unsigned = 65535;
+var uint32 medium_unsigned = 4294967295;
+var uint64 big_unsigned = 18446744073709551615;
+
+// Float types
+var float regular_float = 3.14;
+var float32 single_precision = 3.14159;
+var float64 double_precision = 3.141592653589793;
+
+// Other basic types
+var char letter = 'A';
+var string text = "Hello, World!";
+var bool flag = true;
+var bool empty_flag = false;
+
+// Null assignments
+var string empty_string = null;
+var int nullable_int = null;

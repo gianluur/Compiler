@@ -1,0 +1,21 @@
+// While loops
+var int counter = 0;
+while (counter < 10) {
+    counter = counter + 1;
+}
+
+// While with break
+while (true) {
+    if (counter > 5) {
+        break;
+    }
+    counter = counter + 1;
+}
+
+// While with continue
+while (counter < 10) {
+    if (counter == 5) {
+        continue;
+    }
+    counter = counter + 1;
+}

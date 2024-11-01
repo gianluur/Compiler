@@ -1,0 +1,35 @@
+struct Point {
+    var int x;
+    var int y;
+};
+
+// Struct with multiple types
+struct Person {
+    var string name;
+    var int32 age;
+    var float64 height;
+    var bool is_active;
+};
+
+// Nested struct
+struct Rectangle {
+    var Point top_left;
+    var Point bottom_right;
+};
+
+// Struct initialization and usage
+var Point p1;
+p1.x = 10;
+p1.y = 20;
+
+var Person person;
+person.name = "John";
+person.age = 30;
+person.height = 1.75;
+person.is_active = true;
+
+var Rectangle rect;
+rect.top_left.x = 0;
+rect.top_left.y = 0;
+rect.bottom_right.x = 100;
+rect.bottom_right.y = 100;
