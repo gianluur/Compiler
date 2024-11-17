@@ -10,7 +10,7 @@
 #include <optional>
 
 #include "../includes/token.hpp"
-#include "../includes/new_ast.hpp"
+#include "../includes/ast.h"
 #include "../includes/error.hpp"
 #include "semantics.hpp"
 
@@ -18,6 +18,7 @@ using std::cout, std::endl;
 using std::stoi, std::stod;
 using std::vector, std::unordered_map, std::unordered_set, std::stack;
 using std::optional;
+using std::unique_ptr, std::make_unique;
 
 #undef NULL
 
@@ -99,7 +100,7 @@ private:
     TokenType::LITERAL_BOOLEAN,
   };
 
-  unique_ptr<ASTNode> getASTNode() {
+  unique_ptr<ASTNode> getASTNode(const TokenType Scope = TokenType::NULL) {
     const Token& token = nextToken();
 
     switch(token.type){
@@ -112,6 +113,22 @@ private:
 
       case TokenType::IDENTIFIER:
         return parseIdentifier({}, false);
+
+      case TokenType::IF:
+        return parseIfStatement();
+
+      case TokenType::BREAK:
+      case TokenType::CONTINUE:
+        return parseLoopControl();
+
+      case TokenType::WHILE:
+        return parseWhileStatement();
+
+      case TokenType::DO:
+        return parseDoWhileStatement();
+
+      case TokenType::FOR:
+        return parseForStatement();
       
       default:
         error("Token Not handled yet: " + token.lexemes, m_line);
@@ -292,8 +309,7 @@ private:
 
     vector<unique_ptr<ASTNode>> statements = {};
     while(!isNextTokenType(TokenType::RCURLY)){
-      unique_ptr<ASTNode> node = getASTNode();
-      statements.push_back(std::move(node));
+      statements.push_back(getASTNode());
     }
     consumeToken(); // consumes the '}'
 
@@ -343,7 +359,7 @@ private:
       return parseAssignmentOperator(token.value());
   }
 
-  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token) {
+  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false) {
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
     
     if (!isAssigmentOperator(nextToken()))
@@ -359,6 +375,133 @@ private:
     consumeToken();
 
     return make_unique<AssignmentOperator>(std::move(identifier), std::move(op), std::move(value));
+  }
+
+  unique_ptr<If> parseIfStatement(){
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::LPAREN))
+      error("In if statement declaration was expected a opening parenthesis before the condition", m_line);
+    consumeToken();
+
+    if (!isValidExpression(nextToken()))
+      error("In if statement declaration was expected a valid expression for the condition", m_line);
+    unique_ptr<Expression> condition = parseExpression(true);
+
+    if (!isNextTokenType(TokenType::RPAREN))
+      error("In if statement declaration was expected a closing parenthesis after the condition", m_line);
+    consumeToken();
+
+    unique_ptr<Body> body = parseBody();
+
+    vector<unique_ptr<Else>> elses = {};
+    while (!isAtEnd() && isNextTokenType(TokenType::ELSE))
+        elses.push_back(parseElseStatement());
+    
+
+    return make_unique<If>(std::move(condition), std::move(body), std::move(elses));
+  }
+
+  unique_ptr<Else> parseElseStatement(){
+    consumeToken(); //consumes 'else'
+    
+    if (isNextTokenType(TokenType::IF)){
+      unique_ptr<If> ifstatement = parseIfStatement();
+      return make_unique<Else>(std::move(ifstatement));
+    }
+    else {
+      unique_ptr<Body> body = parseBody();
+      return make_unique<Else>(std::move(body));
+    }
+  }
+
+  unique_ptr<LoopControl> parseLoopControl(){
+    const Token& keyword = consumeToken();
+    
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("Expected semicolon after " + keyword.lexemes + "keyword", m_line);
+    consumeToken();
+
+    return make_unique<LoopControl>(keyword);
+  }
+
+  unique_ptr<While> parseWhileStatement(){
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::LPAREN))
+      error("In while statement declaration was expected a opening parenthesis before the condition", m_line);
+    consumeToken();
+
+    if (!isValidExpression(nextToken()))
+      error("In while statement declaration was expected a valid expression for the condition", m_line);
+    unique_ptr<Expression> condition = parseExpression(true);
+
+    if (!isNextTokenType(TokenType::RPAREN))
+      error("In while statement declaration was expected a closing parenthesis after the condition", m_line);
+    consumeToken();
+
+    unique_ptr<Body> body = parseBody();
+
+    return make_unique<While>(std::move(condition), std::move(body));
+  }
+
+  unique_ptr<DoWhile> parseDoWhileStatement(){
+    consumeToken();
+
+    unique_ptr<Body> body = parseBody();
+    if (!isNextTokenType(TokenType::WHILE))
+      error("In do-while statement declaration was expected the while token after the body");
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::LPAREN))
+      error("In while statement declaration was expected a opening parenthesis before the condition", m_line);
+    consumeToken();
+
+    if (!isValidExpression(nextToken()))
+      error("In while statement declaration was expected a valid expression for the condition", m_line);
+    unique_ptr<Expression> condition = parseExpression(true);
+
+    if (!isNextTokenType(TokenType::RPAREN))
+      error("In while statement declaration was expected a closing parenthesis after the condition", m_line);
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("In do-while statement declaration was expected a semicolon",m_line);
+    consumeToken();
+
+    return make_unique<DoWhile>(std::move(condition), std::move(body));
+  }
+
+  unique_ptr<For> parseForStatement(){
+    consumeToken(); // consumes 'for'
+
+    if (!isNextTokenType(TokenType::LPAREN))
+      error("In for statement declaration was expected a opening parenthesis before the condition", m_line);
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+      error("In for statement declaration was expected a valid initialization", m_line);
+    unique_ptr<Variable> initialization = parseVariable();
+
+    if (!isValidExpression(nextToken()))
+      error("In for statement decalration was expecteda a valid condition", m_line);
+    unique_ptr<Expression> condition = parseExpression();
+
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("In for statement declaration was expected a semicolon", m_line);
+    consumeToken();
+
+    if (!isNextTokenType(TokenType::IDENTIFIER))
+      error("In for statement declaration was expected an identifier for the update");  
+    unique_ptr<AssignmentOperator> update = parseAssignmentOperator(consumeToken(), true);
+
+    if (!isNextTokenType(TokenType::RPAREN))
+      error("In for statement declaration was expected a closing parenthesis after the update", m_line);
+    consumeToken();
+
+    unique_ptr<Body> body = parseBody();
+
+    return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(body));
   }
 
   unique_ptr<Cast> parseCast(const Token& token){
@@ -379,14 +522,14 @@ private:
     return make_unique<Cast>(std::move(type), std::move(expression));
   }
 
-  unique_ptr<Expression> parseExpression(const bool isArgument = false) {
+  unique_ptr<Expression> parseExpression(const bool isInsideParenthesis = false) {
     stack<unique_ptr<Operator>> operators;
     stack<unique_ptr<ASTNode>> nodes;
     int parenCount = 0;
 
     while (!isAtEnd()) {
-      if ((!isArgument && isNextTokenType(TokenType::SEMICOLON)) || 
-          (isArgument && parenCount == 0 && (isNextTokenType(TokenType::COMMA) || isNextTokenType(TokenType::RPAREN)))) 
+      if ((!isInsideParenthesis && isNextTokenType(TokenType::SEMICOLON)) || 
+          (isInsideParenthesis && parenCount == 0 && (isNextTokenType(TokenType::COMMA) || isNextTokenType(TokenType::RPAREN)))) 
         break;
 
       const Token& token = nextToken();

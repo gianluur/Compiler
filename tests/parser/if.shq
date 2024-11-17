@@ -1,15 +1,15 @@
-f (true) {
+if (true) {
     var int x = 1;
 }
 
-// If-else
+# If-else
 if (false) {
     var int x = 1;
 } else {
     var int x = 2;
 }
 
-// Nested if
+# Nested if
 if (true) {
     if (false) {
         var int x = 1;
@@ -18,7 +18,7 @@ if (true) {
     }
 }
 
-// Complex conditions
+# Complex conditions
 if (true && false || true) {
     var int x = 1;
 }
