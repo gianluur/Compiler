@@ -1,4 +1,5 @@
 #include "variable.h"
+#include "ASTNode.h"
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier):
   m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(make_unique<Expression>()) {}
@@ -25,4 +26,8 @@ TokenType Variable::getType() const {
 
 ASTNode* Variable::getValue() const {
   return m_value->getExpression();
+}
+
+bool Variable::isPointer() const {
+  return m_type->isPointer();
 }

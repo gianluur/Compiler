@@ -17,6 +17,8 @@
 #include "nodes/loopcontrol.h"
 #include "nodes/operator.h"
 #include "nodes/parameter.h"
+#include "nodes/return.h"
+#include "nodes/struct.h"
 #include "nodes/type.h"
 #include "nodes/unary_operator.h"
 #include "nodes/variable.h"

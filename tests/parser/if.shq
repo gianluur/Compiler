@@ -19,10 +19,10 @@ if (true) {
 }
 
 # Complex conditions
-if (true && false || true) {
+if (true and false or true) {
     var int x = 1;
 }
 
-if (!(false) && (true || false)) {
+if (!(false) and (true and false)) {
     var int x = 2;
 }

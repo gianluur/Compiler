@@ -19,6 +19,7 @@ enum class TokenType {
   COMMA,
   DOT,
   IDENTIFIER,
+  AMPERSAND,
 
   //TYPES 
   ARRAY_INT,
@@ -101,7 +102,7 @@ enum class TokenType {
   //MATH
   ADDITION,
   SUBTRACTION,
-  MULTIPLICATION,
+  STAR,
   DIVISION,
   MODULUS,
 

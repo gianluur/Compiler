@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
-#include <stdexcept>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
@@ -80,23 +79,25 @@ private:
     { "return", TokenType::RETURN },
     { "struct", TokenType::STRUCT },
     { "true", TokenType::LITERAL_BOOLEAN },
-    { "false", TokenType::LITERAL_BOOLEAN }
+    { "false", TokenType::LITERAL_BOOLEAN },
+    { "and", TokenType::AND},
+    { "or", TokenType::OR},
   };
 
   const unordered_map<char, TokenType> singleCharOperatorMap = {
     { '+', TokenType::ADDITION },
     { '-', TokenType::SUBTRACTION },
-    { '*', TokenType::MULTIPLICATION },
+    { '*', TokenType::STAR },
     { '/', TokenType::DIVISION },
     { '%', TokenType::MODULUS },
-    { '!' , TokenType::NOT},
-    { '<' , TokenType::LESS},
-    { '>' , TokenType::GREATER},
-    { '=', TokenType::ASSIGNMENT}
+    { '!', TokenType::NOT},
+    { '<', TokenType::LESS},
+    { '>', TokenType::GREATER},
+    { '=', TokenType::ASSIGNMENT},
+    { '&', TokenType::AMPERSAND}
   };
 
   const unordered_map<string_view, TokenType> doubleCharOperatorMap = {
-    { "&&", TokenType::AND },
     { "||", TokenType::OR },
     { "==", TokenType::EQUALS },
     { "!=", TokenType::NOT_EQUAL },

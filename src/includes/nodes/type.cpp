@@ -1,6 +1,7 @@
 #include "type.h"
 
-Type::Type(const Token& token) : m_type(token.type), m_str(token.lexemes) {}
+Type::Type(const Token& token, const bool isPointer): 
+  m_type(token.type), m_str(token.lexemes), m_isPointer(isPointer) {}
 
 void Type::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Type: " << m_str << '\n';
@@ -28,6 +29,10 @@ bool Type::isChar() const {
 
 bool Type::isNull() const {
   return m_type == TokenType::NULL;
+}
+
+bool Type::isPointer() const {
+  return m_isPointer;
 }
 
 string Type::toString() const {

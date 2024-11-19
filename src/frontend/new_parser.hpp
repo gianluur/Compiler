@@ -78,14 +78,25 @@ private:
   const unordered_set<TokenType> mathOperatorSet = {
     TokenType::ADDITION,
     TokenType::SUBTRACTION,
-    TokenType::MULTIPLICATION,
+    TokenType::STAR,
     TokenType::DIVISION,
     TokenType::MODULUS,
   };
 
   const unordered_set<TokenType> basicTypeSet = {
     TokenType::INT,
+    TokenType::INT8,
+    TokenType::INT16,
+    TokenType::INT32,
+    TokenType::INT64,
+    TokenType::UINT,
+    TokenType::UINT8,
+    TokenType::UINT16,
+    TokenType::UINT32,
+    TokenType::UINT64,
     TokenType::FLOAT,
+    TokenType::FLOAT32,
+    TokenType::FLOAT64,
     TokenType::CHAR,
     TokenType::STRING,
     TokenType::BOOL,
@@ -100,7 +111,7 @@ private:
     TokenType::LITERAL_BOOLEAN,
   };
 
-  unique_ptr<ASTNode> getASTNode(const TokenType Scope = TokenType::NULL) {
+  unique_ptr<ASTNode> getASTNode(const TokenType scope = TokenType::NULL) {
     const Token& token = nextToken();
 
     switch(token.type){
@@ -111,6 +122,9 @@ private:
       case TokenType::FUNC:
         return parseFunction();
 
+      case TokenType::RETURN:
+        return parseReturn(scope);
+
       case TokenType::IDENTIFIER:
         return parseIdentifier({}, false);
 
@@ -119,7 +133,7 @@ private:
 
       case TokenType::BREAK:
       case TokenType::CONTINUE:
-        return parseLoopControl();
+        return parseLoopControl(scope);
 
       case TokenType::WHILE:
         return parseWhileStatement();
@@ -136,7 +150,7 @@ private:
   }
 
   void print() const {
-    for (const auto& node : m_ast) {
+    for (const unique_ptr<ASTNode>& node : m_ast) {
       node->print();
     } 
   }
@@ -163,7 +177,7 @@ private:
 
   int getPrecedence(const TokenType type) const {
     switch (type) {
-      case TokenType::MULTIPLICATION: 
+      case TokenType::STAR: 
       case TokenType::DIVISION:
       case TokenType::MODULUS:
         return 3;
@@ -221,7 +235,7 @@ private:
   }
 
   bool isValidExpression(const Token& token) {
-    return !(index >= m_tokens.size()) && (
+    return !(index >= m_tokens.size()) && (                                                                  
           isLiteral(token) || isType(token) || isOperator(token) || 
           token.type == TokenType::IDENTIFIER || token.type == TokenType::LPAREN || token.type == TokenType::RPAREN);
   }
@@ -231,7 +245,10 @@ private:
 
     if (!isType(nextToken()))
       error("In variable declaration was expected a type after " + keyword.lexemes + " keyword", m_line);
-    unique_ptr<Type> type = make_unique<Type>(consumeToken());
+    unique_ptr<Type> type = make_unique<Type>(consumeToken(), isNextTokenType(TokenType::STAR) ? true : false);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+    if (type->isPointer()) 
+      consumeToken();
 
     if (!isNextTokenType(TokenType::IDENTIFIER))
       error("In variable declaration was expected a identifier after type: " + keyword.lexemes + " " + type->toString(), m_line);
@@ -243,7 +260,7 @@ private:
     }
     else if (isNextTokenType(TokenType::ASSIGNMENT) && !isMember){
       consumeToken(); // consumes '='
-
+  
       if (!isValidExpression(nextToken()))
         error("In variable declaration was expected an appropriate value after assigment operator: " + keyword.lexemes + " " + type->toString() + " " + identifier->toString(), m_line);
       unique_ptr<Expression> value = parseExpression();
@@ -253,7 +270,6 @@ private:
       consumeToken();
 
       return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(value));
-      
     }
     else
       error(std::string((isMember) ? "In struct" : "In variable") + "declaration was expected a semicolon", m_line);
@@ -264,7 +280,9 @@ private:
 
     if (!isType(nextToken()))
       error("In function declaration was expected a type after func keyword", m_line);
-    unique_ptr<Type> type = make_unique<Type>(consumeToken());
+    unique_ptr<Type> type = make_unique<Type>(consumeToken(), isNextTokenType(TokenType::STAR) ? true : false);
+    if (type->isPointer()) 
+      consumeToken();
 
     if (!isNextTokenType(TokenType::IDENTIFIER))
       error("In function declaration was expected a identifier after type: func " + type->toString(), m_line);
@@ -285,7 +303,7 @@ private:
       }
     }
     consumeToken(); //consumes the ')'
-    unique_ptr<Body> body = parseBody();
+    unique_ptr<Body> body = parseBody(TokenType::FUNC);
     
     return make_unique<Function>(std::move(type), std::move(identifier), std::move(parameters), std::move(body));
   }
@@ -293,7 +311,9 @@ private:
   unique_ptr<Parameter> parseParameter(){
     if (!isType(nextToken()))
       error("In function declaration was expected a type for the parameter", m_line);
-    unique_ptr<Type> type = make_unique<Type>(consumeToken());
+    unique_ptr<Type> type = make_unique<Type>(consumeToken(), isNextTokenType(TokenType::STAR) ? true : false);
+    if (type->isPointer()) 
+      consumeToken();
 
     if (!isNextTokenType(TokenType::IDENTIFIER))
       error("In function declaration was expected a identifer after type for a parameter:" + type->toString(), m_line);
@@ -302,14 +322,14 @@ private:
     return make_unique<Parameter>(std::move(type), std::move(identifier));
   }
 
-  unique_ptr<Body> parseBody() {
+  unique_ptr<Body> parseBody(const TokenType scope = TokenType::NULL) {
     if (!isNextTokenType(TokenType::LCURLY))
       error("Expected open curly bracket for the body", m_line);
     consumeToken();
 
     vector<unique_ptr<ASTNode>> statements = {};
     while(!isNextTokenType(TokenType::RCURLY)){
-      statements.push_back(getASTNode());
+      statements.push_back(getASTNode(scope));
     }
     consumeToken(); // consumes the '}'
 
@@ -317,7 +337,7 @@ private:
   }
 
   unique_ptr<FunctionCall> parseFunctionCall(const Token& token){
-    consumeToken();
+    consumeToken(); //TODO: ma che cazzo e'
         
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
     vector<unique_ptr<Expression>> arguments;
@@ -343,6 +363,20 @@ private:
     if (!isValidExpression(nextToken()) && !isNextTokenType(TokenType::SEMICOLON))
       error("In function call was expected a semicolon", m_line);
     return make_unique<FunctionCall>(std::move(identifier), std::move(arguments));
+  }
+
+  unique_ptr<Return> parseReturn(const TokenType scope) {
+    consumeToken();
+
+    if (!isValidExpression(nextToken()))
+      error("In return statement was expected an expression");
+    unique_ptr<Expression> expression = parseExpression();
+
+    if (!isNextTokenType(TokenType::SEMICOLON))
+      error("In return statement was expected a semicolon", m_line);
+    consumeToken();
+
+    return make_unique<Return>(std::move(expression), scope);
   }
 
   unique_ptr<ASTNode> parseIdentifier(optional<Token> token, const bool isInsideExpression = false) {
@@ -415,14 +449,14 @@ private:
     }
   }
 
-  unique_ptr<LoopControl> parseLoopControl(){
+  unique_ptr<LoopControl> parseLoopControl(const TokenType scope){
     const Token& keyword = consumeToken();
     
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("Expected semicolon after " + keyword.lexemes + "keyword", m_line);
     consumeToken();
 
-    return make_unique<LoopControl>(keyword);
+    return make_unique<LoopControl>(keyword, scope);
   }
 
   unique_ptr<While> parseWhileStatement(){
@@ -440,7 +474,7 @@ private:
       error("In while statement declaration was expected a closing parenthesis after the condition", m_line);
     consumeToken();
 
-    unique_ptr<Body> body = parseBody();
+    unique_ptr<Body> body = parseBody(TokenType::WHILE);
 
     return make_unique<While>(std::move(condition), std::move(body));
   }
@@ -448,7 +482,7 @@ private:
   unique_ptr<DoWhile> parseDoWhileStatement(){
     consumeToken();
 
-    unique_ptr<Body> body = parseBody();
+    unique_ptr<Body> body = parseBody(TokenType::DO);
     if (!isNextTokenType(TokenType::WHILE))
       error("In do-while statement declaration was expected the while token after the body");
     consumeToken();
@@ -499,15 +533,35 @@ private:
       error("In for statement declaration was expected a closing parenthesis after the update", m_line);
     consumeToken();
 
-    unique_ptr<Body> body = parseBody();
+    unique_ptr<Body> body = parseBody(TokenType::FOR);
 
     return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(body));
   }
 
+  // unique_ptr<Struct> parseStruct() {
+  //   consumeToken(); // consumes 'struct'
+
+  //   if (!isNextTokenType(TokenType::IDENTIFIER))
+  //     error("In struct declaration was expected an identifier after struct keyword", m_line);
+  //   unique_ptr<Identifier> identifier = make_unique<Identifier>(consumeToken());
+
+  //   if (!isNextTokenType(TokenType::RCURLY))
+  //     error("In struct declaration was expected a opening curly bracket after the identifier", m_line);
+  //   consumeToken();
+
+  //   while(!isNextTokenType(TokenType::LCURLY)){
+  //     if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+  //       error("")
+  //   }
+  // }
+
+  
   unique_ptr<Cast> parseCast(const Token& token){
-    unique_ptr<Type> type = make_unique<Type>(token);
+    unique_ptr<Type> type = make_unique<Type>(token, false); //
     if (token.type == TokenType::NULL)
       error("Casting any type to type 'null' is not allowed", m_line);
+    else if (isNextTokenType(TokenType::STAR))
+      error("Casting to pointer is not allowed", m_line);
 
     if (!isNextTokenType(TokenType::LPAREN))
       error("In cast expression was expected an opening parenthesis", m_line);

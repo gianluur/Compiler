@@ -1,16 +1,16 @@
-func void empty() {
+func null empty() {
 }
 
-// Basic return types
+# Basic return types
 func int return_int() {
     return 42;
 }
 
-func float64 return_float() {
+func float return_float() {
     return 3.14;
 }
 
-func string return_string() {
+func char return_string() {
     return "hello";
 }
 
@@ -18,19 +18,15 @@ func bool return_bool() {
     return true;
 }
 
-// Parameters
-func void single_param(var int x) {
+# Parameters
+func null single_param(int x) {
 }
 
-func int multiple_params(var int x, var float32 y, var string z) {
+func int multiple_params(int x, float64 y, char z) {
     return x;
 }
 
-func string default_param(var string msg = "default") {
-    return msg;
-}
-
-// Nested function calls
+# Nested function calls
 func int nested() {
     var int x = return_int();
     return x + return_int();

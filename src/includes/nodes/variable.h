@@ -15,6 +15,7 @@ public:
   string getKeyword() const;
   TokenType getType() const;
   ASTNode* getValue() const;
+  bool isPointer() const;
 
 private:
   const Token& m_keyword;
