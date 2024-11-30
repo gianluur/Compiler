@@ -177,6 +177,11 @@ private:
 
   int getPrecedence(const TokenType type) const {
     switch (type) {
+      case TokenType::NOT:
+      case TokenType::AMPERSAND:
+      case TokenType::CARET:
+        return 4;
+
       case TokenType::STAR: 
       case TokenType::DIVISION:
       case TokenType::MODULUS:
@@ -203,7 +208,7 @@ private:
   }
 
   bool isLeftAssociative(const TokenType type) const {
-    return type != TokenType::NOT; // Unary NOT is right associative
+    return type != TokenType::NOT && type != TokenType::AMPERSAND && type != TokenType::CARET; // Unary NOT is right associative
   }
 
   bool isAssigmentOperator(const Token& token){
@@ -223,7 +228,9 @@ private:
   }
 
   bool isOperator(const Token& token){
-    return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token);
+    return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
+           token.type == TokenType::AMPERSAND || token.type == TokenType::CARET;
+           
   }
 
   bool isLiteral(const Token& token) const {
@@ -530,7 +537,7 @@ private:
     unique_ptr<AssignmentOperator> update = parseAssignmentOperator(consumeToken(), true);
 
     if (!isNextTokenType(TokenType::RPAREN))
-      error("In for statement declaration was expected a closing parenthesis after the update", m_line);
+      error("In for statement declaration was expected a closing renthesis after the update", m_line);
     consumeToken();
 
     unique_ptr<Body> body = parseBody(TokenType::FOR);
@@ -656,7 +663,9 @@ private:
     unique_ptr<Operator> op = std::move(operators.top());
     operators.pop();
 
-    if (op->getOperator() == TokenType::NOT) {
+    
+    const TokenType operatorToken = op->getOperator();
+    if (operatorToken == TokenType::NOT || operatorToken == TokenType::AMPERSAND || operatorToken == TokenType::CARET) {
       std::unique_ptr<ASTNode> right = std::move(nodes.top());
       nodes.pop();
       nodes.push(std::make_unique<UnaryOperator>(std::move(op), std::move(right)));

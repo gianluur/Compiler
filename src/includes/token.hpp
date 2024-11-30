@@ -20,6 +20,7 @@ enum class TokenType {
   DOT,
   IDENTIFIER,
   AMPERSAND,
+  CARET,
 
   //TYPES 
   ARRAY_INT,

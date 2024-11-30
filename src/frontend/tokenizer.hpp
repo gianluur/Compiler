@@ -94,7 +94,8 @@ private:
     { '<', TokenType::LESS},
     { '>', TokenType::GREATER},
     { '=', TokenType::ASSIGNMENT},
-    { '&', TokenType::AMPERSAND}
+    { '&', TokenType::AMPERSAND},
+    { '^', TokenType::CARET}
   };
 
   const unordered_map<string_view, TokenType> doubleCharOperatorMap = {

@@ -1,4 +1,4 @@
 var int* ptr1;
 var float* ptr2 = 3.5;
-var int* ptr3 = &ptr2;
-var int* ptr4;
+var int* ptr3 = &ptr2 + 5;
+var int* ptr4 = 3 * ^ptr3;
