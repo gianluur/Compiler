@@ -1,7 +1,8 @@
 #include "functioncall.h"
+#include "ASTNode.h"
 
 FunctionCall::FunctionCall(unique_ptr<Identifier> identifier, vector<unique_ptr<Expression>> arguments):
-  m_identifier(std::move(identifier)), m_arguments(std::move(arguments)) {}
+  ASTNode(ASTNodeType::FUNCTION_CALL), m_identifier(std::move(identifier)), m_arguments(std::move(arguments)) {}
 
 void FunctionCall::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Function Call{\n";
@@ -10,4 +11,11 @@ void FunctionCall::print(int indentation_level) const {
     argument->print(indentation_level + 2);
   }
   cout << setw(indentation_level) << " " << "}\n";
+}
+
+const ASTNodeType FunctionCall::getFunctionCallType(const FunctionCall* functionCall) const {
+  const string name = functionCall->m_identifier->toString();
+  if (!scope->isDeclared(name))
+    error("Function call: " + name + " definition wasn't found");
+  return scope->find(name).type;
 }

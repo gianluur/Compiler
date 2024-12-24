@@ -1,9 +1,10 @@
 #include "return.h"
+#include "ASTNode.h"
 #include "expression.h"
 #include <iomanip>
 
 Return::Return(unique_ptr<Expression> expression, const TokenType scope):
-  m_expression(std::move(expression)), m_scope(scope) {}
+  ASTNode(ASTNodeType::RETURN), m_expression(std::move(expression)), m_scope(scope) {}
 
 void Return::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Return {\n";

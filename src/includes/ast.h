@@ -5,6 +5,7 @@
 #include "nodes/binary_operator.h"
 #include "nodes/body.h"
 #include "nodes/cast.h"
+#include "nodes/dot_operator.h"
 #include "nodes/dowhile.h"
 #include "nodes/else.h"
 #include "nodes/expression.h"

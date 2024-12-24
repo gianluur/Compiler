@@ -6,6 +6,7 @@ public:
   Operator(const Token& token);
   void print(int indentation_level = 0) const override;
   TokenType getOperator() const;
+  string toString() const;
 
 private:
   const TokenType op;

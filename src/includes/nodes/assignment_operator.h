@@ -5,6 +5,8 @@
 #include "operator.h"
 #include "expression.h"
 
+class Expression;
+
 class AssignmentOperator : public ASTNode {
 public:
   AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value);
@@ -12,6 +14,7 @@ public:
   TokenType getOperator() const;
   Identifier* getIdentifier() const;
   ASTNode* getExpression() const;
+  string getOperatorToString() const;
 
 private:  
   unique_ptr<Identifier> m_identifier;

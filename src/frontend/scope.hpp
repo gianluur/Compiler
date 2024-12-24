@@ -1,85 +1,88 @@
-// #pragma once
+#pragma once
 
-// #include <iostream>
-// #include <vector>
-// #include <unordered_map>
-// #include <string>
-// #include <variant>
-// #include <memory>
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <string>
+#include <variant>
+#include <memory>
 
-// #include "../includes/error.hpp"
+#include "../includes/error.hpp"
+#include "../includes/ASTNodeType.h"
+// #include "../includes/nodes/variable.h"
+// #include "../includes/nodes/struct.h"
+// #include "../includes/nodes/function.h"
 
-// using std::cout, std::vector, std::string, std::unordered_map, std::variant, std::unique_ptr;
+class Variable;
+class Struct;
+class Function;
+class Parameter;
 
-// struct Symbol {
-//   string keyword; // var/const/func
-//   string type;
-//   vector<Parameter*> params; // for function
-//   vector<Variable*> members; // for structs
-//   std::variant<string, Variable*, Function*, Struct*> node;
+using std::cout, std::vector, std::string, std::unordered_map, std::variant, std::unique_ptr;
 
-//   Symbol() : keyword(""), type("") {}
+struct Symbol {
+  ASTNodeType type;
+  variant<string, const Variable*, const Function*, const Struct*> symbol;
+  vector<variant<string, const Parameter*, const Variable*>> args;
 
-//   Symbol(string keyword, string type) :
-//     keyword(keyword), type(type) {}
+  Symbol() {}
 
-//   Symbol(string keyword, string type, vector<Parameter*> parameters) :
-//     keyword(keyword), type(type), params(parameters) {}
+  Symbol(const Variable* variable) : symbol(variable) {}
 
-//   Symbol(string keyword, string type, vector<Variable*> members) :
-//     keyword(keyword), type(type), members(members) {}
+  Symbol(const Function* function, const std::vector<Parameter*>& parameters) : symbol(function) {
+    for (const Parameter* param : parameters) {
+      args.emplace_back(param);
+    }
+  }
 
-//   Symbol(string keyword, string type, Variable* variable) :
-//     keyword(keyword), type(type), node(variable) {}
+  Symbol(const Struct* structure, const std::vector<Variable*>& members) : symbol(structure) {
+    for (const Variable* member : members) {
+      args.emplace_back(member);
+    }
+  }
+};
 
-//   Symbol(string keyword, string type, Function* function) :
-//     keyword(keyword), type(type), node(function) {}
+class Scope {
+public:
+  Scope() { enterScope(); }
+  ~Scope() { exitScope(); }
 
-//   Symbol(string keyword, string type, Struct* structure) :
-//     keyword(keyword), type(type), node(structure) {}
-// };
+  void enterScope() {
+    symbolTable.emplace_back();
+  }
 
-// class Scope {
-// public:
-//   Scope() { enterScope(); }
-//   ~Scope() {exitScope(); }
+  void exitScope() {
+    symbolTable.pop_back();
+  }
 
-//   void enterScope() {
-//     scopes.emplace_back();
-//   }
+  void declare(const string& name, const Symbol& symbol) {
+    if (isRedeclared(name))
+      error("'" + name + "' is already declared");
+    symbolTable.back().emplace(name, std::move(symbol));
+  }
 
-//   void exitScope(){
-//     scopes.pop_back();
-//   }
+  bool isRedeclared(const string& name) const {
+    return symbolTable.back().count(name) > 0;
+  }
 
-//   void declare(const string& name, const Symbol& symbol) {
-//     if (isRedeclared(name))
-//       error("'" + name + "' is already declared");
-//     scopes.back().emplace(name, std::move(symbol));
-//   }
+  bool isDeclared(const string& name) const {
+    for (int i = symbolTable.size() - 1; i >= 0; i--)
+      if (symbolTable[i].count(name) > 0) 
+        return true;
+    return false;
+  }
 
-//   bool isRedeclared(const string& name) const {
-//     return scopes.back().count(name) > 0;
-//   }
+  const Symbol& find(const string& name) const {
+    for (int i = symbolTable.size() - 1; i >= 0; i--)
+      if (symbolTable[i].count(name) > 0)
+        return symbolTable[i].at(name);
 
-//   bool isDeclared(const string& name) const {
-//     for (int i = scopes.size() - 1; i >= 0; i--){
-//       if (scopes[i].count(name) > 0) return true;
-//     }
-//     return false;
-//   }
+    error("'" + name + "'" + " is not declared");
+    static Symbol dummy;
+    return dummy;
 
-//   const Symbol& find(const string& name) const {
-//     for (int i = scopes.size() - 1; i >= 0; i--){
-//       if (scopes[i].count(name) > 0)
-//         return scopes[i].at(name);
-//     }
-//     error("'" + name + "'" + " is not declared");
-//     static Symbol dummy;
-//     return dummy;
+  }
 
-//   }
-
-// private:
-//   vector<unordered_map<string, Symbol>> scopes;
-// };
+private:
+  vector<unordered_map<string, Symbol>> symbolTable;
+};

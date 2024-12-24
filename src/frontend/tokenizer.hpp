@@ -222,7 +222,7 @@ private:
     string token = character == '-' ? "-" : string(1, character);
     
     char current; uint8_t dots = 0;
-    while(std::isdigit(peekNextChar()) || peekNextChar() == '.'){
+    while((std::isdigit(peekNextChar()) || peekNextChar() == '.')){
       current = nextChar();
 
       if (current == '.' && (dots += 1) > 1)

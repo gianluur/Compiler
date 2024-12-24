@@ -10,7 +10,8 @@ public:
 
   void print(int indentation_level = 0) const override;
   ASTNode* getExpression() const;
-  TokenType getType() const;
+  ASTNodeType getType() const;
+  ASTNodeType analyzeCast(const Cast* cast) const;
 
 private:
   unique_ptr<Type> m_type;

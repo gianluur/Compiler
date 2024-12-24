@@ -17,6 +17,7 @@ public:
   bool isNull() const;
 
   string toString() const;
+  ASTNodeType LiteralTokenToASTNodeTypeLiteral(const TokenType tokenType);
 
 private:
   const TokenType m_type;

@@ -3,7 +3,7 @@
 
 #include "./frontend/preprocessing.hpp"  
 #include "./frontend/tokenizer.hpp"
-#include "./frontend/new_parser.hpp"
+#include "./frontend/parser.hpp"
 //#include "./frontend/semantics.hpp"
 //#include "./includes/ast.hpp"
 //#include "./backend/codegen.hpp"
@@ -13,7 +13,7 @@ int main(int argc, char* argv[]){
 
   Preprocessor preprocessed(argc, argv);
   Tokenizer tokenizer(preprocessed.getSrc());
-  NEWParser parser(tokenizer.getTokens());
+  Parser parser(tokenizer.getTokens());
   //Codegen codegen(parser.getAST());
 
   auto end = std::chrono::high_resolution_clock::now();

@@ -2,10 +2,10 @@
 #include "ASTNode.h"
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier):
-  m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(make_unique<Expression>()) {}
+  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(make_unique<Expression>()) {}
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value):
-  m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(std::move(value)) {}
+  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(std::move(value)) {}
 
 void Variable::print(int indentation_level) const {
   cout << '\n' << std::setw(indentation_level) << " " << "Variable {\n";
@@ -20,7 +20,7 @@ string Variable::getKeyword() const {
   return m_keyword.lexemes;
 }
 
-TokenType Variable::getType() const {
+ASTNodeType Variable::getType() const {
   return m_type->getType();
 }
 

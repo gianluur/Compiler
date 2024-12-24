@@ -1,7 +1,8 @@
 #include "parameter.h"
+#include "ASTNode.h"
 
-Parameter::Parameter(unique_ptr<Type> type, unique_ptr<Identifier> name)
-  : m_type(std::move(type)), m_identifier(std::move(name)) {}
+Parameter::Parameter(unique_ptr<Type> type, unique_ptr<Identifier> name): 
+  ASTNode(ASTNodeType::PARAMETER), m_type(std::move(type)), m_identifier(std::move(name)) {}
 
 void Parameter::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Parameter {\n";
@@ -10,8 +11,8 @@ void Parameter::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "}\n";
 }
 
-TokenType Parameter::getType() const {
-  return m_type->getType();
+ASTNodeType Parameter::getType() const {
+  return m_type->getNodeType();
 }
 
 string Parameter::getIdentifier() const {

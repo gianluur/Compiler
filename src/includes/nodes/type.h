@@ -5,7 +5,7 @@ class Type: public ASTNode {
 public:
   Type(const Token& token, const bool isPointer);
   void print(int indentation_level = 0) const override;
-  TokenType getType() const;
+  ASTNodeType getType() const;
   bool isInteger() const;
   bool isFloat() const;
   bool isBool() const;
@@ -13,6 +13,7 @@ public:
   bool isNull() const;
   bool isPointer() const;
   string toString() const;
+  ASTNodeType TokenTypeToASTNodeType(const TokenType type) const;
 
 private:
   const TokenType m_type;

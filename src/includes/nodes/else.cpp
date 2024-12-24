@@ -1,10 +1,11 @@
 #include "else.h"
+#include "ASTNode.h"
 
-Else::Else(unique_ptr<If> ifstatement)
-  : m_ifstatement(std::move(ifstatement)) {}
+Else::Else(unique_ptr<If> ifstatement): 
+  ASTNode(ASTNodeType::ELSE), m_ifstatement(std::move(ifstatement)) {} //idk if this should be 'if' or 'else'
 
-Else::Else(unique_ptr<Body> body)
-  : m_body(std::move(body)) {}
+Else::Else(unique_ptr<Body> body): 
+  ASTNode(ASTNodeType::ELSE), m_body(std::move(body)) {}
 
 void Else::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Else Statement {\n";

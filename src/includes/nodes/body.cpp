@@ -1,7 +1,8 @@
 #include "body.h"
+#include "ASTNode.h"
 
 Body::Body(vector<unique_ptr<ASTNode>> statements):
-  m_statements(std::move(statements)) {}
+  ASTNode(ASTNodeType::BODY), m_statements(std::move(statements)) {}
 
 void Body::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Body {";

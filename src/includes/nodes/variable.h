@@ -13,7 +13,7 @@ public:
   void print(int indentation_level = 0) const override;
 
   string getKeyword() const;
-  TokenType getType() const;
+  ASTNodeType getType() const;
   ASTNode* getValue() const;
   bool isPointer() const;
 

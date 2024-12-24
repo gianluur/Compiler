@@ -1,7 +1,8 @@
 #include "function.h"
+#include "ASTNode.h"
 
 Function::Function(unique_ptr<Type> type, unique_ptr<Identifier> identifier, vector<unique_ptr<Parameter>> parameters, unique_ptr<Body> body):
-  m_type(std::move(type)), m_identifier(std::move(identifier)), m_parameters(std::move(parameters)), m_body(std::move(body)) {}
+  ASTNode(ASTNodeType::FUNCTION), m_type(std::move(type)), m_identifier(std::move(identifier)), m_parameters(std::move(parameters)), m_body(std::move(body)) {}
 
 void Function::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Function {\n";
@@ -14,8 +15,8 @@ void Function::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "}\n";
 }
 
-TokenType Function::getType() const {
-  return m_type->getType();
+ASTNodeType Function::getType() const {
+  return m_type->getNodeType();
 }
 
 string Function::getIdentifier() const {

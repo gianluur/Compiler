@@ -9,7 +9,7 @@ class Function: public ASTNode {
 public:
   Function(unique_ptr<Type> type, unique_ptr<Identifier> identifier, vector<unique_ptr<Parameter>> parameters, unique_ptr<Body> body);
   void print(int indentation_level = 0) const override;
-  TokenType getType() const;
+  ASTNodeType getType() const;
   string getIdentifier() const;
   vector<Parameter*> getParameter() const;
 

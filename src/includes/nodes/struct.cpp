@@ -1,8 +1,9 @@
 #include "struct.h"
+#include "ASTNode.h"
 #include "variable.h"
 
 Struct::Struct(unique_ptr<Identifier> identifier, vector<unique_ptr<Variable>> members):
-  m_identifier(std::move(identifier)), m_members(std::move(members)) {}
+  ASTNode(ASTNodeType::STRUCTURE), m_identifier(std::move(identifier)), m_members(std::move(members)) {}
 
 void Struct::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Struct {\n";

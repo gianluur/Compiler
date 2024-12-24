@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
 #include <iostream>
 #include <string>
 #include <unordered_map> 
@@ -47,7 +49,7 @@ namespace CLIStyle {
   namespace _private {
 
     //Maps style names to their corresponding ANSI escape codes.
-    unordered_map<string, string> styles = 
+    inline unordered_map<string, string> styles = 
     { 
       {"bold", "\033[1m"},
       {"italic", "\033[3m"}, 
@@ -56,7 +58,7 @@ namespace CLIStyle {
     };
 
     //Maps color names to their corresponding ANSI escape codes for text.
-    unordered_map<string, string> color_text = {
+    inline unordered_map<string, string> color_text = {
       {"grey", "\033[30m"},
       {"red", "\033[31m"},
       {"green", "\033[32m"},
@@ -76,7 +78,7 @@ namespace CLIStyle {
     };
 
     //Maps color names to their corresponding ANSI escape codes for background.
-    unordered_map<string, string> color_background = {
+    inline unordered_map<string, string> color_background = {
       {"grey", "\033[40m"},
       {"red", "\033[41m"},
       {"green", "\033[42m"},
@@ -97,7 +99,7 @@ namespace CLIStyle {
 
     constexpr auto RESET_STYLE = "\033[0m";
 
-    bool handleVTSequences = false; //checks if the user terminal can access the ANSI code
+    inline bool handleVTSequences = false; //checks if the user terminal can access the ANSI code
 
     #ifdef _WIN32 // check if the user is on Windows
     /**
@@ -105,7 +107,7 @@ namespace CLIStyle {
      * 
      * @param handleVTSequences A reference to a boolean flag indicating whether the user terminal can handle VT sequences.
     */
-    void enableVTSequences(bool& handleVTSequences) {
+    inline void enableVTSequences(bool& handleVTSequences) {
       HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
       if (hOut == INVALID_HANDLE_VALUE)
       {
@@ -130,7 +132,7 @@ namespace CLIStyle {
     }
     #else //If not on Windows, runs a simplifed function just for code reusability
 
-    void enableVTSequences(bool& handleVTSequences) {
+    inline void enableVTSequences(bool& handleVTSequences) {
       handleVTSequences = true;
     }
     #endif
@@ -222,7 +224,7 @@ namespace CLIStyle {
     /**
      * @brief Check if a given position is equal to TEXT (1) or to BACKGROUND (0), otherwise throws an error
     */
-    void checkPosition(uint8_t position){
+    inline void checkPosition(uint8_t position){
       if (position != 1 && position != 0){
         std::cerr << "Position must be either 0 or 1";
         exit(EXIT_FAILURE);
@@ -387,7 +389,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with the grey color.
   */
-  string grey(const string& text) {
+  inline string grey(const string& text) {
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string grey = _private::color_text["grey"];
     return grey + text + _private::RESET_STYLE;
@@ -400,7 +402,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& grey(ostream& os){
+  inline ostream& grey(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     os << _private::color_text["grey"];
     return os;
@@ -413,7 +415,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with the grey color.
   */
-  string on_grey(const string& text){
+  inline string on_grey(const string& text){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string grey = _private::color_background["grey"];
     return grey + text + _private::RESET_STYLE;
@@ -426,7 +428,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& on_grey(ostream& os){
+  inline ostream& on_grey(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     os << _private::color_background["grey"];
     return os;
@@ -473,7 +475,7 @@ namespace CLIStyle {
    * @param text The text to which the bright grey color will be applied.
    * @return The modified text with the bright grey color applied.
   */
-  string bright_grey(const string& text) {
+  inline string bright_grey(const string& text) {
     const string bright_grey = _private::color_text["bright grey"];
     return bright_grey + text + _private::RESET_STYLE;
   }
@@ -486,7 +488,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright grey color will be applied.
    * @return The modified output stream with the bright grey color applied.
   */
-  ostream& bright_grey(ostream& os){
+  inline ostream& bright_grey(ostream& os){
     os << _private::color_text["bright grey"];
     return os;
   }
@@ -499,7 +501,7 @@ namespace CLIStyle {
    * @param text The text to which the bright grey color will be applied.
    * @return The modified text with the bright grey color applied.
   */
-  string on_bright_grey(const string& text){
+  inline string on_bright_grey(const string& text){
     const string bright_grey = _private::color_background["bright grey"];
     return bright_grey + text + _private::RESET_STYLE;
   }
@@ -512,7 +514,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright grey color will be applied.
    * @return The modified output stream with the bright grey color applied.
   */
-  ostream& on_bright_grey(ostream& os){
+  inline ostream& on_bright_grey(ostream& os){
     os << _private::color_background["bright grey"];
     return os;
   }
@@ -561,7 +563,7 @@ namespace CLIStyle {
    * @param text The text to which the red color will be applied.
    * @return The modified text with the red color applied.
   */
-  string red(const string& text) {
+  inline string red(const string& text) {
     const string red = _private::color_text["red"];
     return red + text + _private::RESET_STYLE;
   }
@@ -574,7 +576,7 @@ namespace CLIStyle {
    * @param os The output stream to which the red color will be applied.
    * @return The modified output stream with the red color applied.
   */
-  ostream& red(ostream& os){
+  inline ostream& red(ostream& os){
     os << _private::color_text["red"];
     return os;
   }
@@ -587,7 +589,7 @@ namespace CLIStyle {
    * @param text The text to which the red color will be applied.
    * @return The modified text with the red color applied.
   */
-  string on_red(const string& text){
+  inline string on_red(const string& text){
     const string red = _private::color_background["red"];
     return red + text + _private::RESET_STYLE;
   }
@@ -600,7 +602,7 @@ namespace CLIStyle {
    * @param os The output stream to which the red color will be applied.
    * @return The modified output stream with the red color applied.
   */
-  ostream& on_red(ostream& os){
+  inline ostream& on_red(ostream& os){
     os << _private::color_background["red"];
     return os;
   }
@@ -649,7 +651,7 @@ namespace CLIStyle {
    * @param text The text to which the bright red color will be applied.
    * @return The modified text with the bright red color applied.
   */
-  string bright_red(const string& text) {
+  inline string bright_red(const string& text) {
     const string bright_red = _private::color_text["bright red"];
     return bright_red + text + _private::RESET_STYLE;
   }
@@ -662,7 +664,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright red color will be applied.
    * @return The modified output stream with the bright red color applied.
   */
-  ostream& bright_red(ostream& os){
+  inline ostream& bright_red(ostream& os){
     os << _private::color_text["bright red"];
     return os;
   }
@@ -675,7 +677,7 @@ namespace CLIStyle {
    * @param text The text to which the bright red color will be applied.
    * @return The modified text with the bright red color applied.
   */
-  string on_bright_red(const string& text){
+  inline string on_bright_red(const string& text){
     const string bright_red = _private::color_background["bright red"];
     return bright_red + text + _private::RESET_STYLE;
   }
@@ -688,7 +690,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright red color will be applied.
    * @return The modified output stream with the bright red color applied.
   */
-  ostream& on_bright_red(ostream& os){
+  inline ostream& on_bright_red(ostream& os){
     os << _private::color_background["bright red"];
     return os;
   }
@@ -737,7 +739,7 @@ namespace CLIStyle {
    * @param text The text to which the green color will be applied.
    * @return The modified text with the green color applied.
   */
-  string green(const string& text) {
+  inline string green(const string& text) {
     const string green = _private::color_text["green"];
     return green + text + _private::RESET_STYLE;
   }
@@ -750,7 +752,7 @@ namespace CLIStyle {
    * @param os The output stream to which the green color will be applied.
    * @return The modified output stream with the green color applied.
   */
-  ostream& green(ostream& os){
+  inline ostream& green(ostream& os){
     os << _private::color_text["green"];
     return os;
   }
@@ -763,7 +765,7 @@ namespace CLIStyle {
    * @param text The text to which the green color will be applied.
    * @return The modified text with the green color applied.
   */
-  string on_green(const string& text){
+  inline string on_green(const string& text){
     const string green = _private::color_background["green"];
     return green + text + _private::RESET_STYLE;
   }
@@ -776,7 +778,7 @@ namespace CLIStyle {
    * @param os The output stream to which the green color will be applied.
    * @return The modified output stream with the green color applied.
   */
-  ostream& on_green(ostream& os){
+  inline ostream& on_green(ostream& os){
     os << _private::color_background["green"];
     return os;
   }
@@ -824,7 +826,7 @@ namespace CLIStyle {
    * @param text The text to which the bright green color will be applied.
    * @return The modified text with the bright green color applied.
   */
-  string bright_green(const string& text) {
+  inline string bright_green(const string& text) {
     const string bright_green = _private::color_text["bright green"];
     return bright_green + text + _private::RESET_STYLE;
   }
@@ -837,7 +839,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright green color will be applied.
    * @return The modified output stream with the bright green color applied.
   */
-  ostream& bright_green(ostream& os){
+  inline ostream& bright_green(ostream& os){
     os << _private::color_text["bright green"];
     return os;
   }
@@ -850,7 +852,7 @@ namespace CLIStyle {
    * @param text The text to which the bright green color will be applied.
    * @return The modified text with the bright green color applied.
   */
-  string on_bright_green(const string& text){
+  inline string on_bright_green(const string& text){
     const string bright_green = _private::color_background["bright green"];
     return bright_green + text + _private::RESET_STYLE;
   }
@@ -863,7 +865,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright green color will be applied.
    * @return The modified output stream with the bright green color applied.
   */
-  ostream& on_bright_green(ostream& os){
+  inline ostream& on_bright_green(ostream& os){
     os << _private::color_background["bright green"];
     return os;
   }
@@ -911,7 +913,7 @@ namespace CLIStyle {
    * @param text The text to which the yellow color will be applied.
    * @return The modified text with the yellow color applied.
    */
-  string yellow(const string& text) {
+  inline string yellow(const string& text) {
     const string yellow = _private::color_text["yellow"];
     return yellow + text + _private::RESET_STYLE;
   }
@@ -924,7 +926,7 @@ namespace CLIStyle {
    * @param os The output stream to which the yellow color will be applied.
    * @return The modified output stream with the yellow color applied.
    */
-  ostream& yellow(ostream& os){
+  inline ostream& yellow(ostream& os){
     os << _private::color_text["yellow"];
     return os;
   }
@@ -937,7 +939,7 @@ namespace CLIStyle {
    * @param text The text to which the yellow color will be applied.
    * @return The modified text with the yellow color applied.
    */
-  string on_yellow(const string& text){
+  inline string on_yellow(const string& text){
     const string yellow = _private::color_background["yellow"];
     return yellow + text + _private::RESET_STYLE;
   }
@@ -950,7 +952,7 @@ namespace CLIStyle {
    * @param os The output stream to which the yellow color will be applied.
    * @return The modified output stream with the yellow color applied.
    */
-  ostream& on_yellow(ostream& os){
+  inline ostream& on_yellow(ostream& os){
     os << _private::color_background["yellow"];
     return os;
   }
@@ -998,7 +1000,7 @@ namespace CLIStyle {
    * @param text The text to which the bright yellow color will be applied.
    * @return The modified text with the bright yellow color applied.
   */
-  string bright_yellow(const string& text) {
+  inline string bright_yellow(const string& text) {
     const string bright_yellow = _private::color_text["bright yellow"];
     return bright_yellow + text + _private::RESET_STYLE;
   }
@@ -1011,7 +1013,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright yellow color will be applied.
    * @return The modified output stream with the bright yellow color applied.
   */
-  ostream& bright_yellow(ostream& os){
+  inline ostream& bright_yellow(ostream& os){
     os << _private::color_text["bright yellow"];
     return os;
   }
@@ -1024,7 +1026,7 @@ namespace CLIStyle {
    * @param text The text to which the bright yellow color will be applied.
    * @return The modified text with the bright yellow color applied.
   */
-  string on_bright_yellow(const string& text){
+  inline string on_bright_yellow(const string& text){
     const string bright_yellow = _private::color_background["bright yellow"];
     return bright_yellow + text + _private::RESET_STYLE;
   }
@@ -1037,7 +1039,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright yellow color will be applied.
    * @return The modified output stream with the bright yellow color applied.
   */
-  ostream& on_bright_yellow(ostream& os){
+  inline ostream& on_bright_yellow(ostream& os){
     os << _private::color_background["bright yellow"];
     return os;
   }
@@ -1085,7 +1087,7 @@ namespace CLIStyle {
    * @param text The text to which the blue color will be applied.
    * @return The modified text with the blue color applied.
   */
-  string blue(const string& text) {
+  inline string blue(const string& text) {
     const string blue = _private::color_text["blue"];
     return blue + text + _private::RESET_STYLE;
   }
@@ -1098,7 +1100,7 @@ namespace CLIStyle {
    * @param os The output stream to which the blue color will be applied.
    * @return The modified output stream with the blue color applied.
   */
-  ostream& blue(ostream& os){
+  inline ostream& blue(ostream& os){
     os << _private::color_text["blue"];
     return os;
   }
@@ -1111,7 +1113,7 @@ namespace CLIStyle {
    * @param text The text to which the blue color will be applied.
    * @return The modified text with the blue color applied.
   */
-  string on_blue(const string& text){
+  inline string on_blue(const string& text){
     const string blue = _private::color_background["blue"];
     return blue + text + _private::RESET_STYLE;
   }
@@ -1124,7 +1126,7 @@ namespace CLIStyle {
    * @param os The output stream to which the blue color will be applied.
    * @return The modified output stream with the blue color applied.
   */
-  ostream& on_blue(ostream& os){
+  inline ostream& on_blue(ostream& os){
     os << _private::color_background["blue"];
     return os;
   }
@@ -1172,7 +1174,7 @@ namespace CLIStyle {
    * @param text The text to which the bright blue color will be applied.
    * @return The modified text with the bright blue color applied.
   */
-  string bright_blue(const string& text) {
+  inline string bright_blue(const string& text) {
     const string bright_blue = _private::color_text["bright blue"];
     return bright_blue + text + _private::RESET_STYLE;
   }
@@ -1185,7 +1187,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright blue color will be applied.
    * @return The modified output stream with the bright blue color applied.
   */
-  ostream& bright_blue(ostream& os){
+  inline ostream& bright_blue(ostream& os){
     os << _private::color_text["bright blue"];
     return os;
   }
@@ -1198,7 +1200,7 @@ namespace CLIStyle {
    * @param text The text to which the bright blue color will be applied.
    * @return The modified text with the bright blue color applied.
   */
-  string on_bright_blue(const string& text){
+  inline string on_bright_blue(const string& text){
     const string bright_blue = _private::color_background["bright blue"];
     return bright_blue + text + _private::RESET_STYLE;
   }
@@ -1211,7 +1213,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright blue color will be applied.
    * @return The modified output stream with the bright blue color applied.
   */
-  ostream& on_bright_blue(ostream& os){
+  inline ostream& on_bright_blue(ostream& os){
     os << _private::color_background["bright blue"];
     return os;
   }
@@ -1259,7 +1261,7 @@ namespace CLIStyle {
    * @param text The text to which the magenta color will be applied.
    * @return The modified text with the magenta color applied.
   */
-  string magenta(const string& text) {
+  inline string magenta(const string& text) {
     const string magenta = _private::color_text["magenta"];
     return magenta + text + _private::RESET_STYLE;
   }
@@ -1272,7 +1274,7 @@ namespace CLIStyle {
    * @param os The output stream to which the magenta color will be applied.
    * @return The modified output stream with the magenta color applied.
   */
-  ostream& magenta(ostream& os){
+  inline ostream& magenta(ostream& os){
     os << _private::color_text["magenta"];
     return os;
   }
@@ -1285,7 +1287,7 @@ namespace CLIStyle {
    * @param text The text to which the magenta color will be applied.
    * @return The modified text with the magenta color applied.
   */
-  string on_magenta(const string& text){
+  inline string on_magenta(const string& text){
     const string magenta = _private::color_background["magenta"];
     return magenta + text + _private::RESET_STYLE;
   }
@@ -1298,7 +1300,7 @@ namespace CLIStyle {
    * @param os The output stream to which the magenta color will be applied.
    * @return The modified output stream with the magenta color applied.
   */
-  ostream& on_magenta(ostream& os){
+  inline ostream& on_magenta(ostream& os){
     os << _private::color_background["magenta"];
     return os;
   }
@@ -1346,7 +1348,7 @@ namespace CLIStyle {
    * @param text The text to which the bright magenta color will be applied.
    * @return The modified text with the bright magenta color applied.
   */
-  string bright_magenta(const string& text) {
+  inline string bright_magenta(const string& text) {
     const string bright_magenta = _private::color_text["bright magenta"];
     return bright_magenta + text + _private::RESET_STYLE;
   }
@@ -1359,7 +1361,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright magenta color will be applied.
    * @return The modified output stream with the bright magenta color applied.
   */
-  ostream& bright_magenta(ostream& os){
+  inline ostream& bright_magenta(ostream& os){
     os << _private::color_text["bright magenta"];
     return os;
   }
@@ -1372,7 +1374,7 @@ namespace CLIStyle {
    * @param text The text to which the bright magenta color will be applied.
    * @return The modified text with the bright magenta color applied.
   */
-  string on_bright_magenta(const string& text){
+  inline string on_bright_magenta(const string& text){
     const string bright_magenta = _private::color_background["bright magenta"];
     return bright_magenta + text + _private::RESET_STYLE;
   }
@@ -1385,7 +1387,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright magenta color will be applied.
    * @return The modified output stream with the bright magenta color applied.
   */
-  ostream& on_bright_magenta(ostream& os){
+  inline ostream& on_bright_magenta(ostream& os){
     os << _private::color_background["bright magenta"];
     return os;
   }
@@ -1433,7 +1435,7 @@ namespace CLIStyle {
    * @param text The text to which the cyan color will be applied.
    * @return The modified text with the cyan color applied.
   */
-  string cyan(const string& text) {
+  inline string cyan(const string& text) {
     const string cyan = _private::color_text["cyan"];
     return cyan + text + _private::RESET_STYLE;
   }
@@ -1446,7 +1448,7 @@ namespace CLIStyle {
    * @param os The output stream to which the cyan color will be applied.
    * @return The modified output stream with the cyan color applied.
   */
-  ostream& cyan(ostream& os){
+  inline ostream& cyan(ostream& os){
     os << _private::color_text["cyan"];
     return os;
   }
@@ -1459,7 +1461,7 @@ namespace CLIStyle {
    * @param text The text to which the cyan color will be applied.
    * @return The modified text with the cyan color applied.
   */
-  string on_cyan(const string& text){
+  inline string on_cyan(const string& text){
     const string cyan = _private::color_background["cyan"];
     return cyan + text + _private::RESET_STYLE;
   }
@@ -1472,7 +1474,7 @@ namespace CLIStyle {
    * @param os The output stream to which the cyan color will be applied.
    * @return The modified output stream with the cyan color applied.
   */
-  ostream& on_cyan(ostream& os){
+  inline ostream& on_cyan(ostream& os){
     os << _private::color_background["cyan"];
     return os;
   }
@@ -1521,7 +1523,7 @@ namespace CLIStyle {
    * @param text The text to which the bright cyan color will be applied.
    * @return The modified text with the bright cyan color applied.
    */
-  string bright_cyan(const string& text) {
+  inline string bright_cyan(const string& text) {
     const string bright_cyan = _private::color_text["bright cyan"];
     return bright_cyan + text + _private::RESET_STYLE;
   }
@@ -1534,7 +1536,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright cyan color will be applied.
    * @return The modified output stream with the bright cyan color applied.
    */
-  ostream& bright_cyan(ostream& os){
+  inline ostream& bright_cyan(ostream& os){
     os << _private::color_text["bright cyan"];
     return os;
   }
@@ -1547,7 +1549,7 @@ namespace CLIStyle {
    * @param text The text to which the bright cyan color will be applied.
    * @return The modified text with the bright cyan color applied.
    */
-  string on_bright_cyan(const string& text){
+  inline string on_bright_cyan(const string& text){
     const string bright_cyan = _private::color_background["bright cyan"];
     return bright_cyan + text + _private::RESET_STYLE;
   }
@@ -1560,7 +1562,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright cyan color will be applied.
    * @return The modified output stream with the bright cyan color applied.
    */
-  ostream& on_bright_cyan(ostream& os){
+  inline ostream& on_bright_cyan(ostream& os){
     os << _private::color_background["bright cyan"];
     return os;
   }
@@ -1608,7 +1610,7 @@ namespace CLIStyle {
    * @param text The text to which the white color will be applied.
    * @return The modified text with the white color applied.
   */
-  string white(const string& text) {
+  inline string white(const string& text) {
     const string white = _private::color_text["white"];
     return white + text + _private::RESET_STYLE;
   }
@@ -1621,7 +1623,7 @@ namespace CLIStyle {
    * @param os The output stream to which the white color will be applied.
    * @return The modified output stream with the white color applied.
   */
-  ostream& white(ostream& os){
+  inline ostream& white(ostream& os){
     os << _private::color_text["white"];
     return os;
   }
@@ -1634,7 +1636,7 @@ namespace CLIStyle {
    * @param text The text to which the white color will be applied.
    * @return The modified text with the white color applied.
   */
-  string on_white(const string& text){
+  inline string on_white(const string& text){
     const string white = _private::color_background["white"];
     return white + text + _private::RESET_STYLE;
   }
@@ -1647,7 +1649,7 @@ namespace CLIStyle {
    * @param os The output stream to which the white color will be applied.
    * @return The modified output stream with the white color applied.
   */
-  ostream& on_white(ostream& os){
+  inline ostream& on_white(ostream& os){
     os << _private::color_background["white"];
     return os;
   }
@@ -1696,7 +1698,7 @@ namespace CLIStyle {
    * @param text The text to which the bright white color will be applied.
    * @return The modified text with the bright white color applied.
    */
-  string bright_white(const string& text) {
+  inline string bright_white(const string& text) {
     const string bright_white = _private::color_text["bright white"];
     return bright_white + text + _private::RESET_STYLE;
   }
@@ -1709,7 +1711,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright white color will be applied.
    * @return The modified output stream with the bright white color applied.
    */
-  ostream& bright_white(ostream& os){
+  inline ostream& bright_white(ostream& os){
     os << _private::color_text["bright white"];
     return os;
   }
@@ -1722,7 +1724,7 @@ namespace CLIStyle {
    * @param text The text to which the bright white color will be applied.
    * @return The modified text with the bright white color applied.
    */
-  string on_bright_white(const string& text){
+  inline string on_bright_white(const string& text){
     const string bright_white = _private::color_background["bright white"];
     return bright_white + text + _private::RESET_STYLE;
   }
@@ -1735,7 +1737,7 @@ namespace CLIStyle {
    * @param os The output stream to which the bright white color will be applied.
    * @return The modified output stream with the bright white color applied.
    */
-  ostream& on_bright_white(ostream& os){
+  inline ostream& on_bright_white(ostream& os){
     os << _private::color_background["bright white"];
     return os;
   }
@@ -1749,7 +1751,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& bold(ostream& os){
+  inline ostream& bold(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     return os << "\033[1m";
   }
@@ -1761,7 +1763,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with bold style applied.
   */
-  string bold(const string& text) {
+  inline string bold(const string& text) {
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string bold = "\033[1m";
     return bold + text + _private::RESET_STYLE;
@@ -1776,7 +1778,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& italic(ostream& os){
+  inline ostream& italic(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     return os << "\033[3m";
   }
@@ -1788,7 +1790,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with italic style applied.
   */
-  string italic(const string& text) {
+  inline string italic(const string& text) {
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string italic = "\033[3m";
     return italic + text + _private::RESET_STYLE;
@@ -1803,7 +1805,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& underline(ostream& os){
+  inline ostream& underline(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     return os << "\033[4m";
   }
@@ -1815,7 +1817,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with underline style applied.
   */
-  string underline(const string& text) { 
+  inline string underline(const string& text) { 
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string underline = "\033[4m";
     return underline + text + _private::RESET_STYLE;
@@ -1830,7 +1832,7 @@ namespace CLIStyle {
    * 
    * @return The modified stream.
   */
-  ostream& reverse(ostream& os){
+  inline ostream& reverse(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     return os << "\033[7m";
   }
@@ -1842,7 +1844,7 @@ namespace CLIStyle {
    * 
    * @return The modified text with reverse style applied.
   */
-  string reverse(const string& text) { 
+  inline string reverse(const string& text) { 
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     const string reverse = "\033[7m";
     return reverse + text + _private::RESET_STYLE;
@@ -1856,7 +1858,7 @@ namespace CLIStyle {
    * @param os The stream to reset.
    * @return The modified stream with the default style.
   */
-  ostream& reset(ostream& os){
+  inline ostream& reset(ostream& os){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     os << _private::RESET_STYLE;
     return os;
@@ -1868,7 +1870,7 @@ namespace CLIStyle {
    * @param text The text to reset.
    * @return The modified text with the default style.
   */
-  string reset(const string& text){
+  inline string reset(const string& text){
     if (!_private::handleVTSequences) _private::enableVTSequences(_private::handleVTSequences);
     return text + _private::RESET_STYLE;
   }

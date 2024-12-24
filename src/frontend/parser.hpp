@@ -12,25 +12,23 @@
 #include "../includes/token.hpp"
 #include "../includes/ast.h"
 #include "../includes/error.hpp"
-#include "semantics.hpp"
 
-using std::cout, std::endl;
-using std::stoi, std::stod;
+using std::cout;
 using std::vector, std::unordered_map, std::unordered_set, std::stack;
-using std::optional;
 using std::unique_ptr, std::make_unique;
+using std::optional;
 
 #undef NULL
 
-class NEWParser {
+class Parser {
 public:
-  NEWParser(vector<Token> tokens) : m_tokens(std::move(tokens)), index(0), m_line(1) {
+  Parser(vector<Token> tokens): m_tokens(std::move(tokens)), index(0), m_line(1) {
     cout << "----- AST Start -----\n";
     parse(); 
     cout << "\n-------------------\n\n";
   }
 
-  ~NEWParser(){}
+  ~Parser(){}
 
   void parse() {
     while (index < m_tokens.size()){
@@ -49,7 +47,6 @@ private:
   vector<unique_ptr<ASTNode>> m_ast;
   size_t index;
   size_t m_line;
-
 
   const unordered_set<TokenType> assignmentOperatorSet = {
     TokenType::ASSIGNMENT,
@@ -143,6 +140,9 @@ private:
 
       case TokenType::FOR:
         return parseForStatement();
+
+      case TokenType::STRUCT:
+        return parseStruct();
       
       default:
         error("Token Not handled yet: " + token.lexemes, m_line);
@@ -386,6 +386,22 @@ private:
     return make_unique<Return>(std::move(expression), scope);
   }
 
+  unique_ptr<DotOperator> parseDotOperator(const Token& token, const bool isInsideExpression = false) {
+    consumeToken(); // consumes '.'
+    unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
+
+    if (!isNextTokenType(TokenType::IDENTIFIER))
+      error("In dot operator was expected a member after the dot", m_line);
+    if (!isInsideExpression){
+      unique_ptr<AssignmentOperator> assignment = parseAssignmentOperator(consumeToken(), false, true);
+      return make_unique<DotOperator>(std::move(identifier), std::move(assignment));
+    }
+    else {
+      unique_ptr<Identifier> member = make_unique<Identifier>(consumeToken());
+      return make_unique<DotOperator>(std::move(identifier), std::move(member));
+    }
+  }
+
   unique_ptr<ASTNode> parseIdentifier(optional<Token> token, const bool isInsideExpression = false) {
     if (!token.has_value())
       token = consumeToken();
@@ -393,18 +409,24 @@ private:
     if (isInsideExpression){
       if (isNextTokenType(TokenType::LPAREN))
         return parseFunctionCall(token.value());
-      else 
-        return make_unique<Identifier>(token.value());
+      else
+        if (isNextTokenType(TokenType::DOT))
+            return parseDotOperator(token.value(), true);
+        else
+          return make_unique<Identifier>(token.value());
     }
     else
-      return parseAssignmentOperator(token.value());
+      if (isNextTokenType(TokenType::DOT))
+        return parseDotOperator(token.value(), false);
+      else
+        return parseAssignmentOperator(token.value());
   }
 
-  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false) {
+  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false, const bool isDotOperator = false) {
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
-    
+
     if (!isAssigmentOperator(nextToken()))
-      error("In assignment operator was expected the operator after the identifier", m_line);
+      error("In assignment operator was expected the operator after the identifier: " + nextToken().lexemes, m_line);
     unique_ptr<Operator> op = make_unique<Operator>(consumeToken());
 
     if (!isValidExpression(nextToken()))
@@ -545,26 +567,33 @@ private:
     return make_unique<For>(std::move(initialization), std::move(condition), std::move(update), std::move(body));
   }
 
-  // unique_ptr<Struct> parseStruct() {
-  //   consumeToken(); // consumes 'struct'
+  unique_ptr<Struct> parseStruct() {
+    consumeToken(); // consumes 'struct'
 
-  //   if (!isNextTokenType(TokenType::IDENTIFIER))
-  //     error("In struct declaration was expected an identifier after struct keyword", m_line);
-  //   unique_ptr<Identifier> identifier = make_unique<Identifier>(consumeToken());
+    if (!isNextTokenType(TokenType::IDENTIFIER))
+      error("In struct declaration was expected an identifier after struct keyword", m_line);
+    unique_ptr<Identifier> identifier = make_unique<Identifier>(consumeToken());
 
-  //   if (!isNextTokenType(TokenType::RCURLY))
-  //     error("In struct declaration was expected a opening curly bracket after the identifier", m_line);
-  //   consumeToken();
+    if (!isNextTokenType(TokenType::LCURLY))
+      error("In struct declaration was expected a opening curly bracket after the identifier: ", m_line);
+    consumeToken();
 
-  //   while(!isNextTokenType(TokenType::LCURLY)){
-  //     if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
-  //       error("")
-  //   }
-  // }
+    vector<unique_ptr<Variable>> members = {};
+    while(!isNextTokenType(TokenType::RCURLY)){
+      if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+        error("In struct declaration members can only be declared/initialized with var/const", m_line);
+      members.push_back(parseVariable());
+    }
+    consumeToken(); // consumes '}'
+    if (!isNextTokenType(TokenType::SEMICOLON)) 
+      error("In struct declaration was expected a semicolon after closing curly bracket", m_line);
+    consumeToken(); // consumes ';'
 
+    return make_unique<Struct>(std::move(identifier), std::move(members));
+  }
   
   unique_ptr<Cast> parseCast(const Token& token){
-    unique_ptr<Type> type = make_unique<Type>(token, false); //
+    unique_ptr<Type> type = make_unique<Type>(token, false);
     if (token.type == TokenType::NULL)
       error("Casting any type to type 'null' is not allowed", m_line);
     else if (isNextTokenType(TokenType::STAR))

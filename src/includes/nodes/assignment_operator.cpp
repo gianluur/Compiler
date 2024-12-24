@@ -1,7 +1,11 @@
 #include "assignment_operator.h"
+#include "ASTNode.h"
+#include "operator.h"
 
 AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value):
-  m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)) {}
+  ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)) {
+    
+  }
 
 void AssignmentOperator::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Assignment Operator {\n";
@@ -17,6 +21,10 @@ Identifier* AssignmentOperator::getIdentifier() const {
 
 TokenType AssignmentOperator::getOperator() const {
   return m_op->getOperator();
+}
+
+string AssignmentOperator::getOperatorToString() const {
+  return m_op->toString();
 }
 
 ASTNode* AssignmentOperator::getExpression() const {
