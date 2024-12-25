@@ -22,5 +22,3 @@ public:
 private:
   ASTNodeType m_type;
 };
-
-static unique_ptr<Scope> scope = make_unique<Scope>();

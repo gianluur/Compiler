@@ -16,6 +16,7 @@ SRC_DIR="src"
 BUILD_DIR="build"
 OBJ_DIR="$BUILD_DIR/obj"
 NODES_DIR="$SRC_DIR/includes/nodes"
+FRONTEND_DIR="$SRC_DIR/frontend"  # Add this line for the frontend directory
 
 # Function to show help
 show_help() {
@@ -87,6 +88,7 @@ compile_file() {
 build_project() {
     # Create build directories if they don't exist
     mkdir -p "$OBJ_DIR/includes/nodes"
+    mkdir -p "$OBJ_DIR/frontend"  # Add this line for frontend objects
 
     # Track if any files were compiled
     local compiled=0
@@ -102,8 +104,22 @@ build_project() {
         echo -e "${GREEN}main.cpp is up to date${NC}"
     fi
 
+    # Check and compile scope.cpp if needed
+    local scope_src="$SRC_DIR/frontend/scope.cpp"
+    local scope_obj="$OBJ_DIR/frontend/scope.o"
+
+    if needs_compile "$scope_src" "$scope_obj"; then
+        compile_file "$scope_src" "$scope_obj" || return 1
+        compiled=1
+    else
+        echo -e "${GREEN}scope.cpp is up to date${NC}"
+    fi
+
     # Check and compile all node files if needed
     for src in "$NODES_DIR"/*.cpp; do
+        # Skip if no .cpp files exist
+        [ -e "$src" ] || continue
+        
         # Get the object file path
         local filename=$(basename "$src")
         local obj="$OBJ_DIR/includes/nodes/${filename%.cpp}.o"
@@ -119,7 +135,7 @@ build_project() {
     # If any file was compiled or if the executable doesn't exist, we need to link
     if [ $compiled -eq 1 ] || [ ! -f "$BUILD_DIR/main" ] || [ "$OBJ_DIR/main.o" -nt "$BUILD_DIR/main" ]; then
         echo -e "${BLUE}Linking...${NC}"
-        if clang++ "$OBJ_DIR/main.o" "$OBJ_DIR"/includes/nodes/*.o $LDFLAGS -o "$BUILD_DIR/main"; then
+        if clang++ "$OBJ_DIR/main.o" "$OBJ_DIR/frontend/scope.o" "$OBJ_DIR"/includes/nodes/*.o $LDFLAGS -o "$BUILD_DIR/main"; then
             echo -e "${GREEN}Successfully linked executable${NC}"
         else
             echo -e "${RED}Failed to link executable${NC}"
@@ -131,6 +147,7 @@ build_project() {
 
     return 0
 }
+
 
 # Function to run the program
 run_program() {

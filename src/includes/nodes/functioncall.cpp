@@ -15,7 +15,7 @@ void FunctionCall::print(int indentation_level) const {
 
 const ASTNodeType FunctionCall::getFunctionCallType(const FunctionCall* functionCall) const {
   const string name = functionCall->m_identifier->toString();
-  if (!scope->isDeclared(name))
+  if (!Scope::getInstance()->isDeclared(name))
     error("Function call: " + name + " definition wasn't found");
-  return scope->find(name).type;
+  return Scope::getInstance()->find(name).type;
 }

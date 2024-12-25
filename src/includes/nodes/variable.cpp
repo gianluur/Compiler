@@ -1,11 +1,13 @@
 #include "variable.h"
 #include "ASTNode.h"
 
-Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier):
-  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(make_unique<Expression>()) {}
+Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember):
+  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
+  m_identifier(std::move(identifier)), m_value(make_unique<Expression>()), m_isMember(isMember) {}
 
-Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value):
-  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), m_identifier(std::move(identifier)), m_value(std::move(value)) {}
+Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value,  const bool isMember):
+  ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
+  m_identifier(std::move(identifier)), m_value(std::move(value)), m_isMember(isMember) {}
 
 void Variable::print(int indentation_level) const {
   cout << '\n' << std::setw(indentation_level) << " " << "Variable {\n";
@@ -30,4 +32,9 @@ ASTNode* Variable::getValue() const {
 
 bool Variable::isPointer() const {
   return m_type->isPointer();
+}
+
+void Variable::analyzeVariable() const {
+  if (!m_isMember)
+     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
 }

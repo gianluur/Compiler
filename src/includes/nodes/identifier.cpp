@@ -14,7 +14,7 @@ string Identifier::toString() const {
 
 const ASTNodeType Identifier::getIdentifierType(const Identifier* identifier) const {
   const string name = identifier->m_str;
-  if (!scope->isDeclared(name))
+  if (!Scope::getInstance()->isDeclared(name))
     error("Identifier: " + name + " is not declared");
-  return scope->find(name).type;
+  return Scope::getInstance()->find(name).type;
 }

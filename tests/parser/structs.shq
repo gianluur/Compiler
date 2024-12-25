@@ -1,8 +1,8 @@
-struct Point {
-    var int x;
-    var int y;
-};
+func int main() {
+    struct Point {
+        var int x;
+        var int y;
+    };
 
-p1.x = 5;
-
-var int x = 5 + p1.y;
+    var Point x;
+}

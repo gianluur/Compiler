@@ -7,8 +7,8 @@
 
 class Variable: public ASTNode {
 public:
-  Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier);
-  Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value);
+  Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember);
+  Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value, const bool isMember);
 
   void print(int indentation_level = 0) const override;
 
@@ -16,10 +16,12 @@ public:
   ASTNodeType getType() const;
   ASTNode* getValue() const;
   bool isPointer() const;
+  void analyzeVariable() const;
 
 private:
   const Token& m_keyword;
   unique_ptr<Type> m_type;
   unique_ptr<Identifier> m_identifier;
   unique_ptr<Expression> m_value;
+  const bool m_isMember;
 };

@@ -230,7 +230,6 @@ private:
   bool isOperator(const Token& token){
     return isMathOperator(token) || isBooleanOperator(token) || isComparisonOperator(token) || 
            token.type == TokenType::AMPERSAND || token.type == TokenType::CARET;
-           
   }
 
   bool isLiteral(const Token& token) const {
@@ -238,13 +237,17 @@ private:
   }
 
   bool isType(const Token& token) const {
-    return basicTypeSet.find(token.type) != basicTypeSet.end();
+    return basicTypeSet.find(token.type) != basicTypeSet.end() || isStructType(token);
   }
 
   bool isValidExpression(const Token& token) {
     return !(index >= m_tokens.size()) && (                                                                  
           isLiteral(token) || isType(token) || isOperator(token) || 
           token.type == TokenType::IDENTIFIER || token.type == TokenType::LPAREN || token.type == TokenType::RPAREN);
+  }
+
+  bool isStructType(const Token& token) const {
+    return Scope::getInstance()->find(token.lexemes).type == ASTNodeType::STRUCTURE;
   }
 
   unique_ptr<Variable> parseVariable(const bool isMember = false){
@@ -263,7 +266,7 @@ private:
 
     if (isNextTokenType(TokenType::SEMICOLON)){
       consumeToken(); // consumes ';'
-      return make_unique<Variable>(keyword, std::move(type), std::move(identifier));
+      return make_unique<Variable>(keyword, std::move(type), std::move(identifier), isMember);
     }
     else if (isNextTokenType(TokenType::ASSIGNMENT) && !isMember){
       consumeToken(); // consumes '='
@@ -276,7 +279,7 @@ private:
         error("In variable declaration was expected a semicolon", m_line);
       consumeToken();
 
-      return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(value));
+      return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(value), isMember);
     }
     else
       error(std::string((isMember) ? "In struct" : "In variable") + "declaration was expected a semicolon", m_line);
@@ -330,6 +333,8 @@ private:
   }
 
   unique_ptr<Body> parseBody(const TokenType scope = TokenType::NULL) {
+    Scope::getInstance()->enterScope();
+
     if (!isNextTokenType(TokenType::LCURLY))
       error("Expected open curly bracket for the body", m_line);
     consumeToken();
@@ -340,6 +345,7 @@ private:
     }
     consumeToken(); // consumes the '}'
 
+    Scope::getInstance()->exitScope();
     return make_unique<Body>(std::move(statements));
   }
 

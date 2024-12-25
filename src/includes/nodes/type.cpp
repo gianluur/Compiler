@@ -76,6 +76,8 @@ ASTNodeType Type::TokenTypeToASTNodeType(const TokenType type) const {
       return ASTNodeType::BOOL;
     case TokenType::NULL:
       return ASTNodeType::NULL;
+    case TokenType::IDENTIFIER:
+      return ASTNodeType::IDENTIFIER; // this is actually a struct like type
     default:
       error("Unexpected error when converting type from TokenType to ASTNodeType");
   }
