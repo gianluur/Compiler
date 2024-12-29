@@ -12,6 +12,7 @@ public:
   DotOperator(unique_ptr<Identifier> identifier, unique_ptr<AssignmentOperator> assigment);
   DotOperator(unique_ptr<Identifier> identifier, unique_ptr<Identifier> member);
   void print(int indentation_level = 0) const override;
+  ASTNodeType getMemberType(const DotOperator* dotOperator) const;
 
 private:
   unique_ptr<Identifier> m_identifier;

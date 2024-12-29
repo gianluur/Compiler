@@ -28,7 +28,7 @@ const ASTNode* BinaryOperator::getRight() const {
 ASTNodeType BinaryOperator::analyzeBinaryOperator(const BinaryOperator* binaryOperator) const {
   const ASTNodeType leftOperand = Expression::analyzeExpression(binaryOperator->getLeft());
   const ASTNodeType rightOperand = Expression::analyzeExpression(binaryOperator->getRight());
-  
+
   if (leftOperand != rightOperand) 
     error("In expressions the left and right operand in a binary operator must have the same type");
   return leftOperand; 

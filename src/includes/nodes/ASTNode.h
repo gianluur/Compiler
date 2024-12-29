@@ -5,6 +5,7 @@
 #include <vector>
 #include <iomanip>
 #include <memory>
+#include <variant>
 #include "../../includes/token.hpp"
 #include "../../frontend/scope.hpp"
 #include "../ASTNodeType.h"

@@ -14,7 +14,6 @@ public:
   Expression();
   void print(int indentation_level = 0) const override;
   ASTNode* getExpression() const;
-  ASTNodeType getExpressionType() const;
   static ASTNodeType analyzeExpression(const ASTNode* expression);
 
 private:

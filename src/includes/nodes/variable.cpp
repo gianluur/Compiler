@@ -1,13 +1,18 @@
 #include "variable.h"
 #include "ASTNode.h"
+#include "expression.h"
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember):
   ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
-  m_identifier(std::move(identifier)), m_value(make_unique<Expression>()), m_isMember(isMember) {}
+  m_identifier(std::move(identifier)), m_value(make_unique<Expression>()), m_isMember(isMember) {
+    analyzeVariable();
+  }
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, unique_ptr<Expression> value,  const bool isMember):
   ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
-  m_identifier(std::move(identifier)), m_value(std::move(value)), m_isMember(isMember) {}
+  m_identifier(std::move(identifier)), m_value(std::move(value)), m_isMember(isMember) {
+    analyzeVariable();
+  }
 
 void Variable::print(int indentation_level) const {
   cout << '\n' << std::setw(indentation_level) << " " << "Variable {\n";
@@ -34,7 +39,19 @@ bool Variable::isPointer() const {
   return m_type->isPointer();
 }
 
+string Variable::getIdentifier() const {
+  return m_identifier->toString();
+}
+
+string Variable::getTypeToString() const {
+  return m_type->toString();
+}
+
 void Variable::analyzeVariable() const {
-  if (!m_isMember)
-     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
+  if (Expression::analyzeExpression(getValue()) != NULL && Expression::analyzeExpression(getValue()) != getType())
+    error("In variable declaration the value and the type doesn't match");
+
+  if (!m_isMember){
+    Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
+  }
 }

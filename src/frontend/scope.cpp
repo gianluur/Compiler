@@ -24,7 +24,6 @@ void Scope::exitScope() {
 }
 
 void Scope::declare(const string& name, const Symbol& symbol) {
-    cout << "declaring: " << name << '\n';
     if (isRedeclared(name))
         error("'" + name + "' is already declared");
     symbolTable.back().emplace(name, std::move(symbol));

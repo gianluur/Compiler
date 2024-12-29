@@ -9,6 +9,8 @@ public:
   void print(int indentation_level = 0) const override;
   vector<Variable*> getMembers() const;
   void analyzeStruct() const;
+  size_t getMemberIndex(const string& identifier) const; 
+  const Variable* getMember(const size_t index) const;
   
 private:
   unique_ptr<Identifier> m_identifier;

@@ -1,5 +1,7 @@
 #include "dot_operator.h"
 #include "ASTNode.h"
+#include "variable.h"
+#include "struct.h"
 
 DotOperator::DotOperator(unique_ptr<Identifier> identifier, unique_ptr<AssignmentOperator> assigment):
   ASTNode(ASTNodeType::DOT_OPERATOR), m_identifier(std::move(identifier)), m_assigment(std::move(assigment)), m_member(nullptr) {}
@@ -19,4 +21,12 @@ void DotOperator::print(int indentation_level) const {
     cout << setw(indentation_level + 2) << " " << "Member: " << m_member->toString() << '\n';
 
   cout << setw(indentation_level) << " " << "}\n";  
+}
+
+ASTNodeType DotOperator::getMemberType(const DotOperator* dotOperator) const {
+  const Symbol& variable = Scope::getInstance()->find(dotOperator->m_identifier->toString());
+  const Symbol& structSymbol = Scope::getInstance()->find(std::get<const Variable*>(variable.symbol)->getTypeToString());
+  const Struct* structure = std::get<const Struct*>(structSymbol.symbol);
+  const size_t index = structure->getMemberIndex(dotOperator->m_member->toString());
+  return structure->getMember(index)->getType();
 }

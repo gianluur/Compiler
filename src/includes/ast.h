@@ -14,6 +14,7 @@
 #include "nodes/functioncall.h"
 #include "nodes/identifier.h"
 #include "nodes/if.h"
+#include "nodes/list_initializer.h"
 #include "nodes/literal.h"
 #include "nodes/loopcontrol.h"
 #include "nodes/operator.h"

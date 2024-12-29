@@ -18,19 +18,25 @@ ASTNode* Expression::getExpression() const {
   return m_start.get();
 }
 
-ASTNodeType Expression::getExpressionType() const {
-  return getNodeType();
-}
-
 ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
   const ASTNodeType type = expression->getNodeType();
+
   switch (type) {
     case ASTNodeType::LITERAL_INTEGER:
+      return ASTNodeType::INT;
+
     case ASTNodeType::LITERAL_FLOAT:
+      return ASTNodeType::FLOAT;
+
     case ASTNodeType::LITERAL_CHARACTER:
+      return ASTNodeType::CHAR;
+  
     case ASTNodeType::LITERAL_BOOLEAN:
-      return type;
-    
+      return ASTNodeType::BOOL;
+
+    case ASTNodeType::NULL:
+      return ASTNodeType::NULL;
+
     case ASTNodeType::IDENTIFIER: 
     if (const Identifier* identifier = dynamic_cast<const Identifier*>(expression))
       return identifier->getIdentifierType(identifier);      
@@ -51,9 +57,9 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
       if (const FunctionCall* functionCall = dynamic_cast<const FunctionCall*>(expression))
         return functionCall->getFunctionCallType(functionCall);
       
-    // case ASTNodeType::DOT_OPERATOR:
-    //   if (const DotOperator* dotOperator = dynamic_cast<const DotOperator*>(expression))
-    //     return dotOperator->analyzeDotOperator(dotOperator);
+    case ASTNodeType::DOT_OPERATOR:
+      if (const DotOperator* dotOperator = dynamic_cast<const DotOperator*>(expression))
+        return dotOperator->getMemberType(dotOperator);
 
     default:
       error("Unexpected error when analyzing expression type");

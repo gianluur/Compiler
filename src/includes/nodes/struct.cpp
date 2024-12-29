@@ -1,5 +1,6 @@
 #include "struct.h"
 #include "ASTNode.h"
+#include "identifier.h"
 #include "variable.h"
 
 Struct::Struct(unique_ptr<Identifier> identifier, vector<unique_ptr<Variable>> members):
@@ -26,6 +27,18 @@ vector<Variable*> Struct::getMembers() const {
   return members;
 }
 
+size_t Struct::getMemberIndex(const string& identifier) const {
+  for (size_t index = 0; index < m_members.size(); index++) {
+    if (m_members[index]->getIdentifier() == identifier)
+      return index;
+  }
+  error("Couldn't find the member: " + identifier);
+}
+
+const Variable* Struct::getMember(const size_t index) const {
+  return m_members[index].get();
+}
+
 void Struct::analyzeStruct() const {
   Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
-}
+} 

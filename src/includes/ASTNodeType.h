@@ -48,5 +48,6 @@ enum ASTNodeType {
   STRUCTURE,
   TYPE,
   VARIABLE,
-  WHILE
+  WHILE,
+  LIST_INITIALIZER
 };

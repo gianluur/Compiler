@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ASTNode.h"
-#include "identifier.h"
 #include "expression.h"
+#include "identifier.h"
 #include "type.h"
+
+class Identifier;
 
 class Variable: public ASTNode {
 public:
@@ -17,6 +19,8 @@ public:
   ASTNode* getValue() const;
   bool isPointer() const;
   void analyzeVariable() const;
+  string getIdentifier() const;
+  string getTypeToString() const;
 
 private:
   const Token& m_keyword;

@@ -1,8 +1,7 @@
-func int main() {
-    struct Point {
-        var int x;
-        var int y;
-    };
+struct Point {
+  var float a;
+  var int b;
+};
 
-    var Point x;
-}
+var Point p1;
+var int x = p1.a;

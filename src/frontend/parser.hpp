@@ -588,7 +588,7 @@ private:
     while(!isNextTokenType(TokenType::RCURLY)){
       if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
         error("In struct declaration members can only be declared/initialized with var/const", m_line);
-      members.push_back(parseVariable());
+      members.push_back(parseVariable(true));
     }
     consumeToken(); // consumes '}'
     if (!isNextTokenType(TokenType::SEMICOLON)) 
@@ -596,6 +596,10 @@ private:
     consumeToken(); // consumes ';'
 
     return make_unique<Struct>(std::move(identifier), std::move(members));
+  }
+
+  unique_ptr<ListInitializer> parseListInitializer() {
+    
   }
   
   unique_ptr<Cast> parseCast(const Token& token){

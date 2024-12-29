@@ -1,4 +1,6 @@
 #include "identifier.h"
+#include "variable.h"
+#include "function.h"
 #include "ASTNode.h"
 
 Identifier::Identifier(const Token& token): 
@@ -16,5 +18,16 @@ const ASTNodeType Identifier::getIdentifierType(const Identifier* identifier) co
   const string name = identifier->m_str;
   if (!Scope::getInstance()->isDeclared(name))
     error("Identifier: " + name + " is not declared");
-  return Scope::getInstance()->find(name).type;
+
+  const Symbol& symbol = Scope::getInstance()->find(name);
+  if (symbol.type == ASTNodeType::VARIABLE){
+    const Variable* variable = std::get<const Variable*>(symbol.symbol);
+    return variable->getType();
+  }
+  else if (symbol.type == ASTNodeType::FUNCTION){
+    const Function* function = std::get<const Function*>(symbol.symbol);
+    return function->getType();
+  }
+  else 
+    error("Unexpected error when obtaining identifier type\n");
 }
