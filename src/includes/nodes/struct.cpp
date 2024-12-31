@@ -27,6 +27,10 @@ vector<Variable*> Struct::getMembers() const {
   return members;
 }
 
+size_t Struct::getMembersSize() const {
+  return m_members.size();
+}
+
 size_t Struct::getMemberIndex(const string& identifier) const {
   for (size_t index = 0; index < m_members.size(); index++) {
     if (m_members[index]->getIdentifier() == identifier)
@@ -37,6 +41,12 @@ size_t Struct::getMemberIndex(const string& identifier) const {
 
 const Variable* Struct::getMember(const size_t index) const {
   return m_members[index].get();
+}
+
+const Struct* Struct::getStructure(const string& identifer) {
+  const Symbol& variable = Scope::getInstance()->find(identifer);
+  const Symbol& structSymbol = Scope::getInstance()->find(std::get<const Variable*>(variable.symbol)->getTypeToString());
+  return std::get<const Struct*>(structSymbol.symbol);
 }
 
 void Struct::analyzeStruct() const {

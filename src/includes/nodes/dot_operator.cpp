@@ -24,9 +24,7 @@ void DotOperator::print(int indentation_level) const {
 }
 
 ASTNodeType DotOperator::getMemberType(const DotOperator* dotOperator) const {
-  const Symbol& variable = Scope::getInstance()->find(dotOperator->m_identifier->toString());
-  const Symbol& structSymbol = Scope::getInstance()->find(std::get<const Variable*>(variable.symbol)->getTypeToString());
-  const Struct* structure = std::get<const Struct*>(structSymbol.symbol);
+  const Struct* structure = Struct::getStructure(dotOperator->m_identifier->toString());
   const size_t index = structure->getMemberIndex(dotOperator->m_member->toString());
   return structure->getMember(index)->getType();
 }

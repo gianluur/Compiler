@@ -17,5 +17,6 @@ const ASTNodeType FunctionCall::getFunctionCallType(const FunctionCall* function
   const string name = functionCall->m_identifier->toString();
   if (!Scope::getInstance()->isDeclared(name))
     error("Function call: " + name + " definition wasn't found");
+
   return Scope::getInstance()->find(name).type;
 }

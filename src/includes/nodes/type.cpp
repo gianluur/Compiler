@@ -40,6 +40,10 @@ string Type::toString() const {
   return m_str;
 }
 
+bool Type::isStruct() const {
+  return m_type == TokenType::IDENTIFIER;
+}
+
 ASTNodeType Type::TokenTypeToASTNodeType(const TokenType type) const {
   switch (type) {
     case TokenType::INT:

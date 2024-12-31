@@ -270,16 +270,28 @@ private:
     }
     else if (isNextTokenType(TokenType::ASSIGNMENT) && !isMember){
       consumeToken(); // consumes '='
-  
-      if (!isValidExpression(nextToken()))
-        error("In variable declaration was expected an appropriate value after assigment operator: " + keyword.lexemes + " " + type->toString() + " " + identifier->toString(), m_line);
-      unique_ptr<Expression> value = parseExpression();
-      
-      if (!isNextTokenType(TokenType::SEMICOLON))
-        error("In variable declaration was expected a semicolon", m_line);
-      consumeToken();
 
-      return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(value), isMember);
+      if (isNextTokenType(TokenType::LCURLY)){
+        cout << "we get here\n";
+        unique_ptr<ListInitializer> listInitializer = parseListInitializer();
+        
+        if (!isNextTokenType(TokenType::SEMICOLON))
+          error("In list initializer was expected a semicolon after the closing parenthesis", m_line);
+        consumeToken();
+        
+        return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(listInitializer), isMember);
+      }
+      else {
+        if (!isValidExpression(nextToken()))
+          error("In variable declaration was expected an appropriate value after assigment operator: " + keyword.lexemes + " " + type->toString() + " " + identifier->toString(), m_line);
+        unique_ptr<Expression> value = parseExpression();
+        
+        if (!isNextTokenType(TokenType::SEMICOLON))
+          error("In variable declaration was expected a semicolon", m_line);
+        consumeToken();
+
+        return make_unique<Variable>(keyword, std::move(type), std::move(identifier), std::move(value), isMember);
+      }
     }
     else
       error(std::string((isMember) ? "In struct" : "In variable") + "declaration was expected a semicolon", m_line);
@@ -599,7 +611,27 @@ private:
   }
 
   unique_ptr<ListInitializer> parseListInitializer() {
-    
+    cout << "we join\n";
+    consumeToken(); //consumes '{'
+
+    vector<unique_ptr<Expression>> elements;
+    while(!isNextTokenType(TokenType::RCURLY)){
+      elements.push_back(make_unique<Expression>(parseExpression(true)));
+
+      if (isNextTokenType(TokenType::COMMA)){
+        consumeToken();
+        if (isNextTokenType(TokenType::RCURLY))
+          error("In list initializer was expected another parameter after comma", m_line);
+      }
+    }
+
+    if (!isNextTokenType(TokenType::RCURLY))
+      error("In list initializer was expected a closing parenthesis after the arguments", m_line);
+    consumeToken();
+
+    cout << "we also finish\n";
+
+    return make_unique<ListInitializer>(std::move(elements));
   }
   
   unique_ptr<Cast> parseCast(const Token& token){
@@ -623,13 +655,16 @@ private:
   }
 
   unique_ptr<Expression> parseExpression(const bool isInsideParenthesis = false) {
+    cout << "we lose here\n";
+
     stack<unique_ptr<Operator>> operators;
     stack<unique_ptr<ASTNode>> nodes;
     int parenCount = 0;
 
     while (!isAtEnd()) {
       if ((!isInsideParenthesis && isNextTokenType(TokenType::SEMICOLON)) || 
-          (isInsideParenthesis && parenCount == 0 && (isNextTokenType(TokenType::COMMA) || isNextTokenType(TokenType::RPAREN)))) 
+          (isInsideParenthesis && parenCount == 0 && 
+          (isNextTokenType(TokenType::COMMA) || isNextTokenType(TokenType::RPAREN) || isNextTokenType(TokenType::RCURLY)))) 
         break;
 
       const Token& token = nextToken();

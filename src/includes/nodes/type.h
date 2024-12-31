@@ -12,6 +12,7 @@ public:
   bool isChar() const;
   bool isNull() const;
   bool isPointer() const;
+  bool isStruct() const; 
   string toString() const;
   ASTNodeType TokenTypeToASTNodeType(const TokenType type) const;
 

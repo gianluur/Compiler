@@ -3,5 +3,4 @@ struct Point {
   var int b;
 };
 
-var Point p1;
-var int x = p1.a;
+var Point p1 = {3.5, 3};
