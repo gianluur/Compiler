@@ -241,9 +241,11 @@ private:
   }
 
   bool isValidExpression(const Token& token) {
-    return !(index >= m_tokens.size()) && (                                                                  
-          isLiteral(token) || isType(token) || isOperator(token) || 
-          token.type == TokenType::IDENTIFIER || token.type == TokenType::LPAREN || token.type == TokenType::RPAREN);
+    return index < m_tokens.size() &&
+           !(token.type == TokenType::LCURLY || token.type == TokenType::RCURLY) &&
+           (isLiteral(token) || isType(token) || isOperator(token) ||
+            token.type == TokenType::IDENTIFIER || token.type == TokenType::LPAREN ||
+            token.type == TokenType::RPAREN);
   }
 
   bool isStructType(const Token& token) const {
@@ -272,7 +274,6 @@ private:
       consumeToken(); // consumes '='
 
       if (isNextTokenType(TokenType::LCURLY)){
-        cout << "we get here\n";
         unique_ptr<ListInitializer> listInitializer = parseListInitializer();
         
         if (!isNextTokenType(TokenType::SEMICOLON))
@@ -455,7 +456,7 @@ private:
       error("In assignment operator was expected a semicolon after the value", m_line);
     consumeToken();
 
-    return make_unique<AssignmentOperator>(std::move(identifier), std::move(op), std::move(value));
+    return make_unique<AssignmentOperator>(std::move(identifier), std::move(op), std::move(value), isDotOperator);
   }
 
   unique_ptr<If> parseIfStatement(){
@@ -611,7 +612,6 @@ private:
   }
 
   unique_ptr<ListInitializer> parseListInitializer() {
-    cout << "we join\n";
     consumeToken(); //consumes '{'
 
     vector<unique_ptr<Expression>> elements;
@@ -628,8 +628,6 @@ private:
     if (!isNextTokenType(TokenType::RCURLY))
       error("In list initializer was expected a closing parenthesis after the arguments", m_line);
     consumeToken();
-
-    cout << "we also finish\n";
 
     return make_unique<ListInitializer>(std::move(elements));
   }
@@ -655,8 +653,6 @@ private:
   }
 
   unique_ptr<Expression> parseExpression(const bool isInsideParenthesis = false) {
-    cout << "we lose here\n";
-
     stack<unique_ptr<Operator>> operators;
     stack<unique_ptr<ASTNode>> nodes;
     int parenCount = 0;

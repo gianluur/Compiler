@@ -36,7 +36,7 @@ ASTNodeType Variable::getType() const {
 
 ASTNode* Variable::getValue() const {
   if (std::holds_alternative<unique_ptr<Expression>>(m_value))
-    return std::get<unique_ptr<Expression>>(m_value).get();
+    return std::get<unique_ptr<Expression>>(m_value)->getExpression();
   else 
     return std::get<unique_ptr<ListInitializer>>(m_value).get();
 }
@@ -69,10 +69,8 @@ void Variable::analyzeVariable() const {
       const ASTNodeType memberType = structure->getMember(index)->getType();
       const ASTNodeType elementType = Expression::analyzeExpression(list[index]);
 
-      if (!(memberType == elementType)){
-        cout << "mt: " << static_cast<int>(memberType) << " et: " << static_cast<int>(elementType) << '\n';
+      if (memberType != elementType)
         error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the " + std::to_string(index + 1) + " element type doesn't match the one in the structure");
-      }
     }
   }
   else

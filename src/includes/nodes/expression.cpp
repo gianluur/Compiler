@@ -1,5 +1,6 @@
 #include "expression.h"
 #include "ASTNode.h"
+#include <string>
 
 Expression::Expression(unique_ptr<ASTNode> start): 
   ASTNode(start->getNodeType()), m_start(std::move(start)) {
@@ -20,6 +21,7 @@ ASTNode* Expression::getExpression() const {
 
 ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
   const ASTNodeType type = expression->getNodeType();
+  cout << "expr type:" << static_cast<int>(type) << '\n';
 
   switch (type) {
     case ASTNodeType::LITERAL_INTEGER:
@@ -62,7 +64,7 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
         return dotOperator->getMemberType(dotOperator);
 
     default:
-      error("Unexpected error when analyzing expression type");
+      error("Unexpected error when analyzing expression type: " + std::to_string(static_cast<int>(type)));
       break;
   }
 }

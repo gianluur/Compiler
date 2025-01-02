@@ -1,10 +1,14 @@
 #include "assignment_operator.h"
 #include "ASTNode.h"
+#include "expression.h"
+#include "function.h"
 #include "operator.h"
+#include "variable.h"
+#include <variant>
 
-AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value):
-  ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)) {
-    
+AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator):
+  ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)), m_isDotOperator(isDotOperator) {
+    analyzeAssignmentOperator();
   }
 
 void AssignmentOperator::print(int indentation_level) const {
@@ -29,4 +33,22 @@ string AssignmentOperator::getOperatorToString() const {
 
 ASTNode* AssignmentOperator::getExpression() const {
   return m_value->getExpression();
+}
+
+void AssignmentOperator::analyzeAssignmentOperator() const {
+  if (m_isDotOperator)
+    return;
+
+  const Symbol& symbol = Scope::getInstance()->find(m_identifier->toString());
+
+  ASTNodeType identifierType;
+  if (std::holds_alternative<const Variable*>(symbol.symbol))
+    identifierType = std::get<const Variable*>(symbol.symbol)->getType();
+  else if (std::holds_alternative<const Function*>(symbol.symbol))
+    identifierType = std::get<const Function*>(symbol.symbol)->getType();
+  else
+    error("Unexpected error while analizing assignment operator");
+  
+  if (identifierType != Expression::analyzeExpression(m_value->getExpression()))
+    error("In assignment operator the type and the value type doesn't match");
 }

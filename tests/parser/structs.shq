@@ -3,4 +3,11 @@ struct Point {
   var int b;
 };
 
+
 var Point p1 = {3.5, 3};
+var int x = 5;
+x = 7;
+
+p1.a = 3.5;
+p1.b = 2;
+var int y = p1.b + 7;
