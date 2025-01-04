@@ -372,7 +372,7 @@ private:
       consumeToken();
     else {
       do {
-        arguments.push_back(make_unique<Expression>(parseExpression(true)));
+        arguments.push_back(make_unique<Expression>(parseExpression(true), false));
 
         if (isNextTokenType(TokenType::COMMA)){
           consumeToken();
@@ -450,7 +450,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In assignment operator was expected a valid expression after the operator", m_line);
-    unique_ptr<Expression> value = make_unique<Expression>(parseExpression());
+    unique_ptr<Expression> value = make_unique<Expression>(parseExpression(), false);
 
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("In assignment operator was expected a semicolon after the value", m_line);
@@ -468,7 +468,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In if statement declaration was expected a valid expression for the condition", m_line);
-    unique_ptr<Expression> condition = parseExpression(true);
+    unique_ptr<Expression> condition = parseExpression(true, true);
 
     if (!isNextTokenType(TokenType::RPAREN))
       error("In if statement declaration was expected a closing parenthesis after the condition", m_line);
@@ -516,7 +516,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In while statement declaration was expected a valid expression for the condition", m_line);
-    unique_ptr<Expression> condition = parseExpression(true);
+    unique_ptr<Expression> condition = parseExpression(true, true);
 
     if (!isNextTokenType(TokenType::RPAREN))
       error("In while statement declaration was expected a closing parenthesis after the condition", m_line);
@@ -541,7 +541,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In while statement declaration was expected a valid expression for the condition", m_line);
-    unique_ptr<Expression> condition = parseExpression(true);
+    unique_ptr<Expression> condition = parseExpression(true, true);
 
     if (!isNextTokenType(TokenType::RPAREN))
       error("In while statement declaration was expected a closing parenthesis after the condition", m_line);
@@ -567,7 +567,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In for statement decalration was expecteda a valid condition", m_line);
-    unique_ptr<Expression> condition = parseExpression();
+    unique_ptr<Expression> condition = parseExpression(false, true);
 
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("In for statement declaration was expected a semicolon", m_line);
@@ -616,7 +616,7 @@ private:
 
     vector<unique_ptr<Expression>> elements;
     while(!isNextTokenType(TokenType::RCURLY)){
-      elements.push_back(make_unique<Expression>(parseExpression(true)));
+      elements.push_back(make_unique<Expression>(parseExpression(true), false));
 
       if (isNextTokenType(TokenType::COMMA)){
         consumeToken();
@@ -652,7 +652,7 @@ private:
     return make_unique<Cast>(std::move(type), std::move(expression));
   }
 
-  unique_ptr<Expression> parseExpression(const bool isInsideParenthesis = false) {
+  unique_ptr<Expression> parseExpression(const bool isInsideParenthesis = false, const bool isCondition = false) {
     stack<unique_ptr<Operator>> operators;
     stack<unique_ptr<ASTNode>> nodes;
     int parenCount = 0;
@@ -726,7 +726,7 @@ private:
       handleOperator(operators, nodes);
     }
 
-    return nodes.empty() ? nullptr : make_unique<Expression>(std::move(nodes.top()));
+    return nodes.empty() ? nullptr : make_unique<Expression>(std::move(nodes.top()), isCondition);
   }
 
   void handleOperator(stack<unique_ptr<Operator>>& operators, stack<unique_ptr<ASTNode>>& nodes) {

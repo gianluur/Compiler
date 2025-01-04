@@ -2,9 +2,12 @@
 #include "ASTNode.h"
 #include <string>
 
-Expression::Expression(unique_ptr<ASTNode> start): 
-  ASTNode(start->getNodeType()), m_start(std::move(start)) {
-    Expression::analyzeExpression(m_start.get());
+Expression::Expression(unique_ptr<ASTNode> start, const bool isCondition): 
+  ASTNode(start->getNodeType()), m_start(std::move(start)), m_isCondition(isCondition) {
+    if (m_isCondition)
+      Expression::analyzeCondition(m_start.get());
+    else
+      Expression::analyzeExpression(m_start.get());
   }
 Expression::Expression(): 
   ASTNode(ASTNodeType::NULL), m_start(make_unique<Literal>()) {}
@@ -21,7 +24,6 @@ ASTNode* Expression::getExpression() const {
 
 ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
   const ASTNodeType type = expression->getNodeType();
-  cout << "expr type:" << static_cast<int>(type) << '\n';
 
   switch (type) {
     case ASTNodeType::LITERAL_INTEGER:
@@ -67,4 +69,9 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
       error("Unexpected error when analyzing expression type: " + std::to_string(static_cast<int>(type)));
       break;
   }
+}
+
+void Expression::analyzeCondition(const ASTNode* condition) {
+  if (analyzeExpression(condition) != ASTNodeType::BOOL)
+    error("Conditions must always evaluate to boolean");
 }

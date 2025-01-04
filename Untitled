@@ -1,0 +1,685 @@
+[33mcommit 787e5f5d1760e4b58ac3da44904bd098ed61fedb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jan 2 20:02:17 2025 +0100
+
+    Added semantics check for assignment operator
+
+[33mcommit 158ef21a20267a53fbaaa892b6a48b0fff6835c0[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Dec 31 03:42:42 2024 +0100
+
+    Added list initializer
+
+[33mcommit 0d97f3bd9fa94204821b4d7df2f6925f9467926c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Dec 30 00:01:48 2024 +0100
+
+    Added the possibility to retrive members from structs, with semantics checks + bug fixes
+
+[33mcommit 267b729dbc71100f9cf9c2a2ec53d92db8e325f4[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Dec 25 17:10:04 2024 +0100
+
+    added user defined (struct) type
+
+[33mcommit 1146aca7611ccf9e4c9aac32a15b95395a7a5b54[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Dec 24 11:39:17 2024 +0100
+
+    Adding semantics to finalize structs and pointers
+
+[33mcommit 7411db17a5f31a743036433a3f0d2fc3eaed7d0a[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Nov 30 20:29:58 2024 +0100
+
+    Added pointers to parser
+
+[33mcommit 0e4eabc8ab5b16848e171b81f958d60d755d3860[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Nov 19 08:45:29 2024 +0100
+
+    Added return, pointers, and now adding structs
+
+[33mcommit b24649dec35f053b70b3200edd23d9e62166b350[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Nov 17 23:58:14 2024 +0100
+
+    Added while, do-while, for loops
+
+[33mcommit c4f8aeb9822a9eb5dd1ba2d8948adb39a0d17520[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Nov 7 23:54:23 2024 +0100
+
+    New parser: Added variables, functions, assignments, expressions (with cast)
+
+[33mcommit 3470931de6ed22105de5a3c182b5c92d12812256[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Nov 1 21:41:18 2024 +0100
+
+    Started reworking the parser
+
+[33mcommit 16020f521220ef5f5c067c8065f5ef0994b14028[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Oct 28 23:44:24 2024 +0100
+
+    Added && and || operator to LLVM IR
+
+[33mcommit 0ffa8675f16465c0156110fd795604cf2a24fec0[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Oct 28 23:26:11 2024 +0100
+
+    Fixed a bug with the new tokenizer, and started working on a new parser
+
+[33mcommit 204fcec544542a4229eeddbe665147168b48f8c4[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Oct 28 18:22:08 2024 +0100
+
+    Finished new tokenizer
+
+[33mcommit 665df205e01f0ad48070587f9bcc88b90c61b5d7[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Oct 26 18:32:49 2024 +0200
+
+    Trying to speed up tokenizer
+
+[33mcommit eae4c6f4c13422c7a27c845a85b472af6a1453b1[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Sep 21 15:36:26 2024 +0200
+
+    Refactored parseVariable
+
+[33mcommit ac999392ce10c2dbecd18de11e1d0e0d1e5148d8[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Sep 21 14:42:58 2024 +0200
+
+    Fixed an issue to struct member and assigmnet operator
+
+[33mcommit 95119c4cf1b1954810f3d8e34ceef6fb14ea50d8[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Sep 20 00:25:51 2024 +0200
+
+    Improved file structure
+
+[33mcommit e8fe6043932703d4ee0b78c2968ab69c8d5febfd[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Sep 16 17:50:57 2024 +0200
+
+    Added struct initialization
+
+[33mcommit 54da447d99c9797b83c46a9b6408cf7becab968d[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Sep 15 22:56:46 2024 +0200
+
+    Added access to struct members, needs more testing tho
+
+[33mcommit f9e061ddb0738849a1001a83756e830e6ae7757f[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Sep 15 21:19:57 2024 +0200
+
+    Adding support for struct, currently only declaration fully works, now adding member access
+
+[33mcommit acd7f6bda1ea29897ae2f7f61f8474f89809d043[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Sep 9 20:58:23 2024 +0200
+
+    Fixed cast in expression, now you can use them everywhere
+
+[33mcommit 6bbc8430999477f4e3966e82796016eb6ff6c658[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Sep 9 20:57:40 2024 +0200
+
+    Fixed cast in expression, now you can use them everywhere
+
+[33mcommit 50b38fde68d335e82a080f21be6cec00d1cc19c3[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Sep 3 17:26:06 2024 +0200
+
+    Added function call with no return value
+
+[33mcommit 9222c1b472f780031feb398f18aa4329d335f00e[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Sep 3 00:52:51 2024 +0200
+
+    Added for loops
+
+[33mcommit 5076981fc8f91c3ba0d960afcfd652bc36d40b10[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Sep 3 00:25:53 2024 +0200
+
+    Added do-while statement to llvm ir
+
+[33mcommit 76b2bc878625461f5a037ac46b05ece8b2e8b24f[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Sep 3 00:22:41 2024 +0200
+
+    Added while loop to llvm ir
+
+[33mcommit 7c4d02881016333ab18f678631bee7d93beee8f2[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Sep 2 03:08:32 2024 +0200
+
+    Added else if statements
+
+[33mcommit 72d12f778af3ee5a404031e1222b782dfd49de5b[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 31 16:05:06 2024 +0200
+
+    Added assignment operators and if statements to llvm ir
+
+[33mcommit 5da9d2fabcf67aae0f56b3a55dd16e0f3b9b6dc2[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 31 15:15:40 2024 +0200
+
+    Fixed scopes for return statement
+
+[33mcommit 9c0c66e20c37bbb0bd5395f0b6ba95429b9ef4dc[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 31 02:46:29 2024 +0200
+
+    Finally fixed function call argument parsing problem where it couldn't correctly parse the last parenthesis + added them to the llvm ir
+
+[33mcommit 93a5d6ee3deaf5fe6f68c5694d7ee77160cefdb5[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Aug 27 16:11:41 2024 +0200
+
+    Improved a bit code structure and merged a bit more parser and semantics to work closer togheter
+
+[33mcommit 1d2557e0830bfc073cb1afec24c838b5ef1bbde3[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Aug 27 00:44:39 2024 +0200
+
+    Fixed a major bug regarding scopes, had to change a lot of code of the code structure of semantics
+
+[33mcommit 46fe482dc568aa186a10527939c8295a587db5a8[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Aug 26 13:02:13 2024 +0200
+
+    Changed the parseExpression function to improve performance and to add function call
+
+[33mcommit 19a7ee86900a3aaec11beba53f3de7fb5d146940[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 10 18:15:58 2024 +0200
+
+    Added global variables
+
+[33mcommit 1b5ad74c529447c34562d583fae350bd554e21c6[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 10 18:11:28 2024 +0200
+
+    Added local variable to LLVM IR
+
+[33mcommit 913e74d46c18250bd818137e0712980ef24de32e[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 10 17:59:17 2024 +0200
+
+    Started reworking LLMV IR, will not code for a week tho
+
+[33mcommit d230d7175df6044d0f37d84fa4cf6baa148b0e34[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 19:13:08 2024 +0200
+
+    Added semantic checks returns, now it can only be called from a function
+
+[33mcommit 650cf08b3f8c74fcea9388223ce5b96a2a35e3fe[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 18:33:19 2024 +0200
+
+    Improved performance by checking the return keyword in the same loop for the rest of the function body, and fixed a bug with the isSmallerType function
+
+[33mcommit 990dd8446a83637f03418e3ef956732209dcdb50[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 17:14:44 2024 +0200
+
+    Fixed a semantic issue with condition and with for loops
+
+[33mcommit 7149cdb6c755e5c44e79de7b75dc529d31727d09[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 16:57:03 2024 +0200
+
+    Added semantics check to break and continue
+
+[33mcommit e69b2d74a41728bad6639ebf210d8df6d1c23ea1[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 02:31:27 2024 +0200
+
+    Added break and continue to parsing
+
+[33mcommit 1dfc3c93f3612547dd3959d37c2684b3e901130f[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 9 02:02:09 2024 +0200
+
+    Added new int and floats type
+
+[33mcommit 8082330368b859189c3d8a733a24cf2791f3a74c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Aug 8 20:44:11 2024 +0200
+
+    Added new types for int and float in tokenizer, added coloring to errors and warnings
+
+[33mcommit d0ca574ecd2701c3e740def8c12ccc73630e59e5[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Aug 8 17:33:31 2024 +0200
+
+    Removed implicit type casting and improved error handling in semantic analyzer
+
+[33mcommit a2be62bebfbbf49d3b530d11523c40d45c6535a6[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Aug 8 16:19:27 2024 +0200
+
+    Added explict casting
+
+[33mcommit 26227ab335b51ab29d2de2b5f3c8ec73dad7cbfd[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Aug 7 00:01:26 2024 +0200
+
+    Improved tokenizer error handling
+
+[33mcommit d86edd8080b76f7da3c4baa025ed7961d94b3f3d[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Aug 6 23:32:02 2024 +0200
+
+    reworked bash script
+
+[33mcommit 951813aedff5498782b5fc8ff7055c19853bbbc8[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Aug 6 23:26:34 2024 +0200
+
+    Fixed a bug with binary operators and added a bash script to run
+
+[33mcommit 35d064804ea786ea6554ae7ef4ec9ba4e0841a9b[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Aug 6 21:05:52 2024 +0200
+
+    Added local variables
+
+[33mcommit 821ef86a09f868dbc4cbb381668b40e874d0236c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Aug 4 18:05:10 2024 +0200
+
+    Added global variables
+
+[33mcommit f864fc8ec9e581f561f0f34f529e47250e9abd23[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Aug 4 13:51:27 2024 +0200
+
+    Added unary operator and improved type casting (i hate type casting)
+
+[33mcommit 51fbe38769cb9c16898d49ec76b5f4db3e2fa113[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 21:29:27 2024 +0200
+
+    Added semantic analysis for else statement (i forgor)
+
+[33mcommit 9d877f6e68138f4b1fa0ba8451ce148e21a948b5[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 21:23:28 2024 +0200
+
+    Hopefully this will end this nightmare of type casting values
+
+[33mcommit 2134cd15c06041e50a62d2bfced6b8119e72c5ad[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 20:02:05 2024 +0200
+
+    Added type casting for char and float operations
+
+[33mcommit 9cdafeda7c8d20325b2017ab88cdaba65aa3e5fc[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 18:10:34 2024 +0200
+
+    Added LLVM IR type casting for bool and int
+
+[33mcommit 0133be8f339e9cf7e6307bd4143f6df45b120c07[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 16:48:43 2024 +0200
+
+    Improved performance and added line in every error
+
+[33mcommit 9f9b27b3a3b58650ae7418f1ff7f5374ecbb5aad[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Aug 3 02:50:14 2024 +0200
+
+    Added type casting for char to int for semantic analyzer and for llvm ir
+
+[33mcommit 38b81245a06ad37fb971d661f06018dc5379da91[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 2 19:29:16 2024 +0200
+
+    Added basic type casting for int and float
+
+[33mcommit bef32a170f2f1ef477b9642ee48335da5b8ff092[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 2 18:04:17 2024 +0200
+
+    Added binary operators in LLVM IR
+
+[33mcommit 0a40004602c521a241cd2e751c4d29c94b0ca0e7[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Aug 2 03:26:47 2024 +0200
+
+    Improved codegen code quality
+
+[33mcommit 781acde3e161c1384380db85194160c0e3781408[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Jul 31 15:14:31 2024 +0200
+
+    Added IR Functions even if very basic
+
+[33mcommit 7ad36dfc720d4f00e33d1735cb7b95ac79d18b96[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 28 20:31:23 2024 +0200
+
+    Improved code quality
+
+[33mcommit 6e15e6af60614cb3fd9261e03421ebb75927fc60[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 28 19:44:02 2024 +0200
+
+    Fixed an important bug regarding expressions
+
+[33mcommit 84a05ec3b40a1c5c9da920ee47aaf26a21d090ab[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 28 17:11:58 2024 +0200
+
+    Fixed a issues with conditions (i forgot an if statement lmao)
+
+[33mcommit beef1055f47d9bb5fae56f77c5bbc0aa13189caf[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 28 17:03:29 2024 +0200
+
+    Improved code quality, added better checks for conditional statements, fixed an issue with function calss
+
+[33mcommit a2593abe2a0faa1ef695a11deb3a7f01a9621ce5[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Jul 27 00:27:09 2024 +0200
+
+    Added type casting to variable, assigns, and return values
+
+[33mcommit c8cf3242fe60b4cbc3d101987b24c8d9dcad38ec[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Jul 26 03:18:23 2024 +0200
+
+    Added node for type casting
+
+[33mcommit 736ddf21c7e646aaef2f6f588c09259cbbe783a9[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 25 18:09:47 2024 +0200
+
+    Added error handling
+
+[33mcommit 019cfad20d65998fb674a557d651fea71baa3851[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 25 02:52:52 2024 +0200
+
+    FINISHED SEMANTIC ANALYSIS
+
+[33mcommit 4fb0457fd5f6ea86dc5e6119997af78d93923da3[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 23 18:14:03 2024 +0200
+
+    Added check for conditional statement condition to be a bool
+
+[33mcommit 42bece9d8593b7dde56e18677231e1ee0cbbf304[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 19:45:34 2024 +0200
+
+    Added check for function return type and the actual return type
+
+[33mcommit dfa7f3d4475db237824af795b13f820a2ca8e71f[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 17:13:00 2024 +0200
+
+    Added check for function arguments/parameters type and number
+
+[33mcommit aa459d2ff1a7a17094e67740fcb984afa06fb51c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 16:55:01 2024 +0200
+
+    Fixed expression inside parenthesis statements
+
+[33mcommit 1f0d8824b2c2d743975caefe047fc8cb11469eeb[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 13:38:38 2024 +0200
+
+    Added return statement to parser (i forgor)
+
+[33mcommit 94cbf62bcba033d9ae679472f4414fdcdb4eb50a[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 02:34:17 2024 +0200
+
+    FINALLY UNDERSTOOD HOW TO ADD LLVM
+
+[33mcommit 8aab454b0b76e4a2844506c25b20dda5af4bcb4a[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 22 00:10:55 2024 +0200
+
+    Pushed a crash, now fixed it
+
+[33mcommit 54f7c90098441af826bae888c88b7b59ca84bb24[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 21 23:55:25 2024 +0200
+
+    Added type checking for variable and identifier redeclaration
+
+[33mcommit a7fe52a9f4ad21780d0256f0dd919f5c5ace1067[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jul 21 23:54:11 2024 +0200
+
+    Added type checking for variable and identifier redeclaration
+
+[33mcommit 9e86e52484c10476aba20cdf79b93f2311176b77[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sat Jul 20 17:22:45 2024 +0200
+
+    Added basic semantic checking for variable redeclaration and check between type and value
+
+[33mcommit 9841d943e45454581c99cb2ff6b4536ff48134b7[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Fri Jul 19 19:57:42 2024 +0200
+
+    Added check for variable redeclaration
+
+[33mcommit a2fa7badb070600305519f5abd4abc3e8d34e53a[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 18 15:47:41 2024 +0200
+
+    Added line to tokens for improving error handling
+
+[33mcommit c092355809e2c5fd4dc6b71a852b9d1997085fb1[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 18 01:42:23 2024 +0200
+
+    Improved file structure
+
+[33mcommit be0ddf7ae18cb13cb11c962c268b8669e94d6367[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 18 01:26:12 2024 +0200
+
+    Performance and code structure improvements
+
+[33mcommit 225fbd0b4200d08844f80649a4ee375e03c70c0b[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 18 00:49:07 2024 +0200
+
+    Added a more readable way to check for next token type
+
+[33mcommit 25a2c2fe011b50ba89dbc98f9603af146477b778[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 18 00:24:09 2024 +0200
+
+    Added function calls (i forgor), and fixed how the for loop updates works
+
+[33mcommit ca56bb5c893c886b06f497414fcd1e686086c877[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 19:04:27 2024 +0200
+
+    Code style corrections
+
+[33mcommit c5ea4992c9fb9fc3cbf24fdb55138ce2cadf69cd[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 18:38:08 2024 +0200
+
+    Fixed output #2
+
+[33mcommit 4d865281923cade43f48bd81598dffc0c62bdf52[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 18:37:11 2024 +0200
+
+    Fixed output
+
+[33mcommit f384c760588d2f01d02dd0bf7118dded76b02ede[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 17:39:03 2024 +0200
+
+    Fixed formatting for identifier, if-else statement
+
+[33mcommit dcd1250767f9396c743bbc2f7cf56efeb419f048[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 16:41:24 2024 +0200
+
+    Fixed variable output
+
+[33mcommit 542d476ea50330e2bfb4961239d5475cf9fe94e5[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 16:25:08 2024 +0200
+
+    Improved variables errors
+
+[33mcommit bb4c8ae9b28c6f873b67568c28ecf33f5ec46259[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 13:49:30 2024 +0200
+
+    Improved memory usage in parser
+
+[33mcommit 44a09a57be30008c89f867af98a8c79c6ccbac68[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 13:32:33 2024 +0200
+
+    Added Do-While and Struct
+
+[33mcommit 54e54634732a33028b0ff1a81080f10c8c513c66[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Tue Jul 16 13:03:23 2024 +0200
+
+    Fixed corrupt git file
+
+[33mcommit 4874e7c846714566a460c4e8ca4d58e0da7776eb[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 15 23:58:45 2024 +0200
+
+    Added functions
+
+[33mcommit 8ebe851d637ae7473b4ed95941d0c0a95221a700[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 15 18:48:57 2024 +0200
+
+    Added for statements
+
+[33mcommit b20698547342ee74c12b12cba77927d61acb4469[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 15 18:13:15 2024 +0200
+
+    Added while loops
+
+[33mcommit 1e4cc000fb79b3edc797e21860e6dd0b5c26a9f6[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 15 17:56:43 2024 +0200
+
+    Added else statement
+
+[33mcommit 9ff58ca231b32ebea5425c18ca7d1444606e9397[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jul 15 13:56:18 2024 +0200
+
+    Added parsing for if statements
+
+[33mcommit 8f801d197861473f201716b8274ae93ebc8b6a9c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Thu Jul 11 17:59:56 2024 +0200
+
+    Parsing Identifier!
+
+[33mcommit 38b815c77073383fe27b54d93c08a60f531e2370[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Jul 10 18:29:00 2024 +0200
+
+    ADDED BOOLEAN AND MATH PARSING
+
+[33mcommit 006f1ebcb30248b42b9f1be47740259fe25041bd[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Jul 10 04:26:17 2024 +0200
+
+    Added math parsing that results in working AST
+
+[33mcommit 59e7011ee56ff7633afbbb9095383354adde65c0[m
+Author: unknown <gianluca.rssu@gmail.com>
+Date:   Mon Jul 8 14:49:05 2024 +0200
+
+    Trying to parse expressions
+
+[33mcommit 614fda929446126d592ef8a935231b1bc49415e9[m
+Author: unknown <gianluca.rssu@gmail.com>
+Date:   Sat Jun 29 16:27:47 2024 +0200
+
+    Trying to add math
+
+[33mcommit 927add5a049c22e079f480772849db10959e6b98[m
+Author: gianluca <gianluca.rssu@gmail.com>
+Date:   Sun Jun 23 13:25:41 2024 +0200
+
+    Added some boilerplate
+
+[33mcommit 926160a76ac96362414ea75d0ea6fc1a9142c32c[m
+Author: gianluca <gianluca.rssu@gmail.com>
+Date:   Sun Jun 23 11:26:39 2024 +0200
+
+    Preparing folder for parser
+
+[33mcommit 61467c326d07ba0b6bc5b064d41dcc775075b668[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jun 23 11:06:20 2024 +0200
+
+    organized folders
+
+[33mcommit 18ed682a0ba0d1c382139921cb4832b31a2de7d3[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Jun 19 18:41:26 2024 +0200
+
+    Syntax works!
+
+[33mcommit 4d98cd1ed918ee3f8155397087ce2097fcbe402c[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jun 17 18:13:54 2024 +0200
+
+    added string and chars literals
+
+[33mcommit 41f131913c50ef9957b6f0881b03ff8c77e962ad[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jun 17 16:16:00 2024 +0200
+
+    lexer almost complete
+
+[33mcommit 2a87b211deb238125c50c03c77cb7bed66390db1[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Sun Jun 16 04:44:43 2024 +0200
+
+    Added Identifiers and keywords!
+    
+    even tho it's a shitty af code
+
+[33mcommit f6ad6c28a6f6ab95e18bcb5de7aaa7390ed7e2ac[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Wed Jun 12 02:33:57 2024 +0200
+
+    Reworked the tokenizer!
+
+[33mcommit 378857d8f30ec909117d5b470e969693d42fbc32[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jun 10 02:06:30 2024 +0200
+
+    Recreated the repo + Added all operators to the lexer
+
+[33mcommit 3aa0d09499909a09181dec5a95e13fb73d8343a0[m
+Author: gianluur <gianluca.rssu@gmail.com>
+Date:   Mon Jun 10 02:05:22 2024 +0200
+
+    init
