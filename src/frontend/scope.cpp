@@ -40,14 +40,15 @@ bool Scope::isDeclared(const string& name) const {
   return false;
 }
 
-const Symbol& Scope::find(const string& name) const {    
+const Symbol& Scope::find(const string& name, const bool quit) const {    
   for (int i = symbolTable.size() - 1; i >= 0; i--) {
       auto it = symbolTable[i].find(name);
       if (it != symbolTable[i].end())
           return it->second;
   }
 
-  error("'" + name + "'" + " is not declared");
+  if (quit)
+    error("'" + name + "'" + " is not declared");
   static Symbol dummy;
   return dummy;
 }

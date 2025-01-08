@@ -20,12 +20,13 @@ using std::make_unique;
 
 struct Symbol {
   const ASTNodeType type;
-  variant<string, const Variable*, const Function*, const Struct*> symbol;
+  variant<string, const Variable*, const Function*, const Parameter*, const Struct*> symbol;
 
   Symbol(): type(ASTNodeType::NULL) {}
   Symbol(const Variable* variable): type(ASTNodeType::VARIABLE), symbol(variable) {}
   Symbol(const Function* function): type(ASTNodeType::FUNCTION), symbol(function) {}
   Symbol(const Struct* structure): type(ASTNodeType::STRUCTURE), symbol(structure) {}
+  Symbol(const Parameter* parameter): type(ASTNodeType::PARAMETER), symbol(parameter) {}
 };
 
 class Scope {
@@ -36,7 +37,7 @@ public:
   void declare(const string& name, const Symbol& symbol);
   bool isRedeclared(const string& name) const;
   bool isDeclared(const string& name) const;
-  const Symbol& find(const string& name) const;
+  const Symbol& find(const string& name, const bool quit = true) const;
 
 private:
   static Scope* instance;

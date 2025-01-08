@@ -12,6 +12,7 @@
 #include "../includes/token.hpp"
 #include "../includes/ast.h"
 #include "../includes/error.hpp"
+#include "scope.hpp"
 
 using std::cout;
 using std::vector, std::unordered_map, std::unordered_set, std::stack;
@@ -249,7 +250,7 @@ private:
   }
 
   bool isStructType(const Token& token) const {
-    return Scope::getInstance()->find(token.lexemes).type == ASTNodeType::STRUCTURE;
+    return Scope::getInstance()->find(token.lexemes, false).type == ASTNodeType::STRUCTURE;
   }
 
   unique_ptr<Variable> parseVariable(const bool isMember = false){
@@ -326,7 +327,8 @@ private:
       }
     }
     consumeToken(); //consumes the ')'
-    unique_ptr<Body> body = parseBody(TokenType::FUNC);
+    const vector<unique_ptr<Parameter>>& paramRef = parameters;
+    unique_ptr<Body> body = parseBody(TokenType::FUNC, paramRef);
     
     return make_unique<Function>(std::move(type), std::move(identifier), std::move(parameters), std::move(body));
   }
@@ -345,8 +347,13 @@ private:
     return make_unique<Parameter>(std::move(type), std::move(identifier));
   }
 
-  unique_ptr<Body> parseBody(const TokenType scope = TokenType::NULL) {
+  unique_ptr<Body> parseBody(const TokenType scope = TokenType::NULL, const vector<unique_ptr<Parameter>>& parameters = {}) {
     Scope::getInstance()->enterScope();
+
+    if (!parameters.empty()){
+      for (const auto& parameter: parameters)
+        Scope::getInstance()->declare(parameter->getIdentifier(), Symbol(parameter.get()));
+    }
 
     if (!isNextTokenType(TokenType::LCURLY))
       error("Expected open curly bracket for the body", m_line);
@@ -685,7 +692,8 @@ private:
           if (!operators.empty() && operators.top()->getOperator() == TokenType::LPAREN) {
             operators.pop(); // Pop '('
             parenCount--;
-          } else if (parenCount > 0) {
+          } 
+          else if (parenCount > 0) {
             error("Mismatched parentheses in expression", m_line);
           }
           break;
@@ -733,7 +741,6 @@ private:
     unique_ptr<Operator> op = std::move(operators.top());
     operators.pop();
 
-    
     const TokenType operatorToken = op->getOperator();
     if (operatorToken == TokenType::NOT || operatorToken == TokenType::AMPERSAND || operatorToken == TokenType::CARET) {
       std::unique_ptr<ASTNode> right = std::move(nodes.top());

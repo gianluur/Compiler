@@ -1,4 +1,5 @@
 #include "identifier.h"
+#include "parameter.h"
 #include "variable.h"
 #include "function.h"
 #include "ASTNode.h"
@@ -27,6 +28,10 @@ const ASTNodeType Identifier::getIdentifierType(const Identifier* identifier) co
   else if (symbol.type == ASTNodeType::FUNCTION){
     const Function* function = std::get<const Function*>(symbol.symbol);
     return function->getType();
+  }
+  else if (symbol.type == ASTNodeType::PARAMETER){
+    const Parameter* parameter = std::get<const Parameter*>(symbol.symbol);
+    return parameter->getType();
   }
   else 
     error("Unexpected error when obtaining identifier type\n");

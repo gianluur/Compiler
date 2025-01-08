@@ -75,7 +75,7 @@ private:
     { "for", TokenType::FOR },
     { "break", TokenType::BREAK },
     { "continue", TokenType::CONTINUE },
-    { "func", TokenType::FUNC },
+    { "fn", TokenType::FUNC },
     { "return", TokenType::RETURN },
     { "struct", TokenType::STRUCT },
     { "true", TokenType::LITERAL_BOOLEAN },

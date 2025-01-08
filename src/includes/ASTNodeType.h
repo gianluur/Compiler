@@ -17,7 +17,7 @@ enum ASTNodeType {
   UINT,
   UINT8,
   UINT16,
-  UINT32,
+  UINT32, 
   UINT64,
 
   FLOAT,

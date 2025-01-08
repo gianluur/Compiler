@@ -1,33 +1,29 @@
-func null empty() {
+fn null empty() {
 }
 
 # Basic return types
-func int return_int() {
+fn int return_int() {
     return 42;
 }
 
-func float return_float() {
+fn float return_float() {
     return 3.14;
 }
 
-func char return_string() {
-    return "hello";
-}
-
-func bool return_bool() {
+fn bool return_bool() {
     return true;
 }
 
 # Parameters
-func null single_param(int x) {
+fn null single_param(int x) {
 }
 
-func int multiple_params(int x, float64 y, char z) {
+fn int multiple_params(int x, float64 y, char z) {
     return x;
 }
 
 # Nested function calls
-func int nested() {
+fn int nested() {
     var int x = return_int();
     return x + return_int();
 }

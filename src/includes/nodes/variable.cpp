@@ -1,6 +1,7 @@
 #include "variable.h"
 #include "ASTNode.h"
 #include "expression.h"
+#include "identifier.h"
 #include "list_initializer.h"
 #include "struct.h"
 #include <string>
@@ -22,7 +23,8 @@ void Variable::print(int indentation_level) const {
   cout << std::setw(indentation_level + 2) << " " << "keyword: " << m_keyword.lexemes << '\n';
   m_type->print(indentation_level + 2);
   m_identifier->print(indentation_level + 2);
-  getValue()->print(indentation_level + 2);
+  cout << setw(indentation_level + 2) << " " << "Value: \n"; 
+  getValue()->print(indentation_level + 4);
   cout << std::setw(indentation_level) << " " << "}\n";
 }
 
@@ -73,10 +75,12 @@ void Variable::analyzeVariable() const {
         error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the " + std::to_string(index + 1) + " element type doesn't match the one in the structure");
     }
   }
-  else
+  else{
+    cout << Expression::analyzeExpression(value) << " " << getType() << '\n';
+    
     if (Expression::analyzeExpression(value) != NULL && Expression::analyzeExpression(value) != getType())
       error("In variable declaration the value and the type doesn't match");
-
+  }
   if (!m_isMember){
     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
   }

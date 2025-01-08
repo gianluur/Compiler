@@ -1,23 +1,9 @@
-if (true) {
-  var int x;
-
-  if (false) {
-    var int z;
-  }
-  else {
-    var int a;
-  }
-
+fn int return_int() {
+  return 42;
 }
 
-else if (false) {
-  var int b;
-}
-
-else if (x == "sigma"){
-  var int c;
-}
-
-else {
-  var int y;
+# Nested function calls
+fn int nested() {
+  var int x = return_int();
+  return x + return_int();
 }
