@@ -44,6 +44,24 @@ bool Type::isStruct() const {
   return m_type == TokenType::IDENTIFIER;
 }
 
+bool Type::AreEquals(const ASTNodeType type, const ASTNodeType valueType) {
+  if (type == valueType)
+    return true;
+
+  //Checks if it's smaller types, to avoid that stuff like int and int32 gives a mismatch type
+  static const std::unordered_set<ASTNodeType> intTypes = {
+    INT, INT8, INT16, INT32, INT64,
+    UINT, UINT8, UINT16, UINT32, UINT64
+  };
+
+  static const std::unordered_set<ASTNodeType> floatTypes = {
+    FLOAT, FLOAT32, FLOAT64
+  };
+
+  return ((intTypes.find(type) != intTypes.end()) && (intTypes.find(valueType) != intTypes.end())) ||
+         ((floatTypes.find(type) != floatTypes.end()) && (floatTypes.find(valueType) != floatTypes.end()));
+}
+
 ASTNodeType Type::TokenTypeToASTNodeType(const TokenType type) const {
   switch (type) {
     case TokenType::INT:

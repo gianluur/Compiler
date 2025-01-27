@@ -1,9 +1,5 @@
-fn int return_int() {
-  return 42;
-}
+var int32 age = 123;
 
-# Nested function calls
-fn int nested() {
-  var int x = return_int();
-  return x + return_int();
+if (age < 0 || age > 120) {
+    return -1;
 }

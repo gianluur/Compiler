@@ -14,10 +14,12 @@ public:
   Expression();
   void print(int indentation_level = 0) const override;
   ASTNode* getExpression() const;
+  ASTNodeType getType() const;
   static ASTNodeType analyzeExpression(const ASTNode* expression);
   static void analyzeCondition(const ASTNode* condition);
 
 private:
   unique_ptr<ASTNode> m_start;
   bool m_isCondition;
+  ASTNodeType m_type;
 };

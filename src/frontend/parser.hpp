@@ -271,7 +271,7 @@ private:
       consumeToken(); // consumes ';'
       return make_unique<Variable>(keyword, std::move(type), std::move(identifier), isMember);
     }
-    else if (isNextTokenType(TokenType::ASSIGNMENT) && !isMember){
+    else if (isNextTokenType(TokenType::ASSIGNMENT)){
       consumeToken(); // consumes '='
 
       if (isNextTokenType(TokenType::LCURLY)){
@@ -296,7 +296,7 @@ private:
       }
     }
     else
-      error(std::string((isMember) ? "In struct" : "In variable") + "declaration was expected a semicolon", m_line);
+      error(std::string((isMember) ? "In struct" : "In variable") + " declaration was expected a semicolon", m_line);
   }
 
   unique_ptr<Function> parseFunction(){
@@ -457,7 +457,7 @@ private:
 
     if (!isValidExpression(nextToken()))
       error("In assignment operator was expected a valid expression after the operator", m_line);
-    unique_ptr<Expression> value = make_unique<Expression>(parseExpression(), false);
+    unique_ptr<Expression> value = parseExpression();
 
     if (!isNextTokenType(TokenType::SEMICOLON))
       error("In assignment operator was expected a semicolon after the value", m_line);

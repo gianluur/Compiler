@@ -46,8 +46,8 @@ void AssignmentOperator::analyzeAssignmentOperator() const {
   else if (symbol.type == ASTNodeType::FUNCTION)
     identifierType = std::get<const Function*>(symbol.symbol)->getType();
   else
-    error("Unexpected error while analizing assignment operator");
-  
-  if (identifierType != Expression::analyzeExpression(m_value->getExpression()))
+    error("Unexpected error while analizing assignment operator"); 
+
+  if (!Type::AreEquals(identifierType, m_value->getType()))
     error("In assignment operator the type and the value type doesn't match");
 }

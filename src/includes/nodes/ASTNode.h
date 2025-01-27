@@ -6,13 +6,14 @@
 #include <iomanip>
 #include <memory>
 #include <variant>
+#include <unordered_set>
 #include "../../includes/token.hpp"
 #include "../../frontend/scope.hpp"
 #include "../ASTNodeType.h"
 
 // Common `using` declarations
 using std::cout, std::endl, std::setw;
-using std::size_t, std::string, std::vector, std::unique_ptr, std::make_unique;
+using std::size_t, std::string, std::vector, std::unique_ptr, std::unordered_set, std::make_unique;
 
 class ASTNode {
 public:

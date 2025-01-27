@@ -14,6 +14,7 @@ public:
   bool isPointer() const;
   bool isStruct() const; 
   string toString() const;
+  static bool AreEquals(const ASTNodeType type1, const ASTNodeType type2);
   ASTNodeType TokenTypeToASTNodeType(const TokenType type) const;
 
 private:

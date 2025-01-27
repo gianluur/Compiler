@@ -10,6 +10,7 @@ public:
   void print(int indentation_level = 0) const override;
   TokenType getOperator() const;
   const ASTNode* getRight() const;
+  const ASTNodeType getType() const;
   ASTNodeType analyzeUnaryOperator(const UnaryOperator* unaryOperator) const;
 
 private:

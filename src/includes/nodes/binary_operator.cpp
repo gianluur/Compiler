@@ -26,10 +26,17 @@ const ASTNode* BinaryOperator::getRight() const {
 }
 
 ASTNodeType BinaryOperator::analyzeBinaryOperator(const BinaryOperator* binaryOperator) const {
+  binaryOperator->print(0);
+
   const ASTNodeType leftOperand = Expression::analyzeExpression(binaryOperator->getLeft());
   const ASTNodeType rightOperand = Expression::analyzeExpression(binaryOperator->getRight());
 
-  if (leftOperand != rightOperand) 
-    error("In expressions the left and right operand in a binary operator must have the same type");
+  if (!Type::AreEquals(leftOperand, rightOperand)) 
+    error("In expressions the left and right operand in a binary operator must have the same type: " 
+      + std::to_string(static_cast<int>(leftOperand)) + " " + std::to_string(static_cast<int>(rightOperand)));
+  
+  if (binaryOperator->m_op->isComparisonOperator())
+    return ASTNodeType::BOOL;
+
   return leftOperand; 
 }

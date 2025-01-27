@@ -15,3 +15,7 @@ TokenType Operator::getOperator() const {
 string Operator::toString() const {
   return m_str;
 }
+
+bool Operator::isComparisonOperator() const {
+  return op >= TokenType::OPERATOR_COMPARISON_BEGIN && op <= TokenType::OPERATOR_COMPARISON_END;
+}

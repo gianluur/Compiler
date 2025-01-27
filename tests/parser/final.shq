@@ -4,12 +4,12 @@
 struct Person {
     var int32 age;
     var float64 height;
-    var string name;
+    var char name;
     const bool is_active = true;
 };
 
-# Function to demonstrate various tokens and constructs
-func int calculate_age(int32 birth_year, int32 current_year) {
+# function to demonstrate various tokens and constructs
+fn int calculate_age(int32 birth_year, int32 current_year) {
     var int32 age;
     age = current_year - birth_year;
     
@@ -27,7 +27,7 @@ func int calculate_age(int32 birth_year, int32 current_year) {
     age_multiplier %= 3;
     
     # Arithmetic operations
-    var float64 exact_age = age + 0.5;
+    var float64 exact_age = float(age) + 0.5;
     exact_age = exact_age - 0.1;
     exact_age = exact_age * 2.0;
     exact_age = exact_age / 2.0;
@@ -40,7 +40,6 @@ func int calculate_age(int32 birth_year, int32 current_year) {
     var uint64 big_unsigned = 18446744073709551615;
     var float32 pi = 3.14159;
     var char initial = 'A';
-    var string greeting = "Hello, World!";
     
     # Comparison operators
     var bool is_adult = age >= 18;
@@ -72,21 +71,17 @@ func int calculate_age(int32 birth_year, int32 current_year) {
         counter -= 1;
     } while (counter > 0);
     
-    # Null check
-    var string maybe_name = null;
-    
     return age;
 }
 
-# Main function equivalent
-func int main() {
+# Main fntion equivalent
+fn int main() {
     # Create struct instance
     var Person john;
     john.age = 30;
     john.height = 1.85;
-    john.name = "John Doe";
     
-    # Function call
+    # fntion call
     var int current_age = calculate_age(1990, 2024);
     
     return 0;

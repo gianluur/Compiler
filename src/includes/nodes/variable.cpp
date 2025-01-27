@@ -4,7 +4,7 @@
 #include "identifier.h"
 #include "list_initializer.h"
 #include "struct.h"
-#include <string>
+#include "type.h"
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember):
   ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
@@ -58,8 +58,10 @@ string Variable::getTypeToString() const {
 void Variable::analyzeVariable() const {
   const ASTNode* value = getValue();
   if (m_type->isStruct()) {
+    if (Type::AreEquals(value->getNodeType(), ASTNodeType::NULL)) // It's just declared not initialized, no further checks needed
+      return;
 
-    if (!(value->getNodeType() == ASTNodeType::LIST_INITIALIZER))
+    if (!Type::AreEquals(value->getNodeType(), ASTNodeType::LIST_INITIALIZER))
       error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " is a struct type, so it can only be initialized with a list initializer");
     const vector<Expression*> list = std::get<unique_ptr<ListInitializer>>(m_value)->getList();
     const Struct* structure = std::get<const Struct*>(Scope::getInstance()->find(getTypeToString()).symbol);
@@ -75,12 +77,13 @@ void Variable::analyzeVariable() const {
         error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the " + std::to_string(index + 1) + " element type doesn't match the one in the structure");
     }
   }
-  else{
-    cout << Expression::analyzeExpression(value) << " " << getType() << '\n';
-    
-    if (Expression::analyzeExpression(value) != NULL && Expression::analyzeExpression(value) != getType())
-      error("In variable declaration the value and the type doesn't match");
+  else {    
+    const ASTNodeType valueType = Expression::analyzeExpression(value);
+    if (Type::AreEquals(valueType, ASTNodeType::NULL) && Type::AreEquals(valueType, getType()))
+      error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the value and the type doesn't match " + 
+        std::to_string(static_cast<int>((Expression::analyzeExpression(value)))) + " !=" + std::to_string(static_cast<int>(getType())));
   }
+
   if (!m_isMember){
     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
   }

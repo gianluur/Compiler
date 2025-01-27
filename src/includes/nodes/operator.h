@@ -7,6 +7,7 @@ public:
   void print(int indentation_level = 0) const override;
   TokenType getOperator() const;
   string toString() const;
+  bool isComparisonOperator() const;
 
 private:
   const TokenType op;

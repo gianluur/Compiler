@@ -6,8 +6,9 @@ Expression::Expression(unique_ptr<ASTNode> start, const bool isCondition):
   ASTNode(start->getNodeType()), m_start(std::move(start)), m_isCondition(isCondition) {
     if (m_isCondition)
       Expression::analyzeCondition(m_start.get());
-    else
-      Expression::analyzeExpression(m_start.get());
+    else {
+      m_type = Expression::analyzeExpression(m_start.get());
+    }
   }
 Expression::Expression(): 
   ASTNode(ASTNodeType::NULL), m_start(make_unique<Literal>()) {}
@@ -20,6 +21,10 @@ void Expression::print(int indentation_level) const {
 
 ASTNode* Expression::getExpression() const {
   return m_start.get();
+}
+
+ASTNodeType Expression::getType() const {
+  return m_type;
 }
 
 ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
@@ -66,6 +71,7 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
         return dotOperator->getMemberType(dotOperator);
 
     default:
+      // expression->print(0);
       error("Unexpected error when analyzing expression type: " + std::to_string(static_cast<int>(type)));
       break;
   }
