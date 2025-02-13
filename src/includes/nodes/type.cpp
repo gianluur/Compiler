@@ -9,7 +9,7 @@ void Type::print(int indentation_level) const {
 }
 
 ASTNodeType Type::getType() const {
-  return getNodeType();
+  return isPointer() ? static_cast<ASTNodeType>(static_cast<int>(getNodeType()) + 1) : getNodeType();
 }
 
 bool Type::isInteger() const {

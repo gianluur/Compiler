@@ -21,5 +21,18 @@ const ASTNode* UnaryOperator::getRight() const {
 }
 
 ASTNodeType UnaryOperator::analyzeUnaryOperator(const UnaryOperator* unaryOperator) const {
-  return Expression::analyzeExpression(unaryOperator->getRight());
+  const ASTNodeType type = Expression::analyzeExpression(unaryOperator->getRight());
+  const TokenType op = unaryOperator->getOperator();
+
+  if (op == TokenType::CARET){
+    if ((type >= ASTNodeType::INT && type <= ASTNodeType::FLOAT64_PTR) && !(type % 2 == 0))
+      error("Unary operator '^' can only be used to dereference pointers");
+    return static_cast<ASTNodeType>(static_cast<int>(type) - 1);
+  }
+  else if (op == TokenType::AMPERSAND){
+    cout << "here\n";
+    return static_cast<ASTNodeType>(static_cast<int>(type) + 1);
+  }
+  else
+    return type;
 }

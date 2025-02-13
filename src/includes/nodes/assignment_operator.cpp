@@ -3,10 +3,12 @@
 #include "expression.h"
 #include "function.h"
 #include "operator.h"
+#include "parameter.h"
 #include "variable.h"
+#include <string>
 
-AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator):
-  ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)), m_isDotOperator(isDotOperator) {
+AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator, const bool isDereference):
+  ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)), m_isDotOperator(isDotOperator), m_isDereference(isDereference) {
     analyzeAssignmentOperator();
   }
 
@@ -39,15 +41,20 @@ void AssignmentOperator::analyzeAssignmentOperator() const {
     return;
 
   const Symbol& symbol = Scope::getInstance()->find(m_identifier->toString());
-  ASTNodeType identifierType;
+  ASTNodeType identifierType, valueType = m_value->getType();
   
   if (symbol.type == ASTNodeType::VARIABLE)
     identifierType = std::get<const Variable*>(symbol.symbol)->getType();
   else if (symbol.type == ASTNodeType::FUNCTION)
     identifierType = std::get<const Function*>(symbol.symbol)->getType();
+  else if (symbol.type == ASTNodeType::PARAMETER)
+    identifierType = std::get<const Parameter*>(symbol.symbol)->getType();
   else
     error("Unexpected error while analizing assignment operator"); 
 
-  if (!Type::AreEquals(identifierType, m_value->getType()))
-    error("In assignment operator the type and the value type doesn't match");
+  if (m_isDereference && ((identifierType >= ASTNodeType::INT && identifierType <= ASTNodeType::FLOAT64_PTR) && identifierType % 2 == 0))
+    identifierType = static_cast<ASTNodeType>(static_cast<int>(identifierType) - 1);
+
+  if (!Type::AreEquals(identifierType, valueType))
+    error("In assignment operator the type and the value type doesn't match: " + to_string(identifierType) + " " + to_string(valueType));
 }

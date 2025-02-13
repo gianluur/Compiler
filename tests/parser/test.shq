@@ -1,5 +1,11 @@
-var int32 age = 123;
+fn int swap(int a, int b) {
 
-if (age < 0 || age > 120) {
-    return -1;
 }
+
+fn int main(){
+  var int num1 = 5;
+  var int num2 = 10;
+
+  swap(num1, num2);
+}
+

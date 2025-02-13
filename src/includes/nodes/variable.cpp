@@ -86,5 +86,6 @@ void Variable::analyzeVariable() const {
 
   if (!m_isMember){
     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
+    cout << "we declared " << m_identifier->toString() <<  '\n';
   }
 }

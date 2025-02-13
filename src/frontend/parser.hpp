@@ -124,6 +124,7 @@ private:
         return parseReturn(scope);
 
       case TokenType::IDENTIFIER:
+      case TokenType::CARET:
         return parseIdentifier({}, false);
 
       case TokenType::IF:
@@ -369,7 +370,7 @@ private:
     return make_unique<Body>(std::move(statements));
   }
 
-  unique_ptr<FunctionCall> parseFunctionCall(const Token& token){
+  unique_ptr<FunctionCall> parseFunctionCall(const Token& token, const bool isInsideExpression = false){    
     consumeToken(); //TODO: ma che cazzo e'
         
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
@@ -379,7 +380,7 @@ private:
       consumeToken();
     else {
       do {
-        arguments.push_back(make_unique<Expression>(parseExpression(true), false));
+        arguments.push_back(parseExpression(true));
 
         if (isNextTokenType(TokenType::COMMA)){
           consumeToken();
@@ -393,9 +394,17 @@ private:
       consumeToken();
     }
 
-    if (!isValidExpression(nextToken()) && !isNextTokenType(TokenType::SEMICOLON))
-      error("In function call was expected a semicolon", m_line);
-    return make_unique<FunctionCall>(std::move(identifier), std::move(arguments));
+    if (!isInsideExpression){
+      if (!isNextTokenType(TokenType::SEMICOLON))
+        error("In function call was expected a semicolon", m_line);
+      consumeToken();
+    }
+    else {
+      if (!isValidExpression(nextToken()) && !isNextTokenType(TokenType::SEMICOLON))
+        error("In function call was expected a semicolon", m_line);
+    }
+    
+    return make_unique<FunctionCall>(std::move(identifier), std::move(arguments), isInsideExpression);
   }
 
   unique_ptr<Return> parseReturn(const TokenType scope) {
@@ -429,26 +438,32 @@ private:
   }
 
   unique_ptr<ASTNode> parseIdentifier(optional<Token> token, const bool isInsideExpression = false) {
+    bool isDereference;
+    if ((isDereference = isNextTokenType(TokenType::CARET)))
+      consumeToken();
+
     if (!token.has_value())
       token = consumeToken();
     
     if (isInsideExpression){
       if (isNextTokenType(TokenType::LPAREN))
-        return parseFunctionCall(token.value());
+        return parseFunctionCall(token.value(), isInsideExpression);
       else
         if (isNextTokenType(TokenType::DOT))
-            return parseDotOperator(token.value(), true);
+            return parseDotOperator(token.value(), isInsideExpression);
         else
           return make_unique<Identifier>(token.value());
     }
     else
       if (isNextTokenType(TokenType::DOT))
-        return parseDotOperator(token.value(), false);
+        return parseDotOperator(token.value(), isInsideExpression);
+      else if (isNextTokenType(TokenType::LPAREN))
+        return parseFunctionCall(token.value(), isInsideExpression);
       else
-        return parseAssignmentOperator(token.value());
+        return parseAssignmentOperator(token.value(), false, false, isDereference);
   }
-
-  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false, const bool isDotOperator = false) {
+                
+  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false, const bool isDotOperator = false, const bool isDereference = false) {
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
 
     if (!isAssigmentOperator(nextToken()))
@@ -463,7 +478,7 @@ private:
       error("In assignment operator was expected a semicolon after the value", m_line);
     consumeToken();
 
-    return make_unique<AssignmentOperator>(std::move(identifier), std::move(op), std::move(value), isDotOperator);
+    return make_unique<AssignmentOperator>(std::move(identifier), std::move(op), std::move(value), isDotOperator, isDereference);
   }
 
   unique_ptr<If> parseIfStatement(){
@@ -743,16 +758,16 @@ private:
 
     const TokenType operatorToken = op->getOperator();
     if (operatorToken == TokenType::NOT || operatorToken == TokenType::AMPERSAND || operatorToken == TokenType::CARET) {
-      std::unique_ptr<ASTNode> right = std::move(nodes.top());
+      unique_ptr<ASTNode> right = std::move(nodes.top());
       nodes.pop();
-      nodes.push(std::make_unique<UnaryOperator>(std::move(op), std::move(right)));
+      nodes.push(make_unique<UnaryOperator>(std::move(op), std::move(right)));
     } 
     else {
-      std::unique_ptr<ASTNode> right = std::move(nodes.top());
+      unique_ptr<ASTNode> right = std::move(nodes.top());
       nodes.pop();
-      std::unique_ptr<ASTNode> left = std::move(nodes.top());
+      unique_ptr<ASTNode> left = std::move(nodes.top());
       nodes.pop();
-      nodes.push(std::make_unique<BinaryOperator>(std::move(left), std::move(op), std::move(right)));
+      nodes.push(make_unique<BinaryOperator>(std::move(left), std::move(op), std::move(right)));
     }
   }
 };  

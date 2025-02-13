@@ -1,6 +1,0 @@
-#var int* ptr1;
-#var float* ptr2 = 3.5;
-#var int* ptr3 = &ptr2 + 5;
-#var int* ptr4 = 3 * ^ptr3;
-
-var int x = 5 + 5 + 5;

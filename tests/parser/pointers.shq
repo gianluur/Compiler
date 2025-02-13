@@ -1,0 +1,43 @@
+# Basic pointer declaration and dereferencing
+var int x = 42;
+var int* ptr = &x;
+var int y = ^ptr;  # Should be 42
+
+# Pointer arithmetic and reassignment
+var int a = 10;
+var int* ptr2 = &a;
+^ptr2 = 20;        # a should now be 20
+
+# Function using pointers
+fn null swap(int* a, int* b) {
+    var int temp = ^a;
+    ^a = ^b;
+    ^b = temp;
+}
+
+# Test function with pointer parameters
+fn null testPointers() {
+    var int num1 = 5;
+    var int num2 = 10;
+    
+    swap(&num1, &num2);  # num1 should be 10, num2 should be 5
+        
+    # Testing pointer equality
+    var int value = 30;
+    var int* ptr3 = &value;
+    var int* ptr4 = &value;
+    
+    if (ptr3 == ptr4) {
+        # Should be equal as they point to the same address
+    }
+}
+
+# Complex pointer manipulation
+fn int* createPointer() {
+    var int value = 50;
+    return &value;  # Test returning address of local variable
+}
+
+fn null pointerAsParameter(int* ptr) {
+    ^ptr = ^ptr + 1;  # Increment value at pointer
+}

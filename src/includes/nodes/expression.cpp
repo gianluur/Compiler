@@ -7,6 +7,8 @@ Expression::Expression(unique_ptr<ASTNode> start, const bool isCondition):
     if (m_isCondition)
       Expression::analyzeCondition(m_start.get());
     else {
+      cout << "niggers: \n";
+      m_start->print();
       m_type = Expression::analyzeExpression(m_start.get());
     }
   }
@@ -64,14 +66,13 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
 
     case ASTNodeType::FUNCTION_CALL:
       if (const FunctionCall* functionCall = dynamic_cast<const FunctionCall*>(expression))
-        return functionCall->getFunctionCallType(functionCall);
+        return functionCall->analyzeFunctionCall(functionCall);
       
     case ASTNodeType::DOT_OPERATOR:
       if (const DotOperator* dotOperator = dynamic_cast<const DotOperator*>(expression))
         return dotOperator->getMemberType(dotOperator);
 
     default:
-      // expression->print(0);
       error("Unexpected error when analyzing expression type: " + std::to_string(static_cast<int>(type)));
       break;
   }

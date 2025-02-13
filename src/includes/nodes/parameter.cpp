@@ -12,7 +12,7 @@ void Parameter::print(int indentation_level) const {
 }
 
 ASTNodeType Parameter::getType() const {
-  return m_type->getNodeType();
+  return m_type->getType();
 }
 
 string Parameter::getIdentifier() const {

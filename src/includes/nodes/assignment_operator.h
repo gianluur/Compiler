@@ -9,7 +9,7 @@ class Expression;
 
 class AssignmentOperator : public ASTNode {
 public:
-  AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator);
+  AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator, const bool isDereference);
   void print(int indentation_level = 0) const override;
   TokenType getOperator() const;
   Identifier* getIdentifier() const;
@@ -22,4 +22,5 @@ private:
   unique_ptr<Operator> m_op;
   unique_ptr<Expression> m_value;
   const bool m_isDotOperator;
+  const bool m_isDereference;
 };
