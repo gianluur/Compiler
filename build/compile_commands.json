@@ -1,0 +1,164 @@
+[
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/backend/codegen.cpp.o -c /home/gianlu/development/C++/Compiler/src/backend/codegen.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/backend/codegen.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/backend/codegen.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/frontend/scope.cpp.o -c /home/gianlu/development/C++/Compiler/src/frontend/scope.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/frontend/scope.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/frontend/scope.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/assignment_operator.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/assignment_operator.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/assignment_operator.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/assignment_operator.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/binary_operator.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/binary_operator.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/body.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/body.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/body.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/body.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/cast.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/cast.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/cast.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/cast.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/dot_operator.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/dot_operator.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/dot_operator.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/dot_operator.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/dowhile.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/dowhile.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/dowhile.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/dowhile.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/else.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/else.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/else.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/else.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/expression.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/expression.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/expression.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/expression.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/for.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/for.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/for.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/for.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/function.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/function.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/function.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/function.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/functioncall.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/functioncall.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/functioncall.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/functioncall.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/identifier.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/identifier.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/identifier.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/identifier.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/if.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/if.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/if.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/if.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/list_initializer.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/list_initializer.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/list_initializer.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/list_initializer.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/literal.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/literal.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/literal.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/literal.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/loopcontrol.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/loopcontrol.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/loopcontrol.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/loopcontrol.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/operator.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/operator.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/operator.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/operator.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/parameter.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/parameter.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/parameter.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/parameter.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/return.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/return.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/return.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/return.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/struct.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/struct.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/struct.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/struct.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/type.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/type.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/type.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/type.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/unary_operator.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/unary_operator.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/unary_operator.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/unary_operator.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/variable.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/variable.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/variable.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/variable.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/while.cpp.o -c /home/gianlu/development/C++/Compiler/src/includes/nodes/while.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/includes/nodes/while.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/while.cpp.o"
+},
+{
+  "directory": "/home/gianlu/development/C++/Compiler/build",
+  "command": "clang++  -isystem /usr/lib/llvm-20/include -isystem /home/gianlu/development/C++/Compiler/src -isystem /home/gianlu/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/main.cpp.o -c /home/gianlu/development/C++/Compiler/src/main.cpp",
+  "file": "/home/gianlu/development/C++/Compiler/src/main.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/main.cpp.o"
+}
+]
