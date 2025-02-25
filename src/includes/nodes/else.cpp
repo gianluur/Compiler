@@ -1,11 +1,16 @@
 #include "else.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 Else::Else(unique_ptr<If> ifstatement): 
   ASTNode(ASTNodeType::ELSE), m_ifstatement(std::move(ifstatement)) {} //idk if this should be 'if' or 'else'
 
 Else::Else(unique_ptr<Body> body): 
   ASTNode(ASTNodeType::ELSE), m_body(std::move(body)) {}
+
+void Else::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Else::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Else Statement {\n";

@@ -5,12 +5,17 @@
 #include "operator.h"
 #include "parameter.h"
 #include "variable.h"
-#include <string>
+
+#include "../../backend/codegen.h"
 
 AssignmentOperator::AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator, const bool isDereference):
   ASTNode(ASTNodeType::ASSIGNMENT_OPERATOR), m_identifier(std::move(identifier)), m_op(std::move(op)), m_value(std::move(value)), m_isDotOperator(isDotOperator), m_isDereference(isDereference) {
     analyzeAssignmentOperator();
-  }
+}
+
+void AssignmentOperator::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void AssignmentOperator::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Assignment Operator {\n";
@@ -24,7 +29,7 @@ Identifier* AssignmentOperator::getIdentifier() const {
   return m_identifier.get();
 }
 
-TokenType AssignmentOperator::getOperator() const {
+enum TokenType AssignmentOperator::getOperator() const {
   return m_op->getOperator();
 }
 
@@ -52,9 +57,9 @@ void AssignmentOperator::analyzeAssignmentOperator() const {
   else
     error("Unexpected error while analizing assignment operator"); 
 
-  if (m_isDereference && ((identifierType >= ASTNodeType::INT && identifierType <= ASTNodeType::FLOAT64_PTR) && identifierType % 2 == 0))
+  if (m_isDereference && ((identifierType >= ASTNodeType::INT && identifierType <= ASTNodeType::FLOAT64_PTR) && static_cast<int>(identifierType) % 2 == 0))
     identifierType = static_cast<ASTNodeType>(static_cast<int>(identifierType) - 1);
 
   if (!Type::AreEquals(identifierType, valueType))
-    error("In assignment operator the type and the value type doesn't match: " + to_string(identifierType) + " " + to_string(valueType));
+    error("In assignment operator the type and the value type doesn't match: " + to_string(static_cast<int>(identifierType)) + " " + to_string(static_cast<int>(valueType)));
 }

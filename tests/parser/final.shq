@@ -2,76 +2,76 @@
 
 # Struct definition
 struct Person {
-    var int32 age;
-    var float64 height;
-    var char name;
-    const bool is_active = true;
+  var int32 age;
+  var float64 height;
+  var char name;
+  const bool is_active = true;
 };
 
 # function to demonstrate various tokens and constructs
 fn int calculate_age(int32 birth_year, int32 current_year) {
-    var int32 age;
-    age = current_year - birth_year;
-    
-    # Comparison and logical operators
-    if (age < 0 || age > 120) {
-        return -1;
-    }
-    
-    # Different types of assignments
-    var int age_multiplier = 1;
-    age_multiplier += 1;
-    age_multiplier -= 1;
-    age_multiplier *= 2;
-    age_multiplier /= 2;
-    age_multiplier %= 3;
-    
-    # Arithmetic operations
-    var float64 exact_age = float(age) + 0.5;
-    exact_age = exact_age - 0.1;
-    exact_age = exact_age * 2.0;
-    exact_age = exact_age / 2.0;
-    
-    # Logical negation
-    var bool is_valid = !(age < 0);
-    
-    # Different literal types
-    var int8 small_num = 127;
-    var uint64 big_unsigned = 18446744073709551615;
-    var float32 pi = 3.14159;
-    var char initial = 'A';
-    
-    # Comparison operators
-    var bool is_adult = age >= 18;
-    var bool is_child = age <= 12;
-    var bool is_equal = (age == 30);
-    var bool is_different = (age != 25);
-    
-    # Loops
-    var int32 counter = 0;
-    
-    # For loop
-    for (var int32 i = 0; i < age; i = i + 1;) {
-        counter += i;
-        if (counter > 100) {
-            break;
-        }
-    }
-    
-    # While loop
-    while (counter < 50) {
-        counter += 1;
-        if (counter == 25) {
-            continue;
-        }
-    }
-    
-    # Do-while loop
-    do {
-        counter -= 1;
-    } while (counter > 0);
-    
-    return age;
+  var int32 age;
+  age = current_year - birth_year;
+  
+  # Comparison and logical operators
+  if (age < 0 || age > 120) {
+      return -1;
+  }
+  
+  # Different types of assignments
+  var int age_multiplier = 1;
+  age_multiplier += 1;
+  age_multiplier -= 1;
+  age_multiplier *= 2;
+  age_multiplier /= 2;
+  age_multiplier %= 3;
+  
+  # Arithmetic operations
+  var float64 exact_age = float(age) + 0.5;
+  exact_age = exact_age - 0.1;
+  exact_age = exact_age * 2.0;
+  exact_age = exact_age / 2.0;
+  
+  # Logical negation
+  var bool is_valid = !(age < 0);
+  
+  # Different literal types
+  var int8 small_num = 127;
+  var uint64 big_unsigned = 18446744073709551615;
+  var float32 pi = 3.14159;
+  var char initial = 'A';
+  
+  # Comparison operators
+  var bool is_adult = age >= 18;
+  var bool is_child = age <= 12;
+  var bool is_equal = (age == 30);
+  var bool is_different = (age != 25);
+  
+  # Loops
+  var int32 counter = 0;
+  
+  # For loop
+  for (var int32 i = 0; i < age; i = i + 1;) {
+      counter += i;
+      if (counter > 100) {
+          break;
+      }
+  }
+  
+  # While loop
+  while (counter < 50) {
+      counter += 1;
+      if (counter == 25) {
+          continue;
+      }
+  }
+  
+  # Do-while loop
+  do {
+      counter -= 1;
+  } while (counter > 0);
+  
+  return age;
 }
 
 # Main fntion equivalent

@@ -4,12 +4,15 @@
 class Operator : public ASTNode {
 public:
   Operator(const Token& token);
+
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
-  TokenType getOperator() const;
+
+  enum TokenType getOperator() const;
   string toString() const;
   bool isComparisonOperator() const;
 
 private:
-  const TokenType op;
+  const enum TokenType op;
   const string m_str;
 };

@@ -14,16 +14,18 @@ public:
 
   Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember);
   Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, ValueVariant value, const bool isMember);
-
+  
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
 
   string getKeyword() const;
   ASTNodeType getType() const;
   ASTNode* getValue() const;
-  bool isPointer() const;
-  void analyzeVariable() const;
   string getIdentifier() const;
   string getTypeToString() const;
+
+  bool isPointer() const;
+  void analyzeVariable() const;
   
 private:
   const Token& m_keyword;

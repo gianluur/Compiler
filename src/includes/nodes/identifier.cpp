@@ -4,8 +4,14 @@
 #include "function.h"
 #include "ASTNode.h"
 
+#include "../../backend/codegen.h"
+
 Identifier::Identifier(const Token& token): 
   ASTNode(ASTNodeType::IDENTIFIER), m_str(token.lexemes) {}
+
+void Identifier::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Identifier::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Identifier: " << m_str << '\n';
@@ -15,7 +21,7 @@ string Identifier::toString() const {
   return m_str;
 }
 
-const ASTNodeType Identifier::getIdentifierType(const Identifier* identifier) const {
+ASTNodeType Identifier::getIdentifierType(const Identifier* identifier) const {
   const string name = identifier->m_str;
   if (!Scope::getInstance()->isDeclared(name))
     error("Identifier: " + name + " is not declared");

@@ -1,4 +1,4 @@
-#include "scope.hpp"
+#include "scope.h"
 
 Scope* Scope::instance = nullptr;
 
@@ -34,14 +34,14 @@ bool Scope::isRedeclared(const string& name) const {
 }
 
 bool Scope::isDeclared(const string& name) const {
-  for (int i = symbolTable.size() - 1; i >= 0; i--)
+  for (size_t i = symbolTable.size() - 1; i >= 0; i--)
       if (symbolTable[i].count(name) > 0) 
           return true;
   return false;
 }
 
 const Symbol& Scope::find(const string& name, const bool quit) const {    
-  for (int i = symbolTable.size() - 1; i >= 0; i--) {
+  for (size_t i = symbolTable.size() - 1; i >= 0; i--) {
       auto it = symbolTable[i].find(name);
       if (it != symbolTable[i].end())
           return it->second;

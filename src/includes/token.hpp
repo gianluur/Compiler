@@ -1,19 +1,13 @@
 #pragma once
 
 #include <string>
-
-//REMOVING SOME ANNOYING MACROS, THAT FILL MY NAMESPACE
-
-#undef NULL 
-#undef EOF
-
 using std::string;
+
 
 enum class TokenType {
 
   //MISCELLANEOUS
   INVALID,
-  EOF,
   SEMICOLON,
   COLON,
   COMMA,
@@ -48,7 +42,7 @@ enum class TokenType {
   CHAR,
   STRING,
   BOOL,
-  NULL,
+  NOTHING, //Can't write NULL because of some windows libraries
 
   //LITERALS
   LITERAL_INTEGER,
@@ -59,7 +53,7 @@ enum class TokenType {
 
   //KEYWORDS
   VAR,
-  CONST,
+  CONSTANT,
   IF,
   ELSE,
   DO,
@@ -120,6 +114,7 @@ enum class TokenType {
   OPERATOR_COMPARISON_END = LESS_EQUAL,
 
 };
+
 
 struct Token {
   TokenType type;

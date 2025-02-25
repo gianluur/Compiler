@@ -36,7 +36,7 @@ private:
   size_t index;
   size_t line;
 
-  const unordered_map<char, TokenType> miscellaneousMap = {
+  const unordered_map<char, enum TokenType> miscellaneousMap = {
     { '(', TokenType::LPAREN },
     { ')', TokenType::RPAREN },
     { '[', TokenType::LBRACKET },
@@ -48,9 +48,9 @@ private:
     { '.', TokenType::DOT }
   };
 
-  const unordered_map<string_view, TokenType> keywordMap = {
+  const unordered_map<string_view, enum TokenType> keywordMap = {
     { "var", TokenType::VAR },
-    { "const", TokenType::CONST },
+    { "const", TokenType::CONSTANT },
     { "int8", TokenType::INT8 },
     { "int16", TokenType::INT16 },
     { "int32", TokenType::INT32 },
@@ -67,7 +67,7 @@ private:
     { "char", TokenType::CHAR },
     { "string", TokenType::STRING },
     { "bool", TokenType::BOOL },
-    { "null", TokenType::NULL },
+    { "null", TokenType::NOTHING },
     { "if", TokenType::IF },
     { "else", TokenType::ELSE },
     { "do", TokenType::DO },
@@ -84,7 +84,7 @@ private:
     { "or", TokenType::OR},
   };
 
-  const unordered_map<char, TokenType> singleCharOperatorMap = {
+  const unordered_map<char, enum TokenType> singleCharOperatorMap = {
     { '+', TokenType::ADDITION },
     { '-', TokenType::SUBTRACTION },
     { '*', TokenType::STAR },
@@ -98,7 +98,7 @@ private:
     { '^', TokenType::CARET}
   };
 
-  const unordered_map<string_view, TokenType> doubleCharOperatorMap = {
+  const unordered_map<string_view, enum TokenType> doubleCharOperatorMap = {
     { "||", TokenType::OR },
     { "==", TokenType::EQUALS },
     { "!=", TokenType::NOT_EQUAL },

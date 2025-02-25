@@ -1,19 +1,21 @@
 #include "expression.h"
 #include "ASTNode.h"
-#include <string>
+
+#include "../../backend/codegen.h"
 
 Expression::Expression(unique_ptr<ASTNode> start, const bool isCondition): 
   ASTNode(start->getNodeType()), m_start(std::move(start)), m_isCondition(isCondition) {
     if (m_isCondition)
       Expression::analyzeCondition(m_start.get());
-    else {
-      cout << "niggers: \n";
-      m_start->print();
+    else 
       m_type = Expression::analyzeExpression(m_start.get());
-    }
   }
 Expression::Expression(): 
-  ASTNode(ASTNodeType::NULL), m_start(make_unique<Literal>()) {}
+  ASTNode(ASTNodeType::NOTHING), m_start(make_unique<Literal>()) {}
+
+void Expression::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Expression::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Expression {\n";
@@ -45,8 +47,8 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
     case ASTNodeType::LITERAL_BOOLEAN:
       return ASTNodeType::BOOL;
 
-    case ASTNodeType::NULL:
-      return ASTNodeType::NULL;
+    case ASTNodeType::NOTHING:
+      return ASTNodeType::NOTHING;
 
     case ASTNodeType::IDENTIFIER: 
     if (const Identifier* identifier = dynamic_cast<const Identifier*>(expression))
@@ -54,7 +56,7 @@ ASTNodeType Expression::analyzeExpression(const ASTNode* expression) {
 
     case ASTNodeType::CAST:
       if (const Cast* cast = dynamic_cast<const Cast*>(expression))
-        return cast->analyzeCast(cast);
+        return cast->analyzeCast();
 
     case ASTNodeType::BINARY_OPERATOR:
       if (const BinaryOperator* binaryOperator = dynamic_cast<const BinaryOperator*>(expression))

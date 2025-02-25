@@ -1,8 +1,14 @@
-#include "loopcontrol.h"
 #include "ASTNode.h"
+#include "loopcontrol.h"
 
-LoopControl::LoopControl(const Token& token, const TokenType scope): 
+#include "../../backend/codegen.h"
+
+LoopControl::LoopControl(const Token& token, const enum TokenType scope): 
   ASTNode(ASTNodeType::LOOP_CONTROL), m_str(std::move(token.lexemes)), m_scope(scope) {}
+
+void LoopControl::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void LoopControl::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "LoopControl {\n";
@@ -14,6 +20,6 @@ string LoopControl::getKeyword() const {
   return m_str;
 }
 
-TokenType LoopControl::getScope() const {
+enum TokenType LoopControl::getScope() const {
   return m_scope;
 }

@@ -1,7 +1,6 @@
 #pragma once
-#undef NULL
 
-enum ASTNodeType {
+enum class ASTNodeType {
   LITERAL_INTEGER,
   LITERAL_FLOAT,
   LITERAL_CHARACTER,
@@ -40,7 +39,7 @@ enum ASTNodeType {
   CHAR,
   STRING,
   BOOL,
-  NULL,
+  NOTHING,
   IDENTIFIER,
   BINARY_OPERATOR,
   UNARY_OPERATOR,

@@ -1,11 +1,6 @@
-fn int swap(int a, int b) {
-
-}
-
 fn int main(){
   var int num1 = 5;
   var int num2 = 10;
-
-  swap(num1, num2);
+  num1 += num2;
 }
 

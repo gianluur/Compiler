@@ -3,11 +3,17 @@
 #include "variable.h"
 #include "struct.h"
 
+#include "../../backend/codegen.h"
+
 DotOperator::DotOperator(unique_ptr<Identifier> identifier, unique_ptr<AssignmentOperator> assigment):
   ASTNode(ASTNodeType::DOT_OPERATOR), m_identifier(std::move(identifier)), m_assigment(std::move(assigment)), m_member(nullptr) {}
 
 DotOperator::DotOperator(unique_ptr<Identifier> identifier, unique_ptr<Identifier> member):
   ASTNode(ASTNodeType::DOT_OPERATOR), m_identifier(std::move(identifier)), m_assigment(nullptr), m_member(std::move(member)) {}
+
+void DotOperator::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void DotOperator::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "DotOperator: {\n";

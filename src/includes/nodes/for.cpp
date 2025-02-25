@@ -1,9 +1,14 @@
 #include "for.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 For::For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssignmentOperator> update, unique_ptr<Body> body):
   ASTNode(ASTNodeType::FOR), m_initialization(std::move(initialization)), m_condition(std::move(condition)), m_update(std::move(update)), m_body(std::move(body)) {}
   
+void For::accept(Codegen* generator) const {
+  generator->visit(this);
+}
+
 void For::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "For Statement{\n";
   m_initialization->print(indentation_level + 2);

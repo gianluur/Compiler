@@ -3,9 +3,8 @@
 #include "function.h"
 #include "ASTNode.h"
 #include "parameter.h"
-#include <cerrno>
-#include <memory>
-#include <string>
+
+#include "../../backend/codegen.h"
 
 FunctionCall::FunctionCall(unique_ptr<Identifier> identifier, vector<unique_ptr<Expression>> arguments, const bool isInsideExpression):
   ASTNode(ASTNodeType::FUNCTION_CALL), m_identifier(std::move(identifier)), m_arguments(std::move(arguments)), m_isInsideExpression(isInsideExpression) {
@@ -13,6 +12,10 @@ FunctionCall::FunctionCall(unique_ptr<Identifier> identifier, vector<unique_ptr<
       analyzeFunctionCall(this);
     }
   }
+
+void FunctionCall::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void FunctionCall::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Function Call{\n";
@@ -32,7 +35,7 @@ vector<Expression*> FunctionCall::getArguments() const {
   return arguments;
 }
 
-const ASTNodeType FunctionCall::analyzeFunctionCall(const FunctionCall* functionCall) const {
+ASTNodeType FunctionCall::analyzeFunctionCall(const FunctionCall* functionCall) const {
   const string name = functionCall->m_identifier->toString();
   
   if (!Scope::getInstance()->isDeclared(name))
@@ -49,7 +52,7 @@ const ASTNodeType FunctionCall::analyzeFunctionCall(const FunctionCall* function
   if (parameters.size() != arguments.size())
     error("Function call was required to called with: " + std::to_string(parameters.size()) + " but it was called with " + std::to_string(arguments.size()) + " instead");
   
-  for(int i = 0; i < parameters.size(); i++)
+  for(size_t i = 0; i < parameters.size(); i++)
     if (!Type::AreEquals(parameters[i]->getType(), arguments[i]->getType()))
       error("In function call the " + std::to_string(i + 1) + "# arguments doesn't match the paramter");
   

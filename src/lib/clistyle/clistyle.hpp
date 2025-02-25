@@ -107,7 +107,7 @@ namespace CLIStyle {
      * 
      * @param handleVTSequences A reference to a boolean flag indicating whether the user terminal can handle VT sequences.
     */
-    inline void enableVTSequences(bool& handleVTSequences) {
+    inline void enableVTSequences(bool& handleVTSequencesRef) {
       HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
       if (hOut == INVALID_HANDLE_VALUE)
       {
@@ -128,12 +128,12 @@ namespace CLIStyle {
         std::cerr << "Unable to enter VT processing mode. Quitting.\n" << std::endl;
         exit(EXIT_FAILURE);
       }
-      handleVTSequences = true;
+      handleVTSequencesRef = true;
     }
     #else //If not on Windows, runs a simplifed function just for code reusability
 
-    inline void enableVTSequences(bool& handleVTSequences) {
-      handleVTSequences = true;
+    inline void enableVTSequences(bool& handleVTSequencesRef) {
+      handleVTSequencesRef = true;
     }
     #endif
 

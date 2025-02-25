@@ -2,15 +2,18 @@
 
 #include "ASTNode.h"
 #include "operator.h"
-#include "expression.h"
 
 class BinaryOperator : public ASTNode {
 public:
   BinaryOperator(unique_ptr<ASTNode> left, unique_ptr<Operator> op, unique_ptr<ASTNode> right);
+
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
+
   const ASTNode* getLeft() const;
-  TokenType getOperator() const;
+  enum TokenType getOperator() const;
   const ASTNode* getRight() const;
+  
   ASTNodeType analyzeBinaryOperator(const BinaryOperator* binaryOperator) const;
 
 private:

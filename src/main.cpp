@@ -4,9 +4,8 @@
 #include "./frontend/preprocessing.hpp"  
 #include "./frontend/tokenizer.hpp"
 #include "./frontend/parser.hpp"
-//#include "./frontend/semantics.hpp"
 //#include "./includes/ast.hpp"
-//#include "./backend/codegen.hpp"
+#include "./backend/codegen.h"
 
 int main(int argc, char* argv[]){
   auto start = std::chrono::high_resolution_clock::now();

@@ -2,8 +2,14 @@
 #include "ASTNode.h"
 #include "expression.h"
 
+#include "../../backend/codegen.h"
+
 ListInitializer::ListInitializer(vector<unique_ptr<Expression>> list):
   ASTNode(ASTNodeType::LIST_INITIALIZER), m_list(std::move(list)) {}
+
+void ListInitializer::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void ListInitializer::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "ListInitializer {\n";

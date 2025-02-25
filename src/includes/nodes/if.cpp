@@ -1,8 +1,13 @@
 #include "if.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 If::If(unique_ptr<Expression> condition, unique_ptr<Body> body, vector<unique_ptr<Else>> elses):
   ASTNode(ASTNodeType::IF), m_condition(std::move(condition)), m_body(std::move(body)), m_elses(std::move(elses)) {}
+
+void If::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void If::print(int indetation_level) const {
   cout << '\n' << setw(indetation_level) << " " << "If Statement{\n";

@@ -1,14 +1,19 @@
+#pragma once
+
 #include "ASTNode.h"
 #include "expression.h"
 
 class Return: public ASTNode {
 public:
-  Return(unique_ptr<Expression> expression, const TokenType scope);
+  Return(unique_ptr<Expression> expression, const enum TokenType scope);
+
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
+
   Expression* getExpression() const;
-  TokenType getScope() const;
+  enum TokenType getScope() const;
 
 private:
   unique_ptr<Expression> m_expression;
-  const TokenType m_scope;
+  const enum TokenType m_scope;
 };

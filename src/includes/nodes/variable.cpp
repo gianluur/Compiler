@@ -6,17 +6,24 @@
 #include "struct.h"
 #include "type.h"
 
+#include "../../backend/codegen.h"
+
+
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, const bool isMember):
   ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
   m_identifier(std::move(identifier)), m_value(make_unique<Expression>()), m_isMember(isMember) {
     analyzeVariable();
-  }
+}
 
 Variable::Variable(const Token& keyword, unique_ptr<Type> type, unique_ptr<Identifier> identifier, ValueVariant value,  const bool isMember):
   ASTNode(ASTNodeType::VARIABLE), m_keyword(keyword), m_type(std::move(type)), 
   m_identifier(std::move(identifier)), m_value(std::move(value)), m_isMember(isMember) {
     analyzeVariable();
-  }
+}
+
+void Variable::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Variable::print(int indentation_level) const {
   cout << '\n' << std::setw(indentation_level) << " " << "Variable {\n";
@@ -58,7 +65,7 @@ string Variable::getTypeToString() const {
 void Variable::analyzeVariable() const {
   const ASTNode* value = getValue();
   if (m_type->isStruct()) {
-    if (Type::AreEquals(value->getNodeType(), ASTNodeType::NULL)) // It's just declared not initialized, no further checks needed
+    if (Type::AreEquals(value->getNodeType(), ASTNodeType::NOTHING)) // It's just declared not initialized, no further checks needed
       return;
 
     if (!Type::AreEquals(value->getNodeType(), ASTNodeType::LIST_INITIALIZER))
@@ -69,7 +76,7 @@ void Variable::analyzeVariable() const {
     if (list.size() != structure->getMembersSize())
       error("In this variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the numbers elements in the list initializer is different than the struct members required");
 
-    for (int index = 0; index < list.size(); index++) {
+    for (size_t index = 0; index < list.size(); index++) {
       const ASTNodeType memberType = structure->getMember(index)->getType();
       const ASTNodeType elementType = Expression::analyzeExpression(list[index]);
 
@@ -79,13 +86,12 @@ void Variable::analyzeVariable() const {
   }
   else {    
     const ASTNodeType valueType = Expression::analyzeExpression(value);
-    if (Type::AreEquals(valueType, ASTNodeType::NULL) && Type::AreEquals(valueType, getType()))
+    if (Type::AreEquals(valueType, ASTNodeType::NOTHING) && Type::AreEquals(valueType, getType()))
       error("In variable declaration: " + getKeyword() + " " + getTypeToString() + " " + getIdentifier() + " the value and the type doesn't match " + 
         std::to_string(static_cast<int>((Expression::analyzeExpression(value)))) + " !=" + std::to_string(static_cast<int>(getType())));
   }
 
   if (!m_isMember){
     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
-    cout << "we declared " << m_identifier->toString() <<  '\n';
   }
 }

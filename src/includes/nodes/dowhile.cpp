@@ -1,8 +1,13 @@
 #include "dowhile.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 DoWhile::DoWhile(unique_ptr<Expression> condition, unique_ptr<Body> body) :
   ASTNode(ASTNodeType::DO_WHILE), m_condition(std::move(condition)), m_body(std::move(body)) {}
+
+void DoWhile::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void DoWhile::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Do-While Statement{\n";

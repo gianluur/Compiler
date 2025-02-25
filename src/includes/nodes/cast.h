@@ -8,10 +8,12 @@ class Cast: public ASTNode {
 public:
   Cast(unique_ptr<Type> type, unique_ptr<Expression> expression);
 
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
+
   ASTNode* getExpression() const;
   ASTNodeType getType() const;
-  ASTNodeType analyzeCast(const Cast* cast) const;
+  ASTNodeType analyzeCast() const;
 
 private:
   unique_ptr<Type> m_type;

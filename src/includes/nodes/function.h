@@ -8,7 +8,10 @@
 class Function: public ASTNode {
 public:
   Function(unique_ptr<Type> type, unique_ptr<Identifier> identifier, vector<unique_ptr<Parameter>> parameters, unique_ptr<Body> body);
+  
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
+
   ASTNodeType getType() const;
   string getIdentifier() const;
   vector<Parameter*> getParameter() const;

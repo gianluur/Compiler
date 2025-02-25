@@ -1,12 +1,17 @@
 #include "struct.h"
-#include "ASTNode.h"
 #include "identifier.h"
 #include "variable.h"
+
+#include "../../backend/codegen.h"
 
 Struct::Struct(unique_ptr<Identifier> identifier, vector<unique_ptr<Variable>> members):
   ASTNode(ASTNodeType::STRUCTURE), m_identifier(std::move(identifier)), m_members(std::move(members)) {
     analyzeStruct();
-  }
+}
+
+void Struct::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Struct::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Struct {\n";

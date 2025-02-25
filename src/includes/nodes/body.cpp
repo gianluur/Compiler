@@ -1,8 +1,13 @@
 #include "body.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 Body::Body(vector<unique_ptr<ASTNode>> statements):
   ASTNode(ASTNodeType::BODY), m_statements(std::move(statements)) {}
+
+void Body::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Body::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Body {";

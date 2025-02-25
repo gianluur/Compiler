@@ -10,6 +10,7 @@ public:
   Else(unique_ptr<If> ifstatement);
   Else(unique_ptr<Body> body);
 
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
 
   vector<ASTNode*> getBody() const;

@@ -1,17 +1,23 @@
 #include "literal.h"
 #include "ASTNode.h"
 
+#include "../../backend/codegen.h"
+
 Literal::Literal(const Token& token): 
   ASTNode(Literal::LiteralTokenToASTNodeTypeLiteral(token.type)), m_type(token.type), m_str(token.lexemes) {}
 
 Literal::Literal(): 
-  ASTNode(ASTNodeType::NULL), m_type(TokenType::NULL), m_str("null") {}
+  ASTNode(ASTNodeType::NOTHING), m_type(TokenType::NOTHING), m_str("null") {}
+
+void Literal::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Literal::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "Value: " << m_str << '\n';
 }
 
-TokenType Literal::getType() const {
+enum TokenType Literal::getType() const {
   return m_type;
 }
 
@@ -32,14 +38,14 @@ bool Literal::isChar() const {
 }
 
 bool Literal::isNull() const {
-  return m_type == TokenType::NULL;
+  return m_type == TokenType::NOTHING;
 }
 
 string Literal::toString() const {
   return m_str;
 }
 
-ASTNodeType Literal::LiteralTokenToASTNodeTypeLiteral(const TokenType tokenType) {
+ASTNodeType Literal::LiteralTokenToASTNodeTypeLiteral(const enum TokenType tokenType) {
   switch (tokenType) {
     case TokenType::LITERAL_INTEGER:
       return ASTNodeType::LITERAL_INTEGER;

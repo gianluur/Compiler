@@ -12,7 +12,7 @@
 #include "../includes/token.hpp"
 #include "../includes/ast.h"
 #include "../includes/error.hpp"
-#include "scope.hpp"
+#include "scope.h"
 
 using std::cout;
 using std::vector, std::unordered_map, std::unordered_set, std::stack;
@@ -40,7 +40,7 @@ public:
   }
 
   const vector<unique_ptr<ASTNode>>& getAST() const {
-    return m_ast;
+    return std::move(m_ast);
   }
 
 private:
@@ -49,7 +49,7 @@ private:
   size_t index;
   size_t m_line;
 
-  const unordered_set<TokenType> assignmentOperatorSet = {
+  const unordered_set<enum TokenType> assignmentOperatorSet = {
     TokenType::ASSIGNMENT,
     TokenType::ADDITION_ASSIGNMENT,
     TokenType::SUBTRACTION_ASSIGNMENT,
@@ -58,7 +58,7 @@ private:
     TokenType::MODULUS_ASSIGNMENT,
   };
 
-  const unordered_set<TokenType> comparisonOperatorSet = {
+  const unordered_set<enum TokenType> comparisonOperatorSet = {
     TokenType::EQUALS,
     TokenType::NOT_EQUAL,
     TokenType::LESS,
@@ -67,13 +67,13 @@ private:
     TokenType::GREATER_EQUAL,
   };
 
-  const unordered_set<TokenType> booleanOperatorSet = {
+  const unordered_set<enum TokenType> booleanOperatorSet = {
     TokenType::NOT,
     TokenType::AND,
     TokenType::OR,
   };
 
-  const unordered_set<TokenType> mathOperatorSet = {
+  const unordered_set<enum TokenType> mathOperatorSet = {
     TokenType::ADDITION,
     TokenType::SUBTRACTION,
     TokenType::STAR,
@@ -81,7 +81,7 @@ private:
     TokenType::MODULUS,
   };
 
-  const unordered_set<TokenType> basicTypeSet = {
+  const unordered_set<enum TokenType> basicTypeSet = {
     TokenType::INT,
     TokenType::INT8,
     TokenType::INT16,
@@ -98,10 +98,10 @@ private:
     TokenType::CHAR,
     TokenType::STRING,
     TokenType::BOOL,
-    TokenType::NULL,
+    TokenType::NOTHING,
   };
 
-  const unordered_set<TokenType> literalsMap = {
+  const unordered_set<enum TokenType> literalsMap = {
     TokenType::LITERAL_INTEGER,
     TokenType::LITERAL_FLOAT,
     TokenType::LITERAL_CHARACTER,
@@ -109,12 +109,12 @@ private:
     TokenType::LITERAL_BOOLEAN,
   };
 
-  unique_ptr<ASTNode> getASTNode(const TokenType scope = TokenType::NULL) {
+  unique_ptr<ASTNode> getASTNode(const enum TokenType scope = TokenType::NOTHING) {
     const Token& token = nextToken();
 
     switch(token.type){
       case TokenType::VAR:
-      case TokenType::CONST:
+      case TokenType::CONSTANT:
         return parseVariable();
 
       case TokenType::FUNC:
@@ -177,7 +177,7 @@ private:
     return nextToken().type == type;
   }
 
-  int getPrecedence(const TokenType type) const {
+  int getPrecedence(const enum TokenType type) const {
     switch (type) {
       case TokenType::NOT:
       case TokenType::AMPERSAND:
@@ -209,7 +209,7 @@ private:
     }
   }
 
-  bool isLeftAssociative(const TokenType type) const {
+  bool isLeftAssociative(const enum TokenType type) const {
     return type != TokenType::NOT && type != TokenType::AMPERSAND && type != TokenType::CARET; // Unary NOT is right associative
   }
 
@@ -348,7 +348,7 @@ private:
     return make_unique<Parameter>(std::move(type), std::move(identifier));
   }
 
-  unique_ptr<Body> parseBody(const TokenType scope = TokenType::NULL, const vector<unique_ptr<Parameter>>& parameters = {}) {
+  unique_ptr<Body> parseBody(const enum TokenType scope = TokenType::NOTHING, const vector<unique_ptr<Parameter>>& parameters = {}) {
     Scope::getInstance()->enterScope();
 
     if (!parameters.empty()){
@@ -407,7 +407,7 @@ private:
     return make_unique<FunctionCall>(std::move(identifier), std::move(arguments), isInsideExpression);
   }
 
-  unique_ptr<Return> parseReturn(const TokenType scope) {
+  unique_ptr<Return> parseReturn(const enum TokenType scope) {
     consumeToken();
 
     if (!isValidExpression(nextToken()))
@@ -428,7 +428,7 @@ private:
     if (!isNextTokenType(TokenType::IDENTIFIER))
       error("In dot operator was expected a member after the dot", m_line);
     if (!isInsideExpression){
-      unique_ptr<AssignmentOperator> assignment = parseAssignmentOperator(consumeToken(), false, true);
+      unique_ptr<AssignmentOperator> assignment = parseAssignmentOperator(consumeToken(), true);
       return make_unique<DotOperator>(std::move(identifier), std::move(assignment));
     }
     else {
@@ -460,10 +460,10 @@ private:
       else if (isNextTokenType(TokenType::LPAREN))
         return parseFunctionCall(token.value(), isInsideExpression);
       else
-        return parseAssignmentOperator(token.value(), false, false, isDereference);
+        return parseAssignmentOperator(token.value(), false, isDereference);
   }
                 
-  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isInsideParenthesis = false, const bool isDotOperator = false, const bool isDereference = false) {
+  unique_ptr<AssignmentOperator> parseAssignmentOperator(const Token& token, const bool isDotOperator = false, const bool isDereference = false) {
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
 
     if (!isAssigmentOperator(nextToken()))
@@ -519,7 +519,7 @@ private:
     }
   }
 
-  unique_ptr<LoopControl> parseLoopControl(const TokenType scope){
+  unique_ptr<LoopControl> parseLoopControl(const enum TokenType scope){
     const Token& keyword = consumeToken();
     
     if (!isNextTokenType(TokenType::SEMICOLON))
@@ -583,7 +583,7 @@ private:
       error("In for statement declaration was expected a opening parenthesis before the condition", m_line);
     consumeToken();
 
-    if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+    if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONSTANT))
       error("In for statement declaration was expected a valid initialization", m_line);
     unique_ptr<Variable> initialization = parseVariable();
 
@@ -597,7 +597,7 @@ private:
 
     if (!isNextTokenType(TokenType::IDENTIFIER))
       error("In for statement declaration was expected an identifier for the update");  
-    unique_ptr<AssignmentOperator> update = parseAssignmentOperator(consumeToken(), true);
+    unique_ptr<AssignmentOperator> update = parseAssignmentOperator(consumeToken());
 
     if (!isNextTokenType(TokenType::RPAREN))
       error("In for statement declaration was expected a closing renthesis after the update", m_line);
@@ -621,7 +621,7 @@ private:
 
     vector<unique_ptr<Variable>> members = {};
     while(!isNextTokenType(TokenType::RCURLY)){
-      if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONST))
+      if (!isNextTokenType(TokenType::VAR) && !isNextTokenType(TokenType::CONSTANT))
         error("In struct declaration members can only be declared/initialized with var/const", m_line);
       members.push_back(parseVariable(true));
     }
@@ -656,7 +656,7 @@ private:
   
   unique_ptr<Cast> parseCast(const Token& token){
     unique_ptr<Type> type = make_unique<Type>(token, false);
-    if (token.type == TokenType::NULL)
+    if (token.type == TokenType::NOTHING)
       error("Casting any type to type 'null' is not allowed", m_line);
     else if (isNextTokenType(TokenType::STAR))
       error("Casting to pointer is not allowed", m_line);
@@ -756,7 +756,7 @@ private:
     unique_ptr<Operator> op = std::move(operators.top());
     operators.pop();
 
-    const TokenType operatorToken = op->getOperator();
+    const enum TokenType operatorToken = op->getOperator();
     if (operatorToken == TokenType::NOT || operatorToken == TokenType::AMPERSAND || operatorToken == TokenType::CARET) {
       unique_ptr<ASTNode> right = std::move(nodes.top());
       nodes.pop();

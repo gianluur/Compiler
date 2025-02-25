@@ -1,10 +1,15 @@
 #include "function.h"
-#include "ASTNode.h"
+
+#include "../../backend/codegen.h"
 
 Function::Function(unique_ptr<Type> type, unique_ptr<Identifier> identifier, vector<unique_ptr<Parameter>> parameters, unique_ptr<Body> body):
   ASTNode(ASTNodeType::FUNCTION), m_type(std::move(type)), m_identifier(std::move(identifier)), m_parameters(std::move(parameters)), m_body(std::move(body)) {
     Scope::getInstance()->declare(m_identifier->toString(), Symbol(this));
-  }
+}
+
+void Function::accept(Codegen* generator) const {
+  generator->visit(this);
+}
 
 void Function::print(int indentation_level) const {
   cout << '\n' << setw(indentation_level) << " " << "Function {\n";

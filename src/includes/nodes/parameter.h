@@ -7,7 +7,10 @@
 class Parameter : public ASTNode {
 public:
   Parameter(unique_ptr<Type> type, unique_ptr<Identifier> name);
+
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
+
   ASTNodeType getType() const;
   string getIdentifier() const;
 

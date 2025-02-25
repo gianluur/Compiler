@@ -7,7 +7,10 @@
 class While: public ASTNode {
 public:
   While(unique_ptr<Expression> condition, unique_ptr<Body> body);
-  void print(int indetation_level = 0) const;
+  
+  void accept(Codegen* generator) const override;
+  void print(int indetation_level = 0) const override;
+
   ASTNode* getCondition() const;
   vector<ASTNode*> getBody() const;
 

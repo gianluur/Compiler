@@ -10,11 +10,15 @@ class Expression;
 class AssignmentOperator : public ASTNode {
 public:
   AssignmentOperator(unique_ptr<Identifier> identifier, unique_ptr<Operator> op, unique_ptr<Expression> value, const bool isDotOperator, const bool isDereference);
+  
+  void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
-  TokenType getOperator() const;
+
+  enum TokenType getOperator() const;
   Identifier* getIdentifier() const;
   ASTNode* getExpression() const;
   string getOperatorToString() const;
+
   void analyzeAssignmentOperator() const;
 
 private:  

@@ -9,14 +9,12 @@ class For: public ASTNode {
 public:
   For(unique_ptr<Variable> initialization, unique_ptr<Expression> condition, unique_ptr<AssignmentOperator> update, unique_ptr<Body> body);
   
-  void print(int indentation_level = 0) const;
-  
+  void accept(Codegen* generator) const override;
+  void print(int indentation_level = 0) const override;
+
   Variable* getInitialization() const;
-  
   AssignmentOperator* getUpdate() const;
-  
   Expression* getCondition() const;
-  
   vector<ASTNode*> getBody() const;
 
 private:
