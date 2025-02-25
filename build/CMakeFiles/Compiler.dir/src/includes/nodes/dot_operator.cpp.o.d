@@ -404,11 +404,11 @@ CMakeFiles/Compiler.dir/src/includes/nodes/dot_operator.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/list \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_list.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/list.tcc \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/ast.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/assignment_operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/ASTNode.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/binary_operator.h \
-  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/body.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/cast.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/expression.h \
@@ -426,6 +426,7 @@ CMakeFiles/Compiler.dir/src/includes/nodes/dot_operator.cpp.o: \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/list_initializer.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/literal.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/loopcontrol.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/return.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/struct.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/unary_operator.h \

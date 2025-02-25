@@ -402,6 +402,8 @@ CMakeFiles/Compiler.dir/src/includes/nodes/functioncall.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/list \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_list.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/list.tcc \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/ast.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/assignment_operator.h \
   /home/gianlu/development/C++/Compiler/src/includes/nodes/../../backend/../includes/nodes/ASTNode.h \

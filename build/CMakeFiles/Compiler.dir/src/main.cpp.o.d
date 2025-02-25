@@ -419,6 +419,7 @@ CMakeFiles/Compiler.dir/src/main.cpp.o: \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/list_initializer.h \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/function.h \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/parameter.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/ASTNode.h \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/functioncall.h \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/literal.h \
   /home/gianlu/development/C++/Compiler/src/./frontend/../includes/nodes/loopcontrol.h \
@@ -437,4 +438,5 @@ CMakeFiles/Compiler.dir/src/main.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/list \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_list.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/list.tcc \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.h \
   /home/gianlu/development/C++/Compiler/src/./backend/../includes/ast.h

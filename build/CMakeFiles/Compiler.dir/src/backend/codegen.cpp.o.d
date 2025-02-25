@@ -356,9 +356,8 @@ CMakeFiles/Compiler.dir/src/backend/codegen.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/list \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_list.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/list.tcc \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/ast.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/assignment_operator.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/ASTNode.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/binary_operator.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/ASTNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/iostream \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/ostream \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/ios \
@@ -391,12 +390,16 @@ CMakeFiles/Compiler.dir/src/backend/codegen.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/parse_numbers.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/unordered_set \
   /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/unordered_set.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../../includes/token.hpp \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../../frontend/scope.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../../frontend/../includes/error.hpp \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../../frontend/../includes/../lib/clistyle/clistyle.hpp \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../../frontend/../includes/ASTNodeType.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/../ASTNodeType.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../includes/token.hpp \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../frontend/scope.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../frontend/../includes/error.hpp \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../frontend/../includes/../lib/clistyle/clistyle.hpp \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../../frontend/../includes/ASTNodeType.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/../ASTNodeType.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/operator.h \
+  /home/gianlu/development/C++/Compiler/src/backend/../includes/ast.h \
+  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/assignment_operator.h \
+  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/ASTNode.h \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/identifier.h \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/operator.h \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/expression.h \
@@ -419,4 +422,14 @@ CMakeFiles/Compiler.dir/src/backend/codegen.cpp.o: \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/return.h \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/struct.h \
   /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/unary_operator.h \
-  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/while.h
+  /home/gianlu/development/C++/Compiler/src/backend/../includes/nodes/while.h \
+  /home/gianlu/development/C++/Compiler/src/includes/ASTNodeType.h \
+  /usr/include/llvm-20/llvm/IR/Constants.h \
+  /usr/include/llvm-20/llvm/IR/DerivedTypes.h \
+  /usr/include/llvm-20/llvm/IR/LLVMContext.h \
+  /usr/include/llvm-20/llvm/IR/Type.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/identifier.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/literal.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/parameter.h \
+  /home/gianlu/development/C++/Compiler/src/includes/nodes/unary_operator.h \
+  /home/gianlu/development/C++/Compiler/src/includes/token.hpp
