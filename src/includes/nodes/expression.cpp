@@ -23,7 +23,7 @@ void Expression::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "}\n";
 }
 
-ASTNode* Expression::getExpression() const {
+ASTNode* Expression::getASTNode() const {
   return m_start.get();
 }
 

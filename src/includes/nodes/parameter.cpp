@@ -21,6 +21,10 @@ ASTNodeType Parameter::getType() const {
   return m_type->getType();
 }
 
+string Parameter::getTypeToString() const {
+  return m_type->toString();
+}
+
 string Parameter::getIdentifier() const {
   return m_identifier->toString();
 }

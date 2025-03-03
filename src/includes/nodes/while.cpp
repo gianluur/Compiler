@@ -17,7 +17,7 @@ void While::print(int indetation_level) const {
 }
 
 ASTNode* While::getCondition() const {
-  return m_condition->getExpression();
+  return m_condition->getASTNode();
 }
 
 vector<ASTNode*> While::getBody() const {

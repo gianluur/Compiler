@@ -109,7 +109,7 @@ private:
     TokenType::LITERAL_BOOLEAN,
   };
 
-  unique_ptr<ASTNode> getASTNode(const enum TokenType scope = TokenType::NOTHING) {
+  unique_ptr<ASTNode> getASTNode(const enum TokenType scope = TokenType::NOTHING, const unique_ptr<Type>& returnType = nullptr) {
     const Token& token = nextToken();
 
     switch(token.type){
@@ -121,7 +121,7 @@ private:
         return parseFunction();
 
       case TokenType::RETURN:
-        return parseReturn(scope);
+        return parseReturn(scope, returnType);
 
       case TokenType::IDENTIFIER:
       case TokenType::CARET:
@@ -329,7 +329,7 @@ private:
     }
     consumeToken(); //consumes the ')'
     const vector<unique_ptr<Parameter>>& paramRef = parameters;
-    unique_ptr<Body> body = parseBody(TokenType::FUNC, paramRef);
+    unique_ptr<Body> body = parseBody(TokenType::FUNC, paramRef, type);
     
     return make_unique<Function>(std::move(type), std::move(identifier), std::move(parameters), std::move(body));
   }
@@ -348,7 +348,7 @@ private:
     return make_unique<Parameter>(std::move(type), std::move(identifier));
   }
 
-  unique_ptr<Body> parseBody(const enum TokenType scope = TokenType::NOTHING, const vector<unique_ptr<Parameter>>& parameters = {}) {
+  unique_ptr<Body> parseBody(const enum TokenType scope = TokenType::NOTHING, const vector<unique_ptr<Parameter>>& parameters = {}, const unique_ptr<Type>& returnType = nullptr) {
     Scope::getInstance()->enterScope();
 
     if (!parameters.empty()){
@@ -362,7 +362,7 @@ private:
 
     vector<unique_ptr<ASTNode>> statements = {};
     while(!isNextTokenType(TokenType::RCURLY)){
-      statements.push_back(getASTNode(scope));
+      statements.push_back(getASTNode(scope, returnType));
     }
     consumeToken(); // consumes the '}'
 
@@ -371,7 +371,7 @@ private:
   }
 
   unique_ptr<FunctionCall> parseFunctionCall(const Token& token, const bool isInsideExpression = false){    
-    consumeToken(); //TODO: ma che cazzo e'
+    consumeToken();
         
     unique_ptr<Identifier> identifier = make_unique<Identifier>(token);
     vector<unique_ptr<Expression>> arguments;
@@ -407,7 +407,7 @@ private:
     return make_unique<FunctionCall>(std::move(identifier), std::move(arguments), isInsideExpression);
   }
 
-  unique_ptr<Return> parseReturn(const enum TokenType scope) {
+  unique_ptr<Return> parseReturn(const enum TokenType scope, const unique_ptr<Type>& returnType) {
     consumeToken();
 
     if (!isValidExpression(nextToken()))
@@ -418,7 +418,7 @@ private:
       error("In return statement was expected a semicolon", m_line);
     consumeToken();
 
-    return make_unique<Return>(std::move(expression), scope);
+    return make_unique<Return>(returnType, std::move(expression), scope);
   }
 
   unique_ptr<DotOperator> parseDotOperator(const Token& token, const bool isInsideExpression = false) {

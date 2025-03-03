@@ -13,7 +13,7 @@ int main(int argc, char* argv[]){
   Preprocessor preprocessed(argc, argv);
   Tokenizer tokenizer(preprocessed.getSrc());
   Parser parser(tokenizer.getTokens());
-  //Codegen codegen(parser.getAST());
+  Codegen codegen(parser.getAST());
 
   auto end = std::chrono::high_resolution_clock::now();
 

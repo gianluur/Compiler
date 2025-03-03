@@ -2,9 +2,12 @@
 #include "loopcontrol.h"
 
 #include "../../backend/codegen.h"
+#include <token.hpp>
 
 LoopControl::LoopControl(const Token& token, const enum TokenType scope): 
-  ASTNode(ASTNodeType::LOOP_CONTROL), m_str(std::move(token.lexemes)), m_scope(scope) {}
+  ASTNode(ASTNodeType::LOOP_CONTROL), m_str(std::move(token.lexemes)), m_scope(scope) {
+    analyzeLoopControl();
+  }
 
 void LoopControl::accept(Codegen* generator) const {
   generator->visit(this);
@@ -22,4 +25,9 @@ string LoopControl::getKeyword() const {
 
 enum TokenType LoopControl::getScope() const {
   return m_scope;
+}
+
+void LoopControl::analyzeLoopControl() const {
+  if (m_scope == TokenType::NOTHING)
+    error(m_str + " statement can't be outside a function scope");
 }

@@ -10,6 +10,7 @@ public:
 
   string getKeyword() const;
   enum TokenType getScope() const;
+  void analyzeLoopControl() const;
 
 private:
   const string m_str;

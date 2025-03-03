@@ -38,7 +38,7 @@ string AssignmentOperator::getOperatorToString() const {
 }
 
 ASTNode* AssignmentOperator::getExpression() const {
-  return m_value->getExpression();
+  return m_value->getASTNode();
 }
 
 void AssignmentOperator::analyzeAssignmentOperator() const {

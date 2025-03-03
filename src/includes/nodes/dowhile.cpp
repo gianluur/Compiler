@@ -17,7 +17,7 @@ void DoWhile::print(int indentation_level) const {
 }
 
 ASTNode* DoWhile::getCondition() const {
-  return m_condition->getExpression();
+  return m_condition->getASTNode();
 }
 
 vector<ASTNode*> DoWhile::getBody() const {

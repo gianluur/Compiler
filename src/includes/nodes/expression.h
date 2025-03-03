@@ -9,7 +9,7 @@ public:
   void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
 
-  ASTNode* getExpression() const;
+  ASTNode* getASTNode() const;
   ASTNodeType getType() const;
   static ASTNodeType analyzeExpression(const ASTNode* expression);
   static void analyzeCondition(const ASTNode* condition);

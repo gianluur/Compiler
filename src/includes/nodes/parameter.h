@@ -11,8 +11,9 @@ public:
   void accept(Codegen* generator) const override;
   void print(int indentation_level = 0) const override;
 
-  ASTNodeType getType() const;
   string getIdentifier() const;
+  ASTNodeType getType() const;
+  string getTypeToString() const;
 
 private:
   unique_ptr<Type> m_type;

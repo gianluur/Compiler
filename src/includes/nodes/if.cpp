@@ -20,7 +20,7 @@ void If::print(int indetation_level) const {
 }
 
 ASTNode* If::getCondition() const {
-  return m_condition->getExpression();
+  return m_condition->getASTNode();
 }
 
 vector<ASTNode*> If::getBody() const {

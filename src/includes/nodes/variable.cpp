@@ -45,7 +45,7 @@ ASTNodeType Variable::getType() const {
 
 ASTNode* Variable::getValue() const {
   if (std::holds_alternative<unique_ptr<Expression>>(m_value))
-    return std::get<unique_ptr<Expression>>(m_value)->getExpression();
+    return std::get<unique_ptr<Expression>>(m_value)->getASTNode();
   else 
     return std::get<unique_ptr<ListInitializer>>(m_value).get();
 }

@@ -17,8 +17,12 @@ void Cast::print(int indentation_level) const {
   cout << setw(indentation_level) << " " << "}\n";
 }
 
+ASTNodeType Cast::getType() const {
+  return m_type->getNodeType();
+}
+
 ASTNode* Cast::getExpression() const {
-  return m_expression->getExpression();
+  return m_expression->getASTNode();
 }
 
 ASTNodeType Cast::analyzeCast() const {

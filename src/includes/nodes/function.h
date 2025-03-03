@@ -13,8 +13,9 @@ public:
   void print(int indentation_level = 0) const override;
 
   ASTNodeType getType() const;
-  string getIdentifier() const;
+  const Identifier* getIdentifier() const;
   vector<Parameter*> getParameter() const;
+  vector<ASTNode*> getBody() const;
 
 private:
   unique_ptr<Type> m_type;

@@ -42,6 +42,9 @@ llvm_map_components_to_libnames(LLVM_LIBS
     support
     analysis
     passes
+    executionengine  # Add this
+    mcjit            # Add this
+    native           # Add this for native target support
 )
 
 # Link LLVM libraries to your target.

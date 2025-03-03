@@ -2,8 +2,17 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/MCJIT.h"
+#include "llvm/ExecutionEngine/SectionMemoryManager.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/IRPrintingPasses.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Transforms/Scalar.h"
 
 #include "../includes/ast.h"
+#include "irscope.h"
 
 using std::string;
 using std::unique_ptr;
@@ -15,11 +24,21 @@ public:
   Codegen(const vector<unique_ptr<ASTNode>>& ast); 
 
   void generateIR();
+  void executeIR();
 
   //Getter & Setter
   llvm::LLVMContext& getContext();
   llvm::Module* getModule();
   llvm::IRBuilder<>& getBuilder();
+
+  llvm::Type* getLLVMType(const ASTNodeType type, const string& str_type);
+  llvm::Value* getLLVMValue(const ASTNode* value);
+
+  vector<llvm::Type*> getParametersType(const vector<Parameter*>& parameters);
+  
+  llvm::Value* generateBinaryOperator(const BinaryOperator* statement);
+  llvm::Value* generateUnaryOperator(const UnaryOperator* statement);
+  llvm::Value* generateCast(const Cast* statement);
 
   //Code Generation Methods
   void visit(const AssignmentOperator* statement);
@@ -53,4 +72,6 @@ private:
   llvm::LLVMContext context;
   unique_ptr<llvm::Module> module;
   llvm::IRBuilder<> builder;
+  IRScope scope;
+  
 };
