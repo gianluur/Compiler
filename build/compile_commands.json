@@ -19,6 +19,12 @@
 },
 {
   "directory": "/home/gianluca/development/C++/Compiler/build",
+  "command": "clang++ -isystem /usr/lib/llvm-20/include -isystem /home/gianluca/development/C++/Compiler/src -isystem /home/gianluca/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/argument.cpp.o -c /home/gianluca/development/C++/Compiler/src/includes/nodes/argument.cpp",
+  "file": "/home/gianluca/development/C++/Compiler/src/includes/nodes/argument.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/includes/nodes/argument.cpp.o"
+},
+{
+  "directory": "/home/gianluca/development/C++/Compiler/build",
   "command": "clang++ -isystem /usr/lib/llvm-20/include -isystem /home/gianluca/development/C++/Compiler/src -isystem /home/gianluca/development/C++/Compiler/src/includes -g -std=c++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -Wall -Wextra -Wpedantic -Werror -o CMakeFiles/Compiler.dir/src/includes/nodes/assignment_operator.cpp.o -c /home/gianluca/development/C++/Compiler/src/includes/nodes/assignment_operator.cpp",
   "file": "/home/gianluca/development/C++/Compiler/src/includes/nodes/assignment_operator.cpp",
   "output": "CMakeFiles/Compiler.dir/src/includes/nodes/assignment_operator.cpp.o"
